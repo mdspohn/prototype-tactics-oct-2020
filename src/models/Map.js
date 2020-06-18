@@ -2,6 +2,7 @@ class Map {
     constructor(config) {
         this.id = config.id;
         this.layout = config.layout;
+        this.structure = null;
         this.tileset = Data.getTileset(config.tileset);
     }
 
@@ -12,21 +13,19 @@ class Map {
               h = this.tileset.height,
               d = this.tileset.depth;
         
-        this.layout = this.layout.map((r, ri) => {
+        this.structure = [].concat(...this.layout.map((r, ri) => {
             return r.map((c, ci) => {
                 const location = new Object();
                 location.x = ri;
                 location.y = ci;
-                location.z = c.length;
+                location.z = c.length || 1;
                 location.posX = (ci * (w / 2)) - (ri * (w / 2));
                 location.posY = (ci * (d / 2)) + (ri * (d / 2)) - (((c.length || 1) - 1) * h);
-                location.tileset = c.length ? c : [c];
+                location.tiles = c.length ? c : [c];
                 location.sortIndex = ri + ci;
                 return location;
             });
-        });
-
-        this.layout.sort((a, b) => a.sortIndex - b.sortIndex);
+        })).sort((a, b) => (a.sortIndex - b.sortIndex) ? a.sortIndex - b.sortIndex : a.x - b.x);
     }
 }
 
@@ -40,7 +39,7 @@ Map.prototype.render = function(delta, location) {
           x = Game.camera.position.x - ((location.x - location.y + 1) * (w / 2)),
           y = Game.camera.position.y + ((location.x + location.y) * (d / 2));
 
-    location.tileset.forEach((id, index) => {
+    location.tiles.forEach((id, index) => {
         Game.ctx.save();
         Game.ctx.translate(x, y - (index * h));
         this.tileset.render(id);

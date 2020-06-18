@@ -17,10 +17,13 @@ class Scene {
     }
 
     render(delta) {
-        this.map.layout.forEach(row => {
-            row.forEach(location => {
-                this.map.render(delta, location);
-            });
+        this.map.structure.forEach(location => {
+            this.map.render(delta, location);
+            // this.map.decorations.render(delta, location);
+            // this.map.objects.render(delta, location);
+            // this.entities.ally.forEach(entity => entity.render(delta, location));
+            // this.entities.neutral.forEach(entity => entity.render(delta, location));
+            // this.entities.enemy.forEach(entity => entity.render(delta, location));
         });
     }
 }

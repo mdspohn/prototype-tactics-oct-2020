@@ -1,6 +1,4 @@
-GAME_DATA.scenes = [
-    {
-        id: 'test',
-        map: 'woodlands'
-    }
-];
+GAME_DATA.scenes = [{
+    id: 'test',
+    map: 'woodlands'
+}];
