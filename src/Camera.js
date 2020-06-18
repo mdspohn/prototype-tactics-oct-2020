@@ -120,7 +120,8 @@ class Camera {
     }
 
     getCenterCoords(map) {
-        const lastTile = map.sorted['x'][map.sorted['x'].length - 1];
+        const lastRow = map.layout[map.layout.length - 1],
+              lastTile = lastRow[lastRow.length - 1];
         return {
             x: Math.floor((Game.canvas.width / 2) - 16),
             y: Math.floor((Game.canvas.height / 2) - ((lastTile.x + lastTile.y + 1) * 4))

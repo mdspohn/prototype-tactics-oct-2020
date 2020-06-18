@@ -1,7 +1,9 @@
 class GameEngine {
     constructor() {
-        this.step = 1 / 60;
+        this.step = 1000 / 20; // update 20 times a second
+        this.maxUpdateLag = 1000;
         this.frame = 0;
+        this.updateTick = 0;
     }
 
     start() {
@@ -11,17 +13,18 @@ class GameEngine {
 
         const loop = (timestamp) => {
             this.frame = requestAnimationFrame(loop);
-    
+            
             last = now;
             now = timestamp;
-            delta = delta + Math.min(1, (now - last) / 1000);
+            delta = delta + Math.min(this.maxUpdateLag, (now - last)); // catch up
     
-            while(delta > this.step) {
+            while(delta >= this.step) {
+                this.updateTick = (this.updateTick + 1) % 100;
                 delta -= this.step;
-                this.update(this.step);
+                Game.update(this.step);
             }
     
-            this.render(delta);
+            Game.render(delta);
         }
         this.frame = requestAnimationFrame(loop);
         console.log('Engine started...');
@@ -30,13 +33,5 @@ class GameEngine {
     stop() {
         cancelAnimationFrame(this.frame);
         console.log('Engine stopped...');
-    }
-
-    update(step) {
-        Game.update(step);
-    }
-
-    render(delta) {
-        Game.render(delta);
     }
 }

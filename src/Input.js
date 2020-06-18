@@ -20,16 +20,20 @@ class InputManager {
         this.KEYBOARD['3']     = 'Skill';
         this.KEYBOARD['4']     = 'Skill';
 
+        // action queue
+        this.actions = [];
+
         // keyboard and mouse event listeners
-        document.addEventListener('click', event => Game._handleInput('Click', event));
-        document.addEventListener('mousemove', event => Game._handleInput('MouseMove', event));
+        document.addEventListener('click', event => this.actions.push({ key: 'Click', data: event }));
+        document.addEventListener('mousemove', event => this.actions.push({ key: 'MouseMove', data: event }));
         document.addEventListener('keyup', event => {
             if (this.KEYBOARD[event.key])
-                Game._handleInput(this.KEYBOARD[event.key], event.key);
+                this.actions.push({ key: this.KEYBOARD[event.key], data: event.key });
         });
     }
 
     update(step) {
-        // controller input detection
+        //this.actions.forEach(action => Game._handleInput(action.key, action.data));
+        return this.actions.splice(0, this.actions.length);
     }
 }

@@ -15,24 +15,21 @@
   </script>
 
   <!-- GAME DATA -->
+  <script type="text/javascript" src="data/scenes.js"></script>
   <script type="text/javascript" src="data/maps.js"></script>
   <script type="text/javascript" src="data/tilesets.js"></script>
-  <script type="text/javascript" src="data/beasts.js"></script>
-
-  <!-- SAVE DATA -->
-  <script type="text/javascript" src="data/save.js"></script>
 
   <!-- GAME OBJECTS -->
+  <script type="text/javascript" src="src/models/Scene.js"></script>
   <script type="text/javascript" src="src/models/Map.js"></script>
-  <script type="text/javascript" src="src/models/Decoration.js"></script>
-  <script type="text/javascript" src="src/models/Beast.js"></script>
+  <script type="text/javascript" src="src/models/Tileset.js"></script>
 
   <!-- GAME STATE CONTROLLERS -->
-  <script type="text/javascript" src="src/Interface.js"></script>
-  <script type="text/javascript" src="src/Combat.js"></script>
+  <script type="text/javascript" src="src/State.js"></script>
 
   <!-- GAME LOGIC -->
   <script type="text/javascript" src="src/Events.js"></script>
+  <script type="text/javascript" src="src/P2P.js"></script>
   <script type="text/javascript" src="src/Data.js"></script>
   <script type="text/javascript" src="src/Game.js"></script>
   <script type="text/javascript" src="src/Engine.js"></script>
@@ -42,6 +39,7 @@
   <!-- INITIALIZATION -->
   <script type="text/javascript">
     const Events = new EventManager(),
+          P2P    = new P2PManager(),
           Data   = new DataManager(),
           Game   = new GameManager(),
           Engine = new GameEngine();
@@ -51,11 +49,6 @@
     window.addEventListener('fullscreenchange', () => Game.camera._onWindowResize(Game.canvas));
     document.addEventListener('contextmenu', (event) => event.preventDefault());
 
-    Data.loadGameData()
-        .then(() => Game.prepare(0))
-        .then(() => Game.camera.initialize())
-        .then(() => Game.changeTo(0))
-        .then(() => Engine.start())
-        .catch(console.error);
+    Game.prepare().then(() => Engine.start());
   </script>
 </html>

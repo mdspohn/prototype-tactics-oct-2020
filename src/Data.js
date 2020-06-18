@@ -1,54 +1,21 @@
 class DataManager {
     constructor() {
-        this.maps    = [];
-        this.beasts  = [];
+        // TODO
     }
 
-    loadGameData() {
-        // TODO: find through json data
-        return new Promise((resolve, reject) => {
-            this._initializeGameData().then(() => resolve());
-        });
+    getScene(id) {
+        return new Scene(GAME_DATA.scenes.find(scene => scene.id == id));
     }
 
-    _initializeGameData() {
-        return new Promise((resolve, reject) => {
-            this.maps   = GAME_DATA.maps.map(opts => new Map(opts));
-            this.beasts = GAME_DATA.beasts.map(opts => new Beast(opts));
-            resolve();
-        });
+    getMap(id) {
+        return new Map(GAME_DATA.maps.find(map => map.id == id));
     }
 
-    _initializeSaveData() {
-        return new Promise.resolve();
+    getTileset(id) {
+        return new Tileset(GAME_DATA.tilesets.find(tileset => tileset.id == id));
+    }
+
+    getBeast(id) {
+        return new Beast(GAME_DATA.beasts.find(beast => beast.id == id));
     }
 }
-
-// -------------------------
-// Maps
-// -------------------------
-
-DataManager.prototype.getMap = function(id, config) {
-    return this._getMapTemplate(id).clone(config);
-};
-
-DataManager.prototype._getMapTemplate = function(id) {
-    return this.maps.find(map => map.id == id);
-};
-
-// -------------------------
-// Beasts
-// -------------------------
-
-DataManager.prototype._getBeastTemplate = function(id) {
-    return this.beasts.find(beast => beast.id == id);
-};
-
-DataManager.prototype.getBeast = function(id, config) {
-    return this._getBeastTemplate(id).clone(config);
-};
-
-DataManager.prototype.getRandomBeast = function(idArray, config) {
-    const id = idArray[Math.floor(Math.random() * idArray.length)];
-    return this._getBeastTemplate(id).clone(config);
-};
