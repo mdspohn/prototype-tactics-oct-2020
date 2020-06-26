@@ -44,11 +44,6 @@
           Game   = new GameManager(),
           Engine = new GameEngine();
     
-    // bind window events
-    window.addEventListener('resize', () => Game.camera._resizeCanvas());
-    window.addEventListener('fullscreenchange', () => Game.camera._resizeCanvas());
-    document.addEventListener('contextmenu', (event) => event.preventDefault());
-
     Game.prepare().then(() => Engine.start());
   </script>
 </html>

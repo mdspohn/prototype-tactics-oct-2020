@@ -24,6 +24,12 @@ GAME_DATA.tilesets = [{
             slope: false,
             animated: false,
             idx: 2
+        },
+        {
+            name: 'Stump',
+            slope: false,
+            animated: false,
+            idx: 5
         }
     ]
 }];

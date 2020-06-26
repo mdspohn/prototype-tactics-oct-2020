@@ -25,11 +25,6 @@ class StateController {
     }
 
     async initialize() {
-        await Game.camera.setPosition({
-            x: Game.camera.getCenterCoords(this.scene.map).x,
-            y: Game.camera.getCenterCoords(this.scene.map).y,
-            pixels: true,
-            isAbsolute: true
-        });
+        await Game.camera.toCenter();
     }
 }

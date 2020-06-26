@@ -3,7 +3,6 @@ class GameEngine {
         this.step = 1000 / 20; // update 20 times a second
         this.maxUpdateLag = 1000;
         this.frame = 0;
-        this.updateTick = 0;
     }
 
     start() {
@@ -19,7 +18,6 @@ class GameEngine {
             delta = delta + Math.min(this.maxUpdateLag, (now - last)); // catch up
     
             while(delta >= this.step) {
-                this.updateTick = (this.updateTick + 1) % 100;
                 delta -= this.step;
                 Game.update(this.step);
             }

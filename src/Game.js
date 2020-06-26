@@ -5,23 +5,27 @@ class GameManager {
         
         this.input = new InputManager();
         this.camera = new Camera();
-        this.controller = new StateController();
+        this.state = new StateController();
     }
     
     update(step) {
         this.input.update(step);
         this.camera.update(step);
-        this.controller.update(step);
+        this.state.update(step);
     }
 
     render(delta) {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.controller.render(delta);
+        this.state.render(delta);
     }
     
     async prepare() {
-        await this.controller.prepare();
+        await this.state.prepare();
         this.camera.initialize();
-        await this.controller.initialize();
+        await this.state.initialize();
+    }
+
+    getMap() {
+        return this.state.scene.map;
     }
 }
