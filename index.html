@@ -45,8 +45,8 @@
           Engine = new GameEngine();
     
     // bind window events
-    window.addEventListener('resize', () => Game.camera._onWindowResize(Game.canvas));
-    window.addEventListener('fullscreenchange', () => Game.camera._onWindowResize(Game.canvas));
+    window.addEventListener('resize', () => Game.camera._resizeCanvas());
+    window.addEventListener('fullscreenchange', () => Game.camera._resizeCanvas());
     document.addEventListener('contextmenu', (event) => event.preventDefault());
 
     Game.prepare().then(() => Engine.start());

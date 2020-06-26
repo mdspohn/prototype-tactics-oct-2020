@@ -1,39 +1,57 @@
 class Camera {
     constructor() {
-        // browser / application window
-        this.window = new Object();
-        this.window.x = window.innerWidth;
-        this.window.y = window.innerHeight;
+        // camera configuration
+        this.window   = { x: window.innerWidth, y: window.innerHeight };
+        this.target   = { x: 0, y: 0 };
+        this.position = { x: 0, y: 0 };
+        this.zoom = 4;
 
-        // playable canvas zoom (always integer to preserve pixel art)
-        this.zoom = 1;
-
-        // the camera's target destination
-        this.target = new Object();
-        this.target.x = 0;
-        this.target.y = 0;
-
-        // the camera's current position
-        this.position = new Object();
-        this.position.x = 0;
-        this.position.y = 0;
-
-        // camera movement calculations
+        // camera state
         this.easing = 'linear';
         this.msRequested = 0;
         this.msRemaining = 0;
         this.partialX = 0;
         this.partialY = 0;
-
-        // state of resolution transformations
-        this.isProcessing = false;
-        this.hasPendingChange = false;
-
         this.isProcessingCameraMovement = false;
     }
 
     initialize() {
-        this._onWindowResize(Game.canvas);
+        this._resizeCanvas();
+    }
+
+    _resizeCanvas() {
+        if (this.resizeProcessing)
+            return this.resizePending = true;
+
+        this.resizeProcessing = true;
+
+        // remember old canvas dimensions for position adjustment later
+        const oW = canvas.width,
+              oH = canvas.height;
+
+        // set new window dimensions
+        this.window.x = window.innerWidth;
+        canvas.width = (this.window.x % this.zoom) + Math.floor(this.window.x / 4);
+        canvas.style.width = this.window.x + 'px';
+
+        this.window.y = window.innerHeight;
+        canvas.height = (this.window.y % this.zoom) + Math.floor(this.window.y / 4);
+        canvas.style.height = this.window.y + 'px';
+
+        // update camera position after canvas size change
+        const wChange = (canvas.width  - oW) / 2,
+              hChange = (canvas.height - oH) / 2;
+
+        this.position.x = this.target.x = this.position.x + ((wChange > 0) ? Math.ceil(wChange) : Math.floor(wChange));
+        this.position.y = this.target.y = this.position.y + ((hChange > 0) ? Math.ceil(hChange) : Math.floor(hChange));
+
+        // process pending changes that came through during process
+        this.resizeProcessing = false;
+
+        if (this.resizePending)
+            this._resizeCanvas();
+        
+        this.resizePending = false;
     }
 
     update(step) {
