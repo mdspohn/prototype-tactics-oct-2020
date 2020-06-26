@@ -6,6 +6,10 @@ class Camera {
         this.position = { x: 0, y: 0 };
         this.zoom = 4;
 
+        // to preserve pixel-perfect assets, canvas adjustments may accumulate small rounding errors
+        this.adjustmentErrorX = 0;
+        this.adjustmentErrorY = 0;
+
         // camera state
         this.easing = 'linear';
         this.msRequested = 0;
@@ -20,10 +24,10 @@ class Camera {
     }
 
     _resizeCanvas() {
-        if (this.resizeProcessing)
-            return this.resizePending = true;
+        if (this.isProcessingResize)
+            return this.isPendingResize = true;
 
-        this.resizeProcessing = true;
+        this.isProcessingResize = true;
 
         // remember old canvas dimensions for position adjustment later
         const oW = canvas.width,
@@ -31,27 +35,31 @@ class Camera {
 
         // set new window dimensions
         this.window.x = window.innerWidth;
-        canvas.width = (this.window.x % this.zoom) + Math.floor(this.window.x / 4);
-        canvas.style.width = this.window.x + 'px';
+        canvas.width = Math.ceil(this.window.x / this.zoom);
+        canvas.style.width = (canvas.width * this.zoom) + 'px';
 
         this.window.y = window.innerHeight;
-        canvas.height = (this.window.y % this.zoom) + Math.floor(this.window.y / 4);
-        canvas.style.height = this.window.y + 'px';
+        canvas.height = Math.ceil(this.window.y / this.zoom);
+        canvas.style.height = (canvas.height * this.zoom) + 'px';
 
         // update camera position after canvas size change
-        const wChange = (canvas.width  - oW) / 2,
-              hChange = (canvas.height - oH) / 2;
+        const wChange = ((canvas.width  - oW) / 2) - this.adjustmentErrorX,
+              hChange = ((canvas.height - oH) / 2) - this.adjustmentErrorY;
 
-        this.position.x = this.target.x = this.position.x + ((wChange > 0) ? Math.ceil(wChange) : Math.floor(wChange));
-        this.position.y = this.target.y = this.position.y + ((hChange > 0) ? Math.ceil(hChange) : Math.floor(hChange));
+        this.adjustmentErrorX = Math.round(wChange) - wChange;
+        this.adjustmentErrorY = Math.round(hChange) - hChange;
+
+        this.position.x = this.target.x = (this.position.x + Math.round(wChange));
+        this.position.y = this.target.y = (this.position.y + Math.round(hChange));
 
         // process pending changes that came through during process
-        this.resizeProcessing = false;
+        this.isProcessingResize = false;
 
-        if (this.resizePending)
-            this._resizeCanvas();
-        
-        this.resizePending = false;
+        if (!this.isPendingResize)
+            return false;
+
+        this.isPendingResize = false;
+        this._resizeCanvas();
     }
 
     update(step) {
@@ -137,17 +145,17 @@ class Camera {
         return Promise.resolve();
     }
 
-    getCenterCoords(map) {
-        const lastTile = map.structure[map.structure.length - 1];
-        return {
-            x: Math.floor((Game.canvas.width / 2) - 16),
-            y: Math.floor((Game.canvas.height / 2) - ((lastTile.x + lastTile.y + 1) * 4))
-        }
-    }
-
     // -----------------------------
     // utility functions
     // ------------------------------------
+
+    getCenterCoords(map) {
+        const lastTile = map.structure[map.structure.length - 1];
+        return {
+            x: Math.floor((Game.canvas.width / 2)),
+            y: Math.floor((Game.canvas.height / 2) - ((lastTile.x + lastTile.y) * this.zoom + 8 /* half of tile depth */))
+        }
+    }
     
     windowToCanvas(windowX, windowY) {
         // translate window (x, y) to canvas (x, y)
