@@ -14,7 +14,7 @@ GAME_DATA.tilesets = [{
             idx: 0
         },
         {
-            name: 'Dirt',
+            name: 'Dirt Slope',
             slope: false,
             animated: false,
             idx: 1
@@ -24,6 +24,12 @@ GAME_DATA.tilesets = [{
             slope: false,
             animated: false,
             idx: 2
+        },
+        {
+            name: 'Grass Slope',
+            slope: false,
+            animated: false,
+            idx: 3
         },
         {
             name: 'Stump',

@@ -2,11 +2,7 @@ class StateController {
     constructor() {
         this.scene = null;
     }
-
-    // -----------------------
-    // Engine Loop
-    // -----------------------
-
+    
     update(step) {
         this.scene.update(step);
     }
