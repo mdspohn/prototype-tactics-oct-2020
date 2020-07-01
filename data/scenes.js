@@ -1,4 +1,9 @@
 GAME_DATA.scenes = [{
     id: 'test',
-    map: 'woodlands'
+    type: 'COMBAT',
+    map: 'woodlands',
+    decoration: 'woodlands',
+    objects: [],
+    enemies: [],
+    neutral: []
 }];

@@ -1,26 +1,28 @@
 class GameManager {
     constructor() {
-        // canvas contexts
+        // canvas context
         this.canvas = document.getElementById('canvas');
         this.ctx = this.canvas.getContext('2d');
         
-        this.input = new InputManager();
-        //this.transitions = new TransitionManager();
-        this.camera = new Camera();
+        this.input  = new InputManager();
+        this.camera = new Camera(this.canvas);
+        this.scene  = new SceneLoader();
+        //this.transition = new TransitionController();
 
         this.controllers = new Array(3);
         this.controllers[0] = new MenuController();
         this.controllers[1] = new CombatController();
         this.controllers[2] = new TownController();
+        this.controllers[3] = new WorldController();
 
-        this.state = new Object();
-        this.state['MENU'] = 0;
-        this.state['COMBAT'] = 1;
-        this.state['TOWN'] = 2;
+        // game states
+        this.types = new Object();
+        this.types['MENU'] = 0;
+        this.types['COMBAT'] = 1;
+        this.types['TOWN'] = 2;
+        this.types['WORLD'] = 3;
 
-        // state
-        this.next = null;
-        this.current = null;
+        this.state = null;
 
         // document events for camera
         window.addEventListener('resize', () => this.camera._resizeCanvas(this.canvas));
@@ -28,28 +30,31 @@ class GameManager {
     }
 
     async _prepare() {
-        await this.load();
-        await this.initialize();
+        await this._load('test');
+        await this._initialize();
     }
 
-    async load() {
-        await this.controllers[this.state['COMBAT']].load();
+    async _load(id) {
+        await this.scene._load(id);
+        await this.controllers[this.types[this.scene.type]]._use(this.scene);
     }
 
-    async initialize() {
-        await this.controllers[this.state['COMBAT']].initialize();
-        this.camera.initialize(this.canvas);
-        this.camera.toCenter(this.canvas, this.controllers[this.state['COMBAT']].getMap());
+    async _initialize() {
+        this.controllers[this.types[this.scene.type]]._initialize();
+        this.camera.toCenter(this.canvas, this.scene.map);
+        this.state = this.types[this.scene.type];
     }
     
     update(step) {
         this.input.update(step)
         this.camera.update(step);
-        this.controllers[this.state['COMBAT']].update(step);
+        this.controllers[this.state].update(step);
+        // this.transition.update(step);
     }
 
     render(delta) {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.controllers[this.state['COMBAT']].render(delta);
+        this.controllers[this.state].render(delta);
+        // this.transition.render(delta);
     }
 }

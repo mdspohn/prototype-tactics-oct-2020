@@ -1,5 +1,5 @@
 class Camera {
-    constructor() {
+    constructor(canvas) {
         // camera configuration
         this.window   = { x: window.innerWidth, y: window.innerHeight };
         this.position = { x: 0, y: 0 };
@@ -10,17 +10,6 @@ class Camera {
         this.adjustmentErrorX = 0;
         this.adjustmentErrorY = 0;
 
-        // camera state
-        // this.easing = 'linear';
-        // this.msRequested = 0;
-        // this.msRemaining = 0;
-        // this.partialX = 0;
-        // this.partialY = 0;
-        // this.isProcessingCameraMovement = false;
-
-    }
-
-    initialize(canvas) {
         this._resizeCanvas(canvas);
     }
 

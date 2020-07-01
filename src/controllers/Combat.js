@@ -1,31 +1,28 @@
 class CombatController {
     constructor() {
-        this.next = null;
-        this.scene = null;
+        this.map = null;
     }
 
-    async load() {
-        this.next = Data.getScene('test');
-        await this.next.load();
+    async _use(scene) {
+        this.map = scene.map;
     }
 
-    async initialize() {
-        this.scene = this.next;
+    async _initialize() {
+        // todo
     }
     
     update(step) {
-        this.scene.update(step);
+        this.map.update(step);
     }
 
     render(delta) {
-        this.scene.render(delta);
-    }
-
-    // -----------------------
-    // Helper Functions
-    // -----------------------
-
-    getMap() {
-        return this.scene.map;
+        this.map.structure.forEach(location => {
+            this.map.render(delta, location);
+            // this.map.decorations.render(delta, location);
+            // this.map.objects.render(delta, location);
+            // this.entities.ally.forEach(entity => entity.render(delta, location));
+            // this.entities.neutral.forEach(entity => entity.render(delta, location));
+            // this.entities.enemy.forEach(entity => entity.render(delta, location));
+        });
     }
 }

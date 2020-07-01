@@ -1,10 +1,19 @@
 class DataManager {
     constructor() {
-        // TODO
+
+        // furthest story mission completion
+        this.progress = 0;
+
+        // data of all available beasts in stables
+        this.roster = [];
+
+        // id of beasts selected for active party
+        this.party = [];
+
     }
 
     getScene(id) {
-        return new Scene(GAME_DATA.scenes.find(scene => scene.id == id));
+        return GAME_DATA.scenes.find(scene => scene.id == id);
     }
 
     getMap(id) {
