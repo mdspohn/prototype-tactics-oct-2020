@@ -1,6 +1,8 @@
 class Scene {
     constructor(config) {
         this.map = Data.getMap(config.map);
+        // this.decoration = Data.getDecoration(config.decoration);
+        // this.objects = Data.getObjects(config.objects);
 
         this.entities = new Object();
         this.entities.ally = new Array();

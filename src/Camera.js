@@ -2,8 +2,8 @@ class Camera {
     constructor() {
         // camera configuration
         this.window   = { x: window.innerWidth, y: window.innerHeight };
-        this.target   = { x: 0, y: 0 };
         this.position = { x: 0, y: 0 };
+        this.target   = { x: 0, y: 0 };
         this.zoom = 4;
 
         // to preserve pixel-perfect assets, canvas adjustments may accumulate small rounding errors
@@ -11,40 +11,37 @@ class Camera {
         this.adjustmentErrorY = 0;
 
         // camera state
-        this.easing = 'linear';
-        this.msRequested = 0;
-        this.msRemaining = 0;
-        this.partialX = 0;
-        this.partialY = 0;
-        this.isProcessingCameraMovement = false;
+        // this.easing = 'linear';
+        // this.msRequested = 0;
+        // this.msRemaining = 0;
+        // this.partialX = 0;
+        // this.partialY = 0;
+        // this.isProcessingCameraMovement = false;
 
-        // document events for camera
-        window.addEventListener('resize', () => this._resizeCanvas());
-        window.addEventListener('fullscreenchange', () => this._resizeCanvas());
     }
 
-    initialize() {
-        this._resizeCanvas();
+    initialize(canvas) {
+        this._resizeCanvas(canvas);
     }
 
-    _resizeCanvas() {
+    _resizeCanvas(canvas) {
         if (this.isProcessingResize)
             return this.isPendingResize = true;
 
         this.isProcessingResize = true;
 
         // remember old canvas dimensions for position adjustment later
-        const oW = Game.canvas.width,
-              oH = Game.canvas.height;
+        const oW = canvas.width,
+              oH = canvas.height;
 
         // set new window dimensions
         this.window.x = window.innerWidth;
-        Game.canvas.width = Math.ceil(this.window.x / this.zoom);
-        Game.canvas.style.width = (canvas.width * this.zoom) + 'px';
+        canvas.width = Math.ceil(this.window.x / this.zoom);
+        canvas.style.width = (canvas.width * this.zoom) + 'px';
 
         this.window.y = window.innerHeight;
-        Game.canvas.height = Math.ceil(this.window.y / this.zoom);
-        Game.canvas.style.height = (canvas.height * this.zoom) + 'px';
+        canvas.height = Math.ceil(this.window.y / this.zoom);
+        canvas.style.height = (canvas.height * this.zoom) + 'px';
 
         // update camera position after canvas size change
         const wChange = ((canvas.width  - oW) / 2) - this.adjustmentErrorX,
@@ -74,14 +71,14 @@ class Camera {
         this.position.y = this.target.y = this.position.y + Math.round((Game.canvas.height / 2) - y / this.zoom);
     }
 
-    toCenter() {
-        this.position.x = this.target.x = Math.floor((Game.canvas.width  - Game.getMap().edges.x2 - Game.getMap().edges.x1) / 2) - (Game.getMap().tileset.width / 2);
-        this.position.y = this.target.y = Math.floor((Game.canvas.height - Game.getMap().edges.y2) / 2) - (Game.getMap().tileset.depth / 2);
+    toCenter(canvas, map) {
+        this.position.x = this.target.x = Math.floor((canvas.width  - map.edges.x2 - map.edges.x1) / 2) - (map.tileset.width / 2);
+        this.position.y = this.target.y = Math.floor((canvas.height - map.edges.y2) / 2) - (map.tileset.depth / 2);
     }
 
-    toTile(tile) {
-        this.position.x = this.target.x = Math.floor((Game.canvas.width  - tile.posX) / 2) - (Game.getMap().tileset.width / 2);
-        this.position.y = this.target.y = Math.floor((Game.canvas.height / 2) - tile.posY - (Game.getMap().tileset.depth / 2));
+    toTile(canvas, map, tile) {
+        this.position.x = this.target.x = Math.floor((canvas.width  - tile.posX) / 2) - (map.tileset.width / 2);
+        this.position.y = this.target.y = Math.floor((canvas.height / 2) - tile.posY - (map.tileset.depth / 2));
     }
 
     update(step) {

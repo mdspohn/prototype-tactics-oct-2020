@@ -39,7 +39,6 @@ class InputManager {
     }
 
     update(step) {
-        //this.actions.forEach(action => Game._handleInput(action.key, action.data));
         return this.actions.splice(0, this.actions.length);
     }
 }

@@ -1,4 +1,4 @@
-class StateController {
+class TownController {
     constructor() {
         this.scene = null;
     }
@@ -15,12 +15,11 @@ class StateController {
     // Game State Transitioning
     // -----------------------
 
-    async prepare() {
+    async load() {
         this.scene = Data.getScene('test');
         await this.scene.load();
     }
 
     async initialize() {
-        await Game.camera.toCenter();
     }
 }

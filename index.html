@@ -25,11 +25,12 @@
   <script type="text/javascript" src="src/models/Tileset.js"></script>
 
   <!-- GAME STATE CONTROLLERS -->
-  <script type="text/javascript" src="src/State.js"></script>
+  <script type="text/javascript" src="src/controllers/Menu.js"></script>
+  <script type="text/javascript" src="src/controllers/Town.js"></script>
+  <script type="text/javascript" src="src/controllers/Combat.js"></script>
 
   <!-- GAME LOGIC -->
   <script type="text/javascript" src="src/Events.js"></script>
-  <script type="text/javascript" src="src/P2P.js"></script>
   <script type="text/javascript" src="src/Data.js"></script>
   <script type="text/javascript" src="src/Game.js"></script>
   <script type="text/javascript" src="src/Engine.js"></script>
@@ -39,11 +40,10 @@
   <!-- INITIALIZATION -->
   <script type="text/javascript">
     const Events = new EventManager(),
-          P2P    = new P2PManager(),
           Data   = new DataManager(),
           Game   = new GameManager(),
           Engine = new GameEngine();
     
-    Game.prepare().then(() => Engine.start());
+    Game._prepare().then(() => Engine.start());
   </script>
 </html>
