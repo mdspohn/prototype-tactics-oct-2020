@@ -60,14 +60,14 @@ class Camera {
         this.position.y = this.target.y = this.position.y + Math.round((Game.canvas.height / 2) - y / this.zoom);
     }
 
-    toCenter(canvas, map) {
-        this.position.x = this.target.x = Math.floor((canvas.width  - map.edges.x2 - map.edges.x1) / 2) - (map.tileset.width / 2);
-        this.position.y = this.target.y = Math.floor((canvas.height - map.edges.y2) / 2) - (map.tileset.depth / 2);
+    toCenter(canvas, layout) {
+        this.position.x = this.target.x = Math.floor((canvas.width  - layout.boundaries.x2 - layout.boundaries.x1) / 2) - (layout.tw / 2);
+        this.position.y = this.target.y = Math.floor((canvas.height - layout.boundaries.y2) / 2) - (layout.td / 2);
     }
 
-    toTile(canvas, map, tile) {
-        this.position.x = this.target.x = Math.floor((canvas.width  - tile.posX) / 2) - (map.tileset.width / 2);
-        this.position.y = this.target.y = Math.floor((canvas.height / 2) - tile.posY - (map.tileset.depth / 2));
+    toTile(canvas, layout, location) {
+        this.position.x = this.target.x = Math.floor((canvas.width  - location.posX) / 2) - (layout.tw / 2);
+        this.position.y = this.target.y = Math.floor((canvas.height / 2) - location.posY - (layout.td / 2));
     }
 
     update(step) {

@@ -9,20 +9,20 @@ class GameManager {
         this.scene  = new SceneLoader();
         //this.transition = new TransitionController();
 
-        this.controllers = new Array(3);
+        this.controllers = new Array(4);
         this.controllers[0] = new MenuController();
         this.controllers[1] = new CombatController();
         this.controllers[2] = new TownController();
         this.controllers[3] = new WorldController();
 
-        // game states
+        // game states dictionary
         this.types = new Object();
         this.types['MENU'] = 0;
         this.types['COMBAT'] = 1;
         this.types['TOWN'] = 2;
         this.types['WORLD'] = 3;
 
-        this.state = null;
+        this.state = null; // <0-3>
 
         // document events for camera
         window.addEventListener('resize', () => this.camera._resizeCanvas(this.canvas));
@@ -36,12 +36,12 @@ class GameManager {
 
     async _load(id) {
         await this.scene._load(id);
-        await this.controllers[this.types[this.scene.type]]._use(this.scene);
+        await this.controllers[this.types[this.scene.type]]._prepare(this.scene);
     }
 
     async _initialize() {
         this.controllers[this.types[this.scene.type]]._initialize();
-        this.camera.toCenter(this.canvas, this.scene.map);
+        this.camera.toCenter(this.canvas, this.scene.layout);
         this.state = this.types[this.scene.type];
     }
     

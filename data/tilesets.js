@@ -1,5 +1,7 @@
-GAME_DATA.tilesets = [{
-    id: 'woodlands',
+GAME_DATA.tilesets = new Object();
+
+GAME_DATA.tilesets['woodlands'] = {
+    dir: 'maps',
     src: 'woodlands.png',
     config: {
         height: 8,
@@ -10,32 +12,46 @@ GAME_DATA.tilesets = [{
         {
             name: 'Grass',
             slope: false,
-            animated: false,
             idx: 0
         },
         {
             name: 'Dirt Slope',
-            slope: false,
-            animated: false,
+            slope: true,
             idx: 1
         },
         {
             name: 'Water',
             slope: false,
-            animated: false,
             idx: 2
         },
         {
             name: 'Grass Slope',
-            slope: false,
-            animated: false,
+            slope: true,
             idx: 3
         },
         {
             name: 'Stump',
             slope: false,
-            animated: false,
             idx: 5
         }
     ]
-}];
+};
+
+GAME_DATA.tilesets['woodlands-decoration'] = {
+    dir: 'decorations',
+    src: 'woodlands.png',
+    config: {
+        height: 48,
+        width: 32
+    },
+    tiles: {
+        '1': {
+            name: 'Grass',
+            idx: 0
+        },
+        '2': {
+            name: 'Heavy Grass',
+            idx: 3
+        }
+    }
+};

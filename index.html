@@ -11,7 +11,9 @@
   </body>
 
   <script type="text/javascript">
-    const GAME_DATA = new Object();
+    GAME_DATA = {};
+    ASSET_DIR = 'assets';
+    OS_FILE_SEPARATOR = '/';
   </script>
 
   <!-- GAME DATA -->
@@ -20,9 +22,9 @@
   <script type="text/javascript" src="data/tilesets.js"></script>
 
   <!-- GAME OBJECTS -->
-  <script type="text/javascript" src="src/models/Scene.js"></script>
   <script type="text/javascript" src="src/models/Map.js"></script>
   <script type="text/javascript" src="src/models/Tileset.js"></script>
+  <script type="text/javascript" src="src/models/Layout.js"></script>
 
   <!-- GAME STATE CONTROLLERS -->
   <script type="text/javascript" src="src/controllers/Menu.js"></script>

@@ -1,57 +1,64 @@
 class Map {
     constructor(config) {
-        this.id = config.id;
-        this.layout = config.layout;
-        this.structure = null;
-        this.tileset = Data.getTileset(config.tileset);
-        this.edges = {
-            x1: 0,
-            x2: 0,
-            y1: 0,
-            y2: 0,
-        }
+        this.tiles = new Object();
+        this.tiles.tileset = new Tileset(Data.getTileset(config.map.tileset));
+        this.tiles.layout = config.map.layout;
+        
+        this.decoration = new Object();
+        this.decoration.tileset = new Tileset(Data.getTileset(config.decoration.tileset));
+        this.decoration.layout = config.decoration.layout;
     }
 
-    async load() {
-        await this.tileset.load();
-
-        const w = this.tileset.width,
-              h = this.tileset.height,
-              d = this.tileset.depth;
-        
-        this.structure = [].concat(...this.layout.map((r, ri) => {
-            return r.map((c, ci) => {
-                const location = new Object();
-                location.x = ri;
-                location.y = ci;
-                location.z = c.length || 1;
-                location.posX = (ci * (w / 2)) - (ri * (w / 2));
-                this.edges.x1 = Math.min(location.posX, this.edges.x1);
-                this.edges.x2 = Math.max(location.posX, this.edges.x2);
-                location.posY = (ci * (d / 2)) + (ri * (d / 2)) - (((c.length || 1) - 1) * h);
-                this.edges.y2 = Math.max(location.posY, this.edges.y2);
-                location.tiles = c.length ? c : [c];
-                location.sortIndex = ri + ci;
-                return location;
-            });
-        })).sort((a, b) => (a.sortIndex - b.sortIndex) ? a.sortIndex - b.sortIndex : b.x - a.x);
+    async _prepare() {
+        return Promise.all([this.tiles.tileset._load(), this.decoration.tileset._load()]);
     }
 }
 
 Map.prototype.update = function(step) {
 };
 
-Map.prototype.render = function(delta, location) {
-    const w = this.tileset.width,
-          h = this.tileset.height,
-          d = this.tileset.depth,
-          x = Game.camera.position.x - ((location.x - location.y) * (w / 2)),
-          y = Game.camera.position.y + ((location.x + location.y) * (d / 2));
+Map.prototype.renderTile = function(delta, location) {
+    const t = this.tiles.tileset,
+          x = Game.camera.position.x - ((location.x - location.y) * (t.tw / 2)),
+          y = Game.camera.position.y + ((location.x + location.y) * (t.td / 2));
 
-    location.tiles.forEach((id, index) => {
+    this.tiles.layout[location.x][location.y].forEach((id, index) => {
+        if (t.tiles[id] == undefined)
+            return;
+        
         Game.ctx.save();
-        Game.ctx.translate(x, y - (index * h));
-        this.tileset.render(id);
+        Game.ctx.translate(x, y - (index * t.th));
+
+        const sx = Math.floor(((t.tiles[id].idx * t.tw) % t.img.width) / t.tw) * t.tw,
+              sy = Math.floor((t.tiles[id].idx * t.tw) / t.img.width) * (t.th + t.td);
+        
+        Game.ctx.drawImage(
+            t.img,
+            sx,
+            sy,
+            t.tw,
+            t.th + t.td,
+            0,
+            0,
+            t.tw,
+            t.th + t.td
+        );
         Game.ctx.restore();
     });
+};
+
+Map.prototype.renderDecoration = function(delta, location) {
+    const d = this.decoration.tileset,
+          t = this.tiles.tileset,
+          x = Game.camera.position.x - ((location.x - location.y) * (t.tw / 2)),
+          y = Game.camera.position.y + ((location.x + location.y) * (t.td / 2));
+
+    const id = this.decoration.layout[location.x][location.y]
+    if (d.tiles[id] == undefined)
+        return;
+
+    Game.ctx.save();
+    Game.ctx.translate(x, y - (location.z * t.th) - (d.th - (t.td + t.th)));
+    Game.ctx.drawImage(d.img, (d.tiles[id].idx * d.tw), 0, d.tw, d.th, 0, 0, d.tw, d.th);
+    Game.ctx.restore();
 };

@@ -1,9 +1,7 @@
-GAME_DATA.scenes = [{
-    id: 'test',
+GAME_DATA.scenes = new Object();
+
+GAME_DATA.scenes['test'] = {
     type: 'COMBAT',
     map: 'woodlands',
-    decoration: 'woodlands',
-    objects: [],
-    enemies: [],
-    neutral: []
-}];
+    entities: []
+};

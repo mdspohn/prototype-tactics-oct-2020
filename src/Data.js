@@ -1,30 +1,25 @@
 class DataManager {
     constructor() {
-
-        // furthest story mission completion
-        this.progress = 0;
-
-        // data of all available beasts in stables
         this.roster = [];
+    }
 
-        // id of beasts selected for active party
-        this.party = [];
-
+    getRoster() {
+        return this.roster;
     }
 
     getScene(id) {
-        return GAME_DATA.scenes.find(scene => scene.id == id);
+        return GAME_DATA.scenes[id];
     }
 
     getMap(id) {
-        return new Map(GAME_DATA.maps.find(map => map.id == id));
+        return GAME_DATA.maps[id];
     }
 
     getTileset(id) {
-        return new Tileset(GAME_DATA.tilesets.find(tileset => tileset.id == id));
+        return GAME_DATA.tilesets[id];
     }
 
     getBeast(id) {
-        return new Beast(GAME_DATA.beasts.find(beast => beast.id == id));
+        return GAME_DATA.beasts[id];
     }
 }

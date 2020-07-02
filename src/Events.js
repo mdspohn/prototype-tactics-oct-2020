@@ -23,6 +23,7 @@ class EventManager {
                 fn: callback,
                 persistent
             };
+            return id;
         }
     }
 

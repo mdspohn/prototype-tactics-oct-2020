@@ -1,4 +1,6 @@
-GAME_DATA.beasts = [{
+GAME_DATA.beasts = new Object();
+
+GAME_DATA.beasts['slime'] = {
     id: 'slime',
     sprite: {
         src: "slime.png",
@@ -82,8 +84,9 @@ GAME_DATA.beasts = [{
             { "id": 1, "ms": 100 }
         ]
     }
-},
-{
+};
+
+GAME_DATA.beasts['mimic'] = {
     id: 'mimic',
     sprite: {
         src: "mimic.png",
@@ -130,4 +133,4 @@ GAME_DATA.beasts = [{
             { "id": 4, "ms": 200 }
         ]
     }
-}];
+};
