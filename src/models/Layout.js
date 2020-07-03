@@ -16,20 +16,20 @@ class Location {
 
 class Layout {
     constructor(map, entities) {
-        this.tw = map.tiles.tileset.tw;
-        this.th = map.tiles.tileset.th;
-        this.td = map.tiles.tileset.td;
+        this.tw = map.tileset.tw;
+        this.th = map.tileset.th;
+        this.td = map.tileset.td;
         
         this.boundaries = { x1: 0, x2: 0, y1: 0, y2: 0 };
-        this.structure = map.tiles.layout.map((row, ri) => {
+        this.structure = map.tiles.map((row, ri) => {
             return row.map((column, ci) => {
-                const tiles = map.tiles.layout[ri][ci] = Array.isArray(column) ? column : Array.of(column);
+                const tiles = map.tiles[ri][ci] = Array.isArray(column) ? column : Array.of(column);
                 const loc = new Location({
                     x: ri,
                     y: ci,
                     z: tiles.length,
                     posX: (ci * (this.tw / 2)) - (ri * (this.tw / 2)),
-                    posY: (ci * (this.td / 2)) + (ri * (this.td / 2)) - ((tiles.length - 1) * this.th),
+                    posY: (ci * (this.td / 2)) + (ri * (this.td / 2)) - ((tiles.length - 1) * this.th) + this.td,
                     occupant: entities.find(target => target.x == ri && target.y == ci)
                 });
 

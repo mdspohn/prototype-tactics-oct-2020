@@ -37,7 +37,7 @@ GAME_DATA.tilesets['woodlands'] = {
     ]
 };
 
-GAME_DATA.tilesets['woodlands-decoration'] = {
+GAME_DATA.tilesets['flora'] = {
     dir: 'decorations',
     src: 'woodlands.png',
     config: {

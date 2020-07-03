@@ -1,5 +1,8 @@
 class DataManager {
     constructor() {
+        // this class is just in charge of converting JSON data to javascript objects and saving changes back
+        // as long as the methods return javascript objects when data is requested, nothing in the app changes
+        this.mission = 0;
         this.roster = [];
     }
 
@@ -13,6 +16,10 @@ class DataManager {
 
     getMap(id) {
         return GAME_DATA.maps[id];
+    }
+
+    getDecoration(id) {
+        return GAME_DATA.decorations[id];
     }
 
     getTileset(id) {

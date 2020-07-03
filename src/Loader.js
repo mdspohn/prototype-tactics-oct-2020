@@ -1,21 +1,28 @@
 class SceneLoader {
     constructor() {
-        this.type = null; // controller type for loaded scene
+        this.type = null;
+
         this.map = null;
-        this.entities = null;
-        this.layout = null;
+        this.decoration = null;
+        this.entities = [];
+
+        this.assets = new Object();
     }
 
-    async _load(sceneId) {
-        const scene   = Data.getScene(sceneId),
-              roster  = Data.getRoster(),
-              mapData = Data.getMap(scene.map);
+    async _load(id) {
+        const scene = Data.getScene(id);
         
+        // configure scene objects
         this.type = scene.type;
-        this.map = new Map(mapData);
-        this.entities = [...roster, ...scene.entities].map(entityData => new Beast(entityData));
-        this.layout = new Layout(this.map, this.entities);
+        this.map = new Map(Data.getMap(scene.map));
+        this.decoration = new Decoration(Data.getDecoration(scene.decoration));
+        this.entities = [...Data.getRoster(), ...scene.entities].map(entity => new Beast(entity));
 
-        return Promise.all([ this.map._prepare(), this.entities.forEach(entity => entity._prepare()) ]);
+        // load missing tilesets
+        return Promise.all([
+            this.map._prepare(this.assets),
+            this.decoration._prepare(this.assets),
+            this.entities.forEach(entity => entity._prepare(this.assets))
+        ]);
     }
 }

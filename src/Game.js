@@ -41,7 +41,7 @@ class GameManager {
 
     async _initialize() {
         this.controllers[this.types[this.scene.type]]._initialize();
-        this.camera.toCenter(this.canvas, this.scene.layout);
+        this.camera.toCenter(this.canvas, this.controllers[this.types[this.scene.type]].layout);
         this.state = this.types[this.scene.type];
     }
     
