@@ -2,12 +2,7 @@ GAME_DATA.beasts = new Object();
 
 GAME_DATA.beasts['slime'] = {
     id: 'slime',
-    sprite: {
-        src: "slime.png",
-        height: 32,
-        width: 32,
-        depth_offset: 0
-    },
+    tileset: 'slime',
     animations: {
         idle: [
             { "id": 1, "ms": 250 },
@@ -15,8 +10,10 @@ GAME_DATA.beasts['slime'] = {
             { "id": 2, "ms": 100, "y": -1  },
             { "id": 3, "ms": 150, "y": -9  },
             { "id": 4, "ms": 250, "y": -11 },
-            { "id": 5, "ms": 100, "y": -7  },
-            { "id": 6, "ms": 100, "y": -5  },
+            { "id": 4, "ms": 100, "y": -9 },
+            { "id": 4, "ms": 50, "y": -7 },
+            { "id": 4, "ms": 25, "y": -5 },
+            { "id": 4, "ms": 25, "y": -3 },
             { "id": 7, "ms": 50,  "y": 0   },
             { "id": 1, "ms": 200 }
         ],
@@ -88,12 +85,7 @@ GAME_DATA.beasts['slime'] = {
 
 GAME_DATA.beasts['mimic'] = {
     id: 'mimic',
-    sprite: {
-        src: "mimic.png",
-        height: 32,
-        width: 32,
-        depth_offset: 0
-    },
+    tileset: 'mimic',
     animations: {
         idle: [
             { "id": 5, "ms": 1000 },

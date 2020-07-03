@@ -28,7 +28,6 @@ class Map {
                 Game.camera.position.x - ((loc.x - loc.y) * (this.tileset.tw / 2)),
                 Game.camera.position.y + ((loc.x + loc.y) * (this.tileset.td / 2)) - (index * this.tileset.th)
             );
-            
             Game.ctx.drawImage(
                 this.tileset.img,
                 this.tileset.tiles[id].idx * this.tileset.tw % this.tileset.img.width,

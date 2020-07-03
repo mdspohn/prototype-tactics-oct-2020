@@ -1,19 +1,11 @@
 class Beast {
     constructor(config) {
-        // internal identifier for this beast
-        this.id = config.id;
-
-        // sprite config
-        this.sprite              = new Object();
-        this.sprite.img          = config.sprite.img || null;
-        this.sprite.src          = config.sprite.src;
-        this.sprite.height       = config.sprite.height;
-        this.sprite.width        = config.sprite.width;
-        this.sprite.depth_offset = config.sprite.depth_offset;
+        this.tileset;
+        this.tileset_id = config.tileset;
 
         // positioning
-        this.x = 0;
-        this.y = 0;
+        this.x = config.x;
+        this.y = config.y;
 
         // animation states
         this.ix = 0;
@@ -44,25 +36,11 @@ class Beast {
 
         // derived information
         this.range = null;
-    }
 
-    _load(resolve) {
-        this._init();
-        return new Promise((resolve, reject) => {
-            if (this.sprite.img != null)
-                return resolve();
-            
-            this.sprite.img = new Image();
-            this.sprite.img.onload = () => resolve();
-            this.sprite.img.src = 'assets/characters/' + this.sprite.src;
-        });
-    }
-
-    _init() {
         if (!this.animations.idle.initialized) {
             Object.entries(this.animations).forEach(entry => {
                 const animation = new Object();
-                animation.frames = entry[1].frames.map(frame => {
+                animation.frames = entry[1].map(frame => {
                     return {
                         id: frame.id,
                         event: frame.event,
@@ -81,6 +59,15 @@ class Beast {
         
         this.frame = this.animations['idle'].frames[0];
         this.queueAnimation('idle', false, { repeat: true });
+    }
+
+    async _prepare(assets) {
+        this.tileset = assets[this.tileset_id];
+        if (this.tileset == undefined) {
+            this.tileset = new Tileset(Data.getTileset(this.tileset_id));
+            await this.tileset._load();
+            assets[this.tileset_id] = this.tileset;
+        }
     }
 
     update(step) {
@@ -122,7 +109,7 @@ class Beast {
             }
             
             if (msAccumulated > 0) {
-                const hasEvent = msAccumulated < (step * 1000) && this.frame.event != undefined,
+                const hasEvent = msAccumulated < step && this.frame.event != undefined,
                       isLastFrame = (this.animations[this.actions[0].id].frames.length - 1) == index;
                 
                 if (hasEvent)
@@ -175,24 +162,44 @@ class Beast {
             this.ox = this.ix + Math.ceil(animationProgress * (this.tx - this.ix)) + (this.frame.x || 0);
             this.oy = this.iy + Math.ceil(animationProgress * (this.ty - this.iy)) + (this.iz + Math.ceil(zProgress * (this.tz - this.iz))) + (this.frame.y || 0);
 
-            this.actions[0].sinceLast += (step * 1000);
+            this.actions[0].sinceLast += step;
         }
     }
     
-    render(delta, location, translate) {
-        // adjust translation for location height, beast width, and any current animation
-        const x = translate.x + ((translate.w - this.sprite.width) / 2) + this.ox,
-              y = translate.y - ((location.z * translate.h) + this.sprite.height - 24) + this.oy;
-
+    render(delta, loc) {
         const animationRow = Math.floor(this.frame.id / 10),
               animationCol = this.frame.id % 10;
         
         Game.ctx.save();
-        Game.ctx.translate(x, y);
-        Game.ctx.drawImage(this.sprite.img,
-                           animationCol * this.sprite.width, animationRow * this.sprite.height, this.sprite.width, this.sprite.height,
-                           0, 0, this.sprite.width, this.sprite.height);
+        Game.ctx.translate(
+            Game.camera.position.x + loc.posX - ((this.tileset.tw - loc.tw) / 2) + this.ox,
+            Game.camera.position.y + loc.posY - (this.tileset.th - loc.td) + this.oy + (loc.slope * (loc.th / 2))
+        );
+        Game.ctx.drawImage(
+            this.tileset.img,
+            animationCol * this.tileset.tw,
+            animationRow * this.tileset.th,
+            this.tileset.tw,
+            this.tileset.th,
+            0,
+            0,
+            this.tileset.tw,
+            this.tileset.th
+        );
         Game.ctx.restore();
+        // adjust translation for location height, beast width, and any current animation
+        // const x = translate.x + ((translate.w - this.sprite.width) / 2) + this.ox,
+        //       y = translate.y - ((location.z * translate.h) + this.sprite.height - 24) + this.oy;
+
+        // const animationRow = Math.floor(this.frame.id / 10),
+        //       animationCol = this.frame.id % 10;
+        
+        // Game.ctx.save();
+        // Game.ctx.translate(x, y);
+        // Game.ctx.drawImage(this.sprite.img,
+        //                    animationCol * this.sprite.width, animationRow * this.sprite.height, this.sprite.width, this.sprite.height,
+        //                    0, 0, this.sprite.width, this.sprite.height);
+        // Game.ctx.restore();
     }
 
     _getAnimationAction(id, hasEvent = true, properties = {}) {

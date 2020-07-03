@@ -1,11 +1,9 @@
 class SceneLoader {
     constructor() {
         this.type = null;
-
         this.map = null;
         this.decoration = null;
-        this.entities = [];
-
+        this.entities = new Array();
         this.assets = new Object();
     }
 
@@ -16,7 +14,10 @@ class SceneLoader {
         this.type = scene.type;
         this.map = new Map(Data.getMap(scene.map));
         this.decoration = new Decoration(Data.getDecoration(scene.decoration));
-        this.entities = [...Data.getRoster(), ...scene.entities].map(entity => new Beast(entity));
+        this.entities = [...Data.getRoster(), ...scene.entities].map(opts => {
+            const config = Object.assign(Data.getBeast(opts.id), opts);
+            return new Beast(config);
+        });
 
         // load missing tilesets
         return Promise.all([

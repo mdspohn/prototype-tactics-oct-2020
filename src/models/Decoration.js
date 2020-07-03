@@ -24,7 +24,10 @@ class Decoration {
             return;
 
         Game.ctx.save();
-        Game.ctx.translate(Game.camera.position.x + loc.posX, Game.camera.position.y + loc.posY - this.tileset.th);
+        Game.ctx.translate(
+            Game.camera.position.x + loc.posX - ((this.tileset.tw - loc.tw) / 2),
+            Game.camera.position.y + loc.posY - (this.tileset.th - loc.td - loc.th)
+        );
         Game.ctx.drawImage(
             this.tileset.img,
             this.tileset.tiles[id].idx * this.tileset.tw,

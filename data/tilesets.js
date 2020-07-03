@@ -55,3 +55,21 @@ GAME_DATA.tilesets['flora'] = {
         }
     }
 };
+
+GAME_DATA.tilesets['slime'] = {
+    dir: 'characters',
+    src: 'slime.png',
+    config: {
+        height: 32,
+        width: 32
+    }
+};
+
+GAME_DATA.tilesets['mimic'] = {
+    dir: 'characters',
+    src: 'mimic.png',
+    config: {
+        height: 32,
+        width: 32
+    }
+};
