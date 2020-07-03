@@ -8,7 +8,7 @@ class Map {
     async _prepare(assets) {
         this.tileset = assets[this.tileset_id];
         if (this.tileset == undefined) {
-            this.tileset = new Tileset(Data.getTileset(this.tileset_id));
+            this.tileset = new Tileset(Data.getTileset(this.tileset_id, 'maps'));
             await this.tileset._load();
             assets[this.tileset_id] = this.tileset;
         }

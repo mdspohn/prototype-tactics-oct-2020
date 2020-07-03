@@ -22,8 +22,8 @@ class DataManager {
         return GAME_DATA.decorations[id];
     }
 
-    getTileset(id) {
-        return GAME_DATA.tilesets[id];
+    getTileset(id, dir) {
+        return Object.assign({ dir }, GAME_DATA.tilesets[dir][id]);
     }
 
     getBeast(id) {

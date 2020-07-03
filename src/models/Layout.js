@@ -34,7 +34,7 @@ class Layout {
                 return location;
             });
         });
-        console.log(this.structure)
+        
         this.order = new Array(2);
         this.order[0] = [].concat(...this.structure).sort((a, b) => (a.x - b.x) ? a.x - b.x : a.y - b.y);
         this.order[1] = [].concat(...this.structure).sort((a, b) => (a.y - b.y) ? a.y - b.y : a.x - b.x);
