@@ -52,6 +52,34 @@ class Camera {
         this._resizeCanvas();
     }
 
+    windowToCanvas(windowX, windowY) {
+        // translate window (x, y) to canvas (x, y)
+        const x = Math.floor(windowX / this.zoom),
+              y = Math.floor(windowY / this.zoom);
+
+        return { x, y };
+    }
+
+    canvasToTile(x, y, layout) {
+        x -= this.position.x;
+        y -= this.position.y;
+        return layout.find(tile => {
+            // this always matches tile that comes first if two are overlapping (which isn't correct)
+            if (x >= tile.posX && x < (tile.posX + 32) && y >= tile.posY && y < (tile.posY + 16)) {
+                let pixelsInX = x - tile.posX;
+                if (Math.ceil((16 - Math.abs(16 - pixelsInX)) / 2) >= Math.abs(8 - (y - tile.posY))) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+
+    windowToTile(windowX, windowY, layout) {
+        const canvasCoords = this.windowToCanvas(windowX, windowY);
+        return this.canvasToTile(canvasCoords.x, canvasCoords.y, layout);
+    }
+
     onRightClick(event) {
         const x = event.x,
               y = event.y;

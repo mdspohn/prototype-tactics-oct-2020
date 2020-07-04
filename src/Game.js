@@ -44,6 +44,14 @@ class GameManager {
         this.camera.toCenter(this.canvas, this.controllers[this.types[this.scene.type]].layout);
         this.state = this.types[this.scene.type];
     }
+
+    onRightClick(event) {
+        this.controllers[this.state].onRightClick(event);
+    }
+
+    onLeftClick(event) {
+        this.controllers[this.state].onLeftClick(event);
+    }
     
     update(step) {
         this.input.update(step)

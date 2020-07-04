@@ -11,9 +11,7 @@ class Layout {
         this.td = map.tileset.td;
 
         this.structure = map.tiles.map((row, rowIdx) => {
-            return row.map((col, colIdx) => {
-                const tiles = map.tiles[rowIdx][colIdx] = Array.isArray(col) ? col : Array.of(col);
-
+            return row.map((tiles, colIdx) => {
                 const location = new Object();
                 location.x = rowIdx;
                 location.y = colIdx;
@@ -24,7 +22,7 @@ class Layout {
                 location.posX = colIdx * (location.tw / 2) - rowIdx * (location.tw / 2);
                 location.posY = colIdx * (location.td / 2) + rowIdx * (location.td / 2) - (tiles.length - 1) * location.th;
                 location.occupant = entities.find(target => target.x == rowIdx && target.y == colIdx);
-                location.slope = map.tileset.tiles[tiles[tiles.length - 1]].slope;
+                location.slope = Boolean(map.tileset.config[tiles[tiles.length - 1].id].slope);
 
                 this.boundaries.x1 = Math.min(this.boundaries.x1, location.posX);
                 this.boundaries.x2 = Math.max(this.boundaries.x2, location.posX);
@@ -55,5 +53,9 @@ class Layout {
 
     forEach(fn) {
         this.order[this.sortingMethod].forEach(location => fn(location));
+    }
+
+    find(fn) {
+        return this.order[0].find(location => fn(location));
     }
 }

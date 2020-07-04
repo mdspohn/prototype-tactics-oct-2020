@@ -14,16 +14,12 @@ class DataManager {
         return GAME_DATA.scenes[id];
     }
 
-    getMap(id) {
-        return GAME_DATA.maps[id];
+    getArea(id) {
+        return GAME_DATA.areas[id];
     }
 
-    getDecoration(id) {
-        return GAME_DATA.decorations[id];
-    }
-
-    getTileset(id, dir) {
-        return Object.assign({ dir }, GAME_DATA.tilesets[dir][id]);
+    getTileset(id, directory) {
+        return Object.assign({ directory }, GAME_DATA.tilesets[directory][id]);
     }
 
     getBeast(id) {

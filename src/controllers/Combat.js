@@ -27,6 +27,27 @@ class CombatController {
     async _initialize() {
         // todo
     }
+
+    onRightClick(event) {
+        const tile = Game.camera.windowToTile(event.x, event.y, this.layout);
+        if (!tile)
+            return;
+        this.decoration.tiles[tile.x][tile.y] = [{
+            id: 3,
+            ms: 0,
+            frame: 0
+        }];
+    }
+    onLeftClick(event) {
+        const tile = Game.camera.windowToTile(event.x, event.y, this.layout);
+        if (!tile)
+            return;
+        this.map.tiles[tile.x][tile.y].push({
+            id: 10,
+            ms: 0,
+            frame: 0
+        });
+    }
     
     update(step) {
         this.map.update(step);

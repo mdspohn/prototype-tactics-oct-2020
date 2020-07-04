@@ -25,7 +25,8 @@ class InputManager {
 
         // keyboard and mouse event listeners
         document.addEventListener('click', event => {
-            this.actions.push({ key: 'Click', data: event });
+            Game.onLeftClick(event);
+            //this.actions.push({ key: 'Click', data: event });
         });
         document.addEventListener('mousemove', event => this.actions.push({ key: 'MouseMove', data: event }));
         document.addEventListener('keyup', event => {
@@ -34,7 +35,8 @@ class InputManager {
         });
         document.addEventListener('contextmenu', (event) => {
             event.preventDefault();
-            Game.camera.onRightClick(event);
+            Game.onRightClick(event);
+            //Game.camera.onRightClick(event);
         });
     }
 

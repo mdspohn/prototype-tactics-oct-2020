@@ -1,8 +1,14 @@
 class Decoration {
     constructor(config) {
-        this.tiles = config.tiles;
         this.tileset;
         this.tileset_id = config.tileset;
+        this.tiles = config.tiles.map(row => {
+            return row.map(tiles => {
+                if (Array.isArray(tiles))
+                    return tiles.map(id => Object.create({ id, frame: 0, ms: 0 }));
+                return [Object.create({ id: tiles, frame: 0, ms: 0 })];
+            })
+        });
     }
 
     async _prepare(assets) {
@@ -19,26 +25,16 @@ class Decoration {
     }
 
     render(delta, loc) {
-        const id = this.tiles[loc.x][loc.y];
-        if (this.tileset.tiles[id] == undefined)
+        if (!this.tiles[loc.x] || !this.tiles[loc.x][loc.y])
             return;
-
-        Game.ctx.save();
-        Game.ctx.translate(
-            Game.camera.position.x + loc.posX - ((this.tileset.tw - loc.tw) / 2),
-            Game.camera.position.y + loc.posY - (this.tileset.th - loc.td - loc.th)
-        );
-        Game.ctx.drawImage(
-            this.tileset.img,
-            this.tileset.tiles[id].idx * this.tileset.tw,
-            0,
-            this.tileset.tw,
-            this.tileset.th,
-            0,
-            0,
-            this.tileset.tw,
-            this.tileset.th
-        );
-        Game.ctx.restore();
+        const x = Game.camera.position.x + loc.posX - ((this.tileset.tw - loc.tw) / 2),
+              y = Game.camera.position.y + loc.posY - (this.tileset.th - loc.td - loc.th);
+        
+        this.tiles[loc.x][loc.y].forEach((tile, index) => {
+            Game.ctx.save();
+            Game.ctx.translate(x, y - (index * this.tileset.th));
+            this.tileset.render(delta, tile);
+            Game.ctx.restore();
+        });
     }
 }
