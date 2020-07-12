@@ -7,7 +7,7 @@ class SceneLoader {
         this.tilesets = new Object();
     }
 
-    async _load(id) {
+    async _prepare(id) {
         const scene = Data.getScene(id),
               area = Data.getArea(scene.area);
         

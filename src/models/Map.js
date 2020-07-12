@@ -5,8 +5,8 @@ class Map {
         this.tiles = config.tiles.map(row => {
             return row.map(tiles => {
                 if (Array.isArray(tiles))
-                    return tiles.map(id => Object.create({ id, frame: 0, ms: 0 }));
-                return [Object.create({ id: tiles, frame: 0, ms: 0 })];
+                    return tiles.map(id => Object.create({ id, frame: 0, ms: 0, ox: 0, oy: 0 }));
+                return [Object.create({ id: tiles, frame: 0, ms: 0, ox: 0, oy: 0 })];
             })
         });
     }

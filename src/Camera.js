@@ -63,16 +63,17 @@ class Camera {
     canvasToTile(x, y, layout) {
         x -= this.position.x;
         y -= this.position.y;
-        return layout.find(tile => {
-            // this always matches tile that comes first if two are overlapping (which isn't correct)
-            if (x >= tile.posX && x < (tile.posX + 32) && y >= tile.posY && y < (tile.posY + 16)) {
-                let pixelsInX = x - tile.posX;
-                if (Math.ceil((16 - Math.abs(16 - pixelsInX)) / 2) >= Math.abs(8 - (y - tile.posY))) {
-                    return true;
+
+        let match;
+        layout.forEach(tile => {
+            if (x >= tile.posX() && x < (tile.posX() + 32) && y >= tile.posY() && y < (tile.posY() + 16)) {
+                let pixelsInX = x - tile.posX();
+                if (Math.ceil((16 - Math.abs(16 - pixelsInX)) / 2) >= Math.abs(8 - (y - tile.posY()))) {
+                    match = tile;
                 }
             }
-            return false;
         });
+        return match;
     }
 
     windowToTile(windowX, windowY, layout) {

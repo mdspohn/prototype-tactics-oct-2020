@@ -25,8 +25,7 @@ class Tileset {
     }
 
     render(delta, tile) {
-        let frame = (tile.finalFrame == undefined) ? this.config[tile.id].frame : tile.finalFrame,
-            oy = 0;
+        let frame = (tile.finalFrame == undefined) ? this.config[tile.id].frame : tile.finalFrame;
 
         if (frame == undefined) {
             // animation calculations
@@ -40,7 +39,8 @@ class Tileset {
                     tile.finalFrame = animationFrames[tile.frame].frame;
                 }
             }
-            oy = ~~animationFrames[tile.frame].oy;
+            tile.oy = ~~animationFrames[tile.frame].oy;
+            tile.ox = ~~animationFrames[tile.frame].ox;
             frame = animationFrames[tile.frame].frame;
         }
 
@@ -53,8 +53,8 @@ class Tileset {
             Math.floor((frame * this.tw) / this.img.width) * (this.th + this.td),
             this.tw,
             this.th + this.td,
-            0,
-            oy,
+            tile.ox,
+            tile.oy,
             this.tw,
             this.th + this.td
         );

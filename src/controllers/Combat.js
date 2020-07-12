@@ -10,12 +10,7 @@ class CombatController {
         this.markers = null;
     }
 
-    async _prepare(scene) {
-        this.map = scene.map;
-        this.decoration = scene.decoration;
-        this.entities = scene.entities;
-        this.layout = new Layout(this.map, this.entities);
-
+    async _prepare() {
         // combat helpers for visually representing available actions to player
         if (this.markers == null) {
             // tile markers for movement or attack targets
@@ -24,29 +19,11 @@ class CombatController {
         }
     }
 
-    async _initialize() {
-        // todo
-    }
-
-    onRightClick(event) {
-        const tile = Game.camera.windowToTile(event.x, event.y, this.layout);
-        if (!tile)
-            return;
-        this.decoration.tiles[tile.x][tile.y] = [{
-            id: 3,
-            ms: 0,
-            frame: 0
-        }];
-    }
-    onLeftClick(event) {
-        const tile = Game.camera.windowToTile(event.x, event.y, this.layout);
-        if (!tile)
-            return;
-        this.map.tiles[tile.x][tile.y].push({
-            id: 10,
-            ms: 0,
-            frame: 0
-        });
+    async _initialize(scene) {
+        this.map = scene.map;
+        this.decoration = scene.decoration;
+        this.entities = scene.entities;
+        this.layout = new Layout(this.map, this.entities);
     }
     
     update(step) {
@@ -60,8 +37,7 @@ class CombatController {
             this.map.render(delta, location);
             this.markers.render(delta, location);
             this.decoration.render(delta, location);
-            if (location.occupant != undefined)
-                location.occupant.render(delta, location);
+            location.getOccupants().forEach(occupant => occupant.render(delta, location));
         });
     }
 }

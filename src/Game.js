@@ -7,7 +7,6 @@ class GameManager {
         this.input  = new InputManager();
         this.camera = new Camera(this.canvas);
         this.scene  = new SceneLoader();
-        //this.transition = new TransitionController();
 
         this.controllers = new Array(4);
         this.controllers[0] = new MenuController();
@@ -30,39 +29,22 @@ class GameManager {
     }
 
     async _prepare() {
-        await this._load('test');
-        await this._initialize();
-    }
+        await this.scene._prepare('test');
+        await this.controllers[this.types[this.scene.type]]._prepare();
 
-    async _load(id) {
-        await this.scene._load(id);
-        await this.controllers[this.types[this.scene.type]]._prepare(this.scene);
-    }
-
-    async _initialize() {
-        this.controllers[this.types[this.scene.type]]._initialize();
+        await this.controllers[this.types[this.scene.type]]._initialize(this.scene);
         this.camera.toCenter(this.canvas, this.controllers[this.types[this.scene.type]].layout);
         this.state = this.types[this.scene.type];
-    }
-
-    onRightClick(event) {
-        this.controllers[this.state].onRightClick(event);
-    }
-
-    onLeftClick(event) {
-        this.controllers[this.state].onLeftClick(event);
     }
     
     update(step) {
         this.input.update(step)
         this.camera.update(step);
         this.controllers[this.state].update(step);
-        // this.transition.update(step);
     }
 
     render(delta) {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.controllers[this.state].render(delta);
-        // this.transition.render(delta);
     }
 }
