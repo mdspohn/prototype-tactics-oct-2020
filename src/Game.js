@@ -31,7 +31,10 @@ class GameManager {
     async _prepare() {
         await this.scene._prepare('test');
         await this.controllers[this.types[this.scene.type]]._prepare();
+        await this._initialize();
+    }
 
+    async _initialize() {
         await this.controllers[this.types[this.scene.type]]._initialize(this.scene);
         this.camera.toCenter(this.canvas, this.controllers[this.types[this.scene.type]].layout);
         this.state = this.types[this.scene.type];

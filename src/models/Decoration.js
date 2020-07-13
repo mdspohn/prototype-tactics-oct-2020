@@ -20,8 +20,10 @@ class Decoration {
         }
     }
 
-    update(step) {
-        // update animations
+    update(step, loc) {
+        if (!this.tiles[loc.x] || !this.tiles[loc.x][loc.y])
+            return;
+        this.tiles[loc.x][loc.y].forEach(tile => this.tileset.update(step, tile));
     }
 
     render(delta, loc) {

@@ -1,7 +1,6 @@
 class GameEngine {
     constructor() {
         this.step = 1000 / 20; // update 20 times a second
-        this.maxUpdateLag = 1000;
         this.frame = 0;
     }
 
@@ -15,7 +14,7 @@ class GameEngine {
             
             last = now;
             now = timestamp;
-            delta = delta + Math.min(this.maxUpdateLag, (now - last)); // catch up
+            delta = delta + (now - last); // catch up
     
             while(delta >= this.step) {
                 delta -= this.step;

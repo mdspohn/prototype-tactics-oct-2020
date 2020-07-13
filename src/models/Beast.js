@@ -36,29 +36,30 @@ class Beast {
 
         // derived information
         this.range = null;
+        this.currentAnim = { id: 'idle', frame: 0, ms: 0, ox: 0, oy: 0 }
 
-        if (!this.animations.idle.initialized) {
-            Object.entries(this.animations).forEach(entry => {
-                const animation = new Object();
-                animation.frames = entry[1].map(frame => {
-                    return {
-                        id: frame.id,
-                        event: frame.event,
-                        ms: frame.ms,       // frame duration
-                        x:  frame.x  || 0,  // x offset
-                        y:  frame.y  || 0,  // y offset
-                        p:  frame.p  || 0,  // movement progress
-                        zd: frame.zd || 0,  // z down progress
-                        zu: frame.zu || 0   // z up progress
-                    }
-                });
-                animation.initialized = true;
-                this.animations[entry[0]] = animation;
-            });
-        }
+        // if (!this.animations.idle.initialized) {
+        //     Object.entries(this.animations).forEach(entry => {
+        //         const animation = new Object();
+        //         animation.frames = entry[1].map(frame => {
+        //             return {
+        //                 id: frame.id,
+        //                 event: frame.event,
+        //                 ms: frame.ms,       // frame duration
+        //                 x:  frame.x  || 0,  // x offset
+        //                 y:  frame.y  || 0,  // y offset
+        //                 p:  frame.p  || 0,  // movement progress
+        //                 zd: frame.zd || 0,  // z down progress
+        //                 zu: frame.zu || 0   // z up progress
+        //             }
+        //         });
+        //         animation.initialized = true;
+        //         this.animations[entry[0]] = animation;
+        //     });
+        // }
         
-        this.frame = this.animations['idle'].frames[0];
-        this.queueAnimation('idle', false, { repeat: true });
+        // this.frame = this.animations['idle'].frames[0];
+        // this.queueAnimation('idle', false, { repeat: true });
     }
 
     async _prepare(assets) {
@@ -71,121 +72,122 @@ class Beast {
     }
 
     update(step) {
-        if (this.actions[0].sorting)
-            this._broadcastAnimationSorting(this.actions[0]);
+        this.tileset.update(step, this.currentAnim);
+        // if (this.actions[0].sorting)
+        //     this._broadcastAnimationSorting(this.actions[0]);
 
-        if (this.actions[0].type === 'event')
-            return this._broadcastAnimationEvent(this.actions.shift());
+        // if (this.actions[0].type === 'event')
+        //     return this._broadcastAnimationEvent(this.actions.shift());
 
-        let isAnimationComplete = false,
-            msAccumulated = this.actions[0].sinceLast,
-            animationProgress = 0,
-            zProgress = 0;
+        // let isAnimationComplete = false,
+        //     msAccumulated = this.actions[0].sinceLast,
+        //     animationProgress = 0,
+        //     zProgress = 0;
 
-        this.animations[this.actions[0].id].frames.some((frame, index) => {
-            if (this.actions[0].movement) {
-                const progress = Math.min(msAccumulated / frame.ms, 1);
-                if (frame.p !== 0)
-                    animationProgress += progress * frame.p;
+        // this.animations[this.actions[0].id].frames.some((frame, index) => {
+        //     if (this.actions[0].movement) {
+        //         const progress = Math.min(msAccumulated / frame.ms, 1);
+        //         if (frame.p !== 0)
+        //             animationProgress += progress * frame.p;
                 
-                if (this.actions[0].z > 0 && frame.zd) {
-                    zProgress += progress * frame.zd;
-                } else if (this.actions[0].z < 0 && frame.zu) {
-                    zProgress += progress * frame.zu;
-                }
-            }
+        //         if (this.actions[0].z > 0 && frame.zd) {
+        //             zProgress += progress * frame.zd;
+        //         } else if (this.actions[0].z < 0 && frame.zu) {
+        //             zProgress += progress * frame.zu;
+        //         }
+        //     }
 
-            msAccumulated -= frame.ms;
+        //     msAccumulated -= frame.ms;
             
-            if (msAccumulated <= 0) {
-                if (this.actions[0].sinceLast === 0 && this.actions[0].movement) {
-                    this.tx = -(this.actions[0].x - this.x) * (TILE_WIDTH / 2);
-                    this.tx += (this.actions[0].y - this.y) * (TILE_WIDTH / 2);
-                    this.ty =  (this.actions[0].x - this.x) * (TILE_DEPTH / 2);
-                    this.ty += (this.actions[0].y - this.y) * (TILE_DEPTH / 2);
-                    this.tz =  (this.actions[0].z * TILE_HEIGHT);
-                }
-                return this.frame = frame;
-            }
+        //     if (msAccumulated <= 0) {
+        //         if (this.actions[0].sinceLast === 0 && this.actions[0].movement) {
+        //             this.tx = -(this.actions[0].x - this.x) * (TILE_WIDTH / 2);
+        //             this.tx += (this.actions[0].y - this.y) * (TILE_WIDTH / 2);
+        //             this.ty =  (this.actions[0].x - this.x) * (TILE_DEPTH / 2);
+        //             this.ty += (this.actions[0].y - this.y) * (TILE_DEPTH / 2);
+        //             this.tz =  (this.actions[0].z * TILE_HEIGHT);
+        //         }
+        //         return this.frame = frame;
+        //     }
             
-            if (msAccumulated > 0) {
-                const hasEvent = msAccumulated < step && this.frame.event != undefined,
-                      isLastFrame = (this.animations[this.actions[0].id].frames.length - 1) == index;
+        //     if (msAccumulated > 0) {
+        //         const hasEvent = msAccumulated < step && this.frame.event != undefined,
+        //               isLastFrame = (this.animations[this.actions[0].id].frames.length - 1) == index;
                 
-                if (hasEvent)
-                    this._broadcastAnimationEvent({ id: this.frame.event });
+        //         if (hasEvent)
+        //             this._broadcastAnimationEvent({ id: this.frame.event });
                 
-                if (isLastFrame) {
-                    if (this.actions[0].movement) {
-                        this.x = this.actions[0].x;
-                        this.y = this.actions[0].y;
-                        this.ox = this.oy = 0;
-                        this.tx = this.ty = this.tz = 0;
-                        this.ix = this.iy = this.iz = 0;
-                    }
+        //         if (isLastFrame) {
+        //             if (this.actions[0].movement) {
+        //                 this.x = this.actions[0].x;
+        //                 this.y = this.actions[0].y;
+        //                 this.ox = this.oy = 0;
+        //                 this.tx = this.ty = this.tz = 0;
+        //                 this.ix = this.iy = this.iz = 0;
+        //             }
 
-                    const previousAction = this.actions.shift();
+        //             const previousAction = this.actions.shift();
 
-                    if (previousAction.repeat) {
-                        previousAction.sinceLast = 0;
-                        this.actions.push(previousAction);
-                    }
-                    return isAnimationComplete = true;
-                }
-            }
-        });
+        //             if (previousAction.repeat) {
+        //                 previousAction.sinceLast = 0;
+        //                 this.actions.push(previousAction);
+        //             }
+        //             return isAnimationComplete = true;
+        //         }
+        //     }
+        // });
 
-        // should current render tile be switched if moving
-        if (!isAnimationComplete) {
-            const hasProgress = (this.x != this.actions[0].x || this.y != this.actions[0].y) && animationProgress > 0;
+        // // should current render tile be switched if moving
+        // if (!isAnimationComplete) {
+        //     const hasProgress = (this.x != this.actions[0].x || this.y != this.actions[0].y) && animationProgress > 0;
 
-            if (hasProgress) {
-                const isRenderedAfter = (this.actions[0].y + this.actions[0].x - this.x - this.y) > 0,
-                      isAlmostDoneJumpingUp = !(this.actions[0].z < 0) || zProgress > 0.9,
-                      isAlmostDoneJumpingDown = this.actions[0].z > 0 && (this.actions[0].x > this.x || animationProgress > 0.3);
+        //     if (hasProgress) {
+        //         const isRenderedAfter = (this.actions[0].y + this.actions[0].x - this.x - this.y) > 0,
+        //               isAlmostDoneJumpingUp = !(this.actions[0].z < 0) || zProgress > 0.9,
+        //               isAlmostDoneJumpingDown = this.actions[0].z > 0 && (this.actions[0].x > this.x || animationProgress > 0.3);
                 
-                if ((isRenderedAfter && isAlmostDoneJumpingUp) || isAlmostDoneJumpingDown) {
-                    this.ix =  -(this.x - this.actions[0].x) * (TILE_WIDTH / 2);
-                    this.ix +=  (this.y - this.actions[0].y) * (TILE_WIDTH / 2);
-                    this.iy =   (this.x - this.actions[0].x) * (TILE_DEPTH / 2);
-                    this.iy +=  (this.y - this.actions[0].y) * (TILE_DEPTH / 2);
-                    this.iz =  -(this.actions[0].z * TILE_HEIGHT);
-                    this.tx = 0;
-                    this.ty = 0;
-                    this.tz = 0;
+        //         if ((isRenderedAfter && isAlmostDoneJumpingUp) || isAlmostDoneJumpingDown) {
+        //             this.ix =  -(this.x - this.actions[0].x) * (TILE_WIDTH / 2);
+        //             this.ix +=  (this.y - this.actions[0].y) * (TILE_WIDTH / 2);
+        //             this.iy =   (this.x - this.actions[0].x) * (TILE_DEPTH / 2);
+        //             this.iy +=  (this.y - this.actions[0].y) * (TILE_DEPTH / 2);
+        //             this.iz =  -(this.actions[0].z * TILE_HEIGHT);
+        //             this.tx = 0;
+        //             this.ty = 0;
+        //             this.tz = 0;
 
-                    this.x = this.actions[0].x;
-                    this.y = this.actions[0].y;
-                }
-            }
+        //             this.x = this.actions[0].x;
+        //             this.y = this.actions[0].y;
+        //         }
+        //     }
 
-            this.ox = this.ix + Math.ceil(animationProgress * (this.tx - this.ix)) + (this.frame.x || 0);
-            this.oy = this.iy + Math.ceil(animationProgress * (this.ty - this.iy)) + (this.iz + Math.ceil(zProgress * (this.tz - this.iz))) + (this.frame.y || 0);
+        //     this.ox = this.ix + Math.ceil(animationProgress * (this.tx - this.ix)) + (this.frame.x || 0);
+        //     this.oy = this.iy + Math.ceil(animationProgress * (this.ty - this.iy)) + (this.iz + Math.ceil(zProgress * (this.tz - this.iz))) + (this.frame.y || 0);
 
-            this.actions[0].sinceLast += step;
-        }
+        //     this.actions[0].sinceLast += step;
+        // }
     }
     
     render(delta, loc) {
-        const animationRow = Math.floor(this.frame.id / 10),
-              animationCol = this.frame.id % 10;
-        
+        const x = Game.camera.position.x + loc.posX() - ((this.tileset.tw - loc.tw) / 2),
+              y = Game.camera.position.y + loc.posY() - (this.tileset.th - loc.td);
         Game.ctx.save();
         Game.ctx.translate(
-            Game.camera.position.x + loc.posX - ((this.tileset.tw - loc.tw) / 2) + this.ox,
-            Game.camera.position.y + loc.posY - (this.tileset.th - loc.td) + this.oy + (loc.slope * (loc.th / 2))
+            x + this.ox,
+            y + this.oy + (~~loc.slope * (loc.th / 2))
         );
-        Game.ctx.drawImage(
-            this.tileset.img,
-            animationCol * this.tileset.tw,
-            animationRow * this.tileset.th,
-            this.tileset.tw,
-            this.tileset.th,
-            0,
-            0,
-            this.tileset.tw,
-            this.tileset.th
-        );
+        this.tileset.render(delta, this.currentAnim);
+        // Game.ctx.drawImage(
+        //     this.tileset.img,
+        //     animationCol * this.tileset.tw,
+        //     animationRow * this.tileset.th,
+        //     this.tileset.tw,
+        //     this.tileset.th,
+        //     0,
+        //     0,
+        //     this.tileset.tw,
+        //     this.tileset.th
+        // );
         Game.ctx.restore();
         // adjust translation for location height, beast width, and any current animation
         // const x = translate.x + ((translate.w - this.sprite.width) / 2) + this.ox,

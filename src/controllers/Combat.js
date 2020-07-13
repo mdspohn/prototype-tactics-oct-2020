@@ -27,8 +27,10 @@ class CombatController {
     }
     
     update(step) {
-        this.map.update(step);
-        this.decoration.update(step);
+        this.layout.forEach(location => {
+            this.map.update(step, location);
+            this.decoration.update(step, location);
+        });
         this.entities.forEach(entity => entity.update(step));
     }
 

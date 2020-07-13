@@ -24,37 +24,78 @@ class Tileset {
         });
     }
 
-    render(delta, tile) {
-        let frame = (tile.finalFrame == undefined) ? this.config[tile.id].frame : tile.finalFrame;
+    update(step, animation) {
+        // no animation if this gets set
+        let animationId = animation.id,
+            idx = this.config[animationId].idx;
 
-        if (frame == undefined) {
+        if (idx !== undefined)
+            return;
+
+        // animation calculations
+        animation.ms += step;
+        const allFrames = this.config[animationId].frames,
+              currentFrame = animation.frame,
+              currentFrameMs = allFrames[currentFrame].ms;
+        
+        // check if we should update to next frame
+        if (animation.ms > currentFrameMs) {
+            animation.ms -= currentFrameMs;
+            animation.frame = (currentFrame + 1) % allFrames.length;
+
+            // is the last frame requesting a swap to another animation?
+            if (allFrames[currentFrame].next !== undefined) {
+                animation.id = allFrames[currentFrame].next;
+                animation.frame = 0;
+            }
+        }
+    }
+
+    render(delta, animation) {
+        // no animation if this gets set
+        let id = animation.id,
+            nextId = id,
+            idx = this.config[id].idx,
+            frame = animation.frame;
+
+        if (idx === undefined) {
             // animation calculations
-            tile.ms += delta;
-            const animationFrames = this.config[tile.id].animation,
-                  frameMs = animationFrames[tile.frame].ms;
-            if (tile.ms > frameMs) {
-                tile.ms -= frameMs;
-                tile.frame = (tile.frame + 1) % animationFrames.length;
-                if (animationFrames[tile.frame].stop) {
-                    tile.finalFrame = animationFrames[tile.frame].frame;
+            const allFrames = this.config[id].frames,
+                  currentFrame = frame,
+                  currentFrameMs = allFrames[currentFrame].ms;
+            
+            // check if we should be rendering the next frame
+            if ((animation.ms + delta) > currentFrameMs) {
+                frame = (currentFrame + 1) % allFrames.length;
+
+                // is the last frame requesting a swap to another animation?
+                if (allFrames[currentFrame].next !== undefined) {
+                    nextId = allFrames[currentFrame].next;
+                    frame = 0;
                 }
             }
-            tile.oy = ~~animationFrames[tile.frame].oy;
-            tile.ox = ~~animationFrames[tile.frame].ox;
-            frame = animationFrames[tile.frame].frame;
+
+            // did we swap to something that isn't animated?
+            if (this.config[nextId].idx !== undefined) {
+                idx = this.config[nextId].idx;
+            } else {
+                animation.ox = ~~this.config[nextId].frames[frame].ox;
+                animation.oy = ~~this.config[nextId].frames[frame].oy;
+                idx = this.config[nextId].frames[frame].idx;
+            }
         }
 
-        if (frame === -1)
+        if (idx === -1)
             return;
         
         Game.ctx.drawImage(
             this.img,
-            frame * this.tw % this.img.width,
-            Math.floor((frame * this.tw) / this.img.width) * (this.th + this.td),
+            idx * this.tw % this.img.width,
+            Math.floor((idx * this.tw) / this.img.width) * (this.th + this.td),
             this.tw,
             this.th + this.td,
-            tile.ox,
-            tile.oy,
+            animation.ox,
+            animation.oy,
             this.tw,
             this.th + this.td
         );

@@ -20,8 +20,8 @@ class Map {
         }
     }
 
-    update(step) {
-        // update animations
+    update(step, loc) {
+        this.tiles[loc.x][loc.y].forEach((tile, index) => this.tileset.update(step, tile));
     }
 
     render(delta, loc) {
