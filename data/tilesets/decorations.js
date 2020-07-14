@@ -2,7 +2,6 @@ if (GAME_DATA.tilesets == undefined)
     GAME_DATA.tilesets = new Object();
 
 GAME_DATA.tilesets.decorations = new Object();
-
 GAME_DATA.tilesets.decorations['woodlands'] = {
     "src": "woodlands.png",
     "measurements": {
@@ -23,7 +22,7 @@ GAME_DATA.tilesets.decorations['woodlands'] = {
             ]
         },
         "4": {
-            "name": "Waterfall",
+            "name": "Waterfall 1",
             "frames": [
                 { "idx": 4, "ms": 200 },
                 { "idx": 5, "ms": 200 },
@@ -32,16 +31,16 @@ GAME_DATA.tilesets.decorations['woodlands'] = {
             ]
         },
         "5": {
-            "name": "Waterfall 2",
+            "name": "Waterfall 2-2",
             "frames": [
-                { "idx": 4, "ms": 200, "oy": 48 },
-                { "idx": 5, "ms": 200, "oy": 48 },
-                { "idx": 6, "ms": 200, "oy": 48 },
-                { "idx": 7, "ms": 200, "oy": 48, "next": 5 }
+                { "idx": 10, "ms": 200, "oy": 48 },
+                { "idx": 11, "ms": 200, "oy": 48 },
+                { "idx": 12, "ms": 200, "oy": 48 },
+                { "idx": 13, "ms": 200, "oy": 48, "next": 5 }
             ]
         },
         "6": {
-            "name": "Waterfall 2",
+            "name": "Waterfall 2-1",
             "frames": [
                 { "idx": 4, "ms": 200, "oy": 72 },
                 { "idx": 5, "ms": 200, "oy": 72 },

@@ -155,3 +155,29 @@ GAME_DATA.tilesets.beasts['mimic'] = {
         }
     }
 };
+
+GAME_DATA.tilesets.beasts['player'] = {
+    "src": "player.png",
+    "measurements": {
+        "sprite": {
+            "height": 32,
+            "width": 32
+        }
+    },
+    "config": {
+        "idle": {
+            "frames": [
+                { "idx": 2, "ms": 500 },
+                { "idx": 3, "ms": 500, "next": "idle" }
+            ]
+        },
+        "move": {
+            "frames": [
+                { "idx": 2, "ms": 125, "p": 0.25 },
+                { "idx": 3, "ms": 125, "p": 0.25 },
+                { "idx": 2, "ms": 125, "p": 0.25 },
+                { "idx": 3, "ms": 125, "p": 0.25 }
+            ]
+        }
+    }
+};

@@ -14,7 +14,7 @@ class GameEngine {
             
             last = now;
             now = timestamp;
-            delta = delta + (now - last); // catch up
+            delta = delta + (now - last);
     
             while(delta >= this.step) {
                 delta -= this.step;

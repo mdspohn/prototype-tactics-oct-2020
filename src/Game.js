@@ -23,6 +23,10 @@ class GameManager {
 
         this.state = null; // <0-3>
 
+        this.frames = 0;
+        this.elapsed = 0;
+        this.fpsCounter = document.getElementById('fps-counter');
+
         // document events for camera
         window.addEventListener('resize', () => this.camera._resizeCanvas(this.canvas));
         window.addEventListener('fullscreenchange', () => this.camera._resizeCanvas(this.canvas));
@@ -44,10 +48,19 @@ class GameManager {
         this.input.update(step)
         this.camera.update(step);
         this.controllers[this.state].update(step);
+
+        this.elapsed += step;
+        if (this.elapsed > 1000) {
+            this.fpsCounter.innerText = this.frames;
+            this.elapsed -= 1000;
+            this.frames = 0;
+        }
     }
 
     render(delta) {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.controllers[this.state].render(delta);
+
+        this.frames += 1;
     }
 }

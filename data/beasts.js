@@ -15,3 +15,11 @@ GAME_DATA.beasts['mimic'] = {
         "movement": 5
     },
 };
+
+GAME_DATA.beasts['player'] = {
+    "id": "player",
+    "tileset": "player",
+    "stats": {
+        "movement": 5
+    },
+};

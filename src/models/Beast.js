@@ -170,7 +170,7 @@ class Beast {
     
     render(delta, loc) {
         const x = Game.camera.position.x + loc.posX() - ((this.tileset.tw - loc.tw) / 2),
-              y = Game.camera.position.y + loc.posY() - (this.tileset.th - loc.td);
+              y = Game.camera.position.y + loc.posY() - (this.tileset.th - (loc.td / 2) - loc.th);
         Game.ctx.save();
         Game.ctx.translate(
             x + this.ox,
