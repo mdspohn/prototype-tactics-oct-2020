@@ -15,42 +15,16 @@ class Beast {
         this.meta = this.tile_config.config;
 
         // beast location
-        this.x = config.x;
-        this.y = config.y;
+        this.location;
+        this.initialX = config.x;
+        this.initialY = config.y;
 
-        // initial movement offsets
-        this.ix = 0;
-        this.iy = 0;
-        this.iz = 0;
-
-        // target movement offsets
-        this.tx = 0;
-        this.ty = 0;
-        this.tz = 0;
-
-        // current movement offsets
-        this.ox = 0;
-        this.oy = 0;
-        this.oz = 0;
-
-        // current movement progress
-        this.p = 0;
-        this.pd = 0;
-        this.pu = 0;
+        // queued animations and movement
+        this.animationQueue = new Array();
 
         // current animation
-        this.animation = new Object();
-        this.animation.id = 'idle';
-        this.animation.frame = 0;
-        this.animation.ms = 0;
-        this.animation.ox = 0;
-        this.animation.oy = 0;
-
-        this.defaultAnimation = 'idle';
-
-        // queued animations and actions
-        this.animationQueue = new Array();
-        this.movementQueue = new Array();
+        this.animation = this._getAnimationData('idle');
+        this.defaultAnimation = new Object(this.animation);
 
         // current directional facing
         this.direction = 'south';
@@ -63,28 +37,104 @@ class Beast {
         });
     }
 
+    _getAnimationData(id, dest = this.location) {
+        const animation = new Object();
+        animation.id = id;
+        animation.frame = 0;
+        animation.ms = 0;
+        animation.destination = dest;
+
+        const referenceLocation = this.animationQueue[this.animationQueue.length - 1] ? this.animationQueue[this.animationQueue.length - 1].destination : this.location;
+
+        if (dest != referenceLocation) {
+            // TODO (doesn't account for slope direction) derive animation type if not set - walk-south, jump-north, etc
+            if (animation.id === null) {
+                if (referenceLocation.z() == dest.z()) {
+                    animation.id = 'move';
+                } else if (Math.abs(referenceLocation.z() - dest.z()) > 1) {
+                    animation.id = 'jump';
+                } else if (referenceLocation.slope() || dest.slope()) {
+                    animation.id = 'move';
+                } else {
+                    animation.id = 'jump';
+                }
+            }
+
+            const swapLocation = (dest.x > referenceLocation.x || dest.y > referenceLocation.y);
+
+            // derived initial and current offset
+            animation.ix = animation.cx = ~~swapLocation * ((dest.x - referenceLocation.x) * (dest.tw / 2) - (dest.y - referenceLocation.y) * (dest.tw / 2));
+            animation.iy = animation.cy = ~~swapLocation * (-(dest.x - referenceLocation.x) * (dest.td / 2) - (dest.y - referenceLocation.y) * (dest.td / 2));
+            animation.iz = animation.cz = ~~swapLocation * ((referenceLocation.z() - dest.z()) * dest.th);
+    
+            // derived target offset
+            animation.tx = ~~!swapLocation * ((dest.y - referenceLocation.y) * (dest.tw / 2) - (dest.x - referenceLocation.x) * (dest.tw / 2));
+            animation.ty = ~~!swapLocation * ((dest.x - referenceLocation.x) * (dest.td / 2) + (dest.y - referenceLocation.y) * (dest.td / 2));
+            animation.tz = ~~!swapLocation * ((referenceLocation.z() - dest.z()) * (dest.th));
+    
+            // current movement progress
+            animation.p = 0;
+            animation.zp = 0;
+        }
+
+        animation.ox = ~~this.meta[animation.id].ox;
+        animation.oy = ~~this.meta[animation.id].oy;
+        animation.movement = Boolean(this.meta[animation.id].movement);
+
+        return animation;
+    }
+
+    moveTo(destination) {
+        this.animationQueue.push(this._getAnimationData(null, destination));
+    }
+
     update(step) {
         this.animation.ms += step;
 
         // no frame change
         const ms = this.meta[this.animation.id].frames[this.animation.frame].ms;
-        if (ms >= this.animation.ms)
-            return;
+        if (ms < this.animation.ms) {
+            // handle animation frame event
+            if (this.meta[this.animation.id].frames[this.animation.frame].event)
+                Events.dispatch(this.meta[this.animation.id].frames[this.animation.frame].event, this);
+            
+            if (this.animation.movement) {
+                // add all movement progress from this frame
+                this.animation.p  += this.meta[this.animation.id].frames[this.animation.frame].p  || 0;
+                this.animation.zp += this.meta[this.animation.id].frames[this.animation.frame].zp || 0;
+            }
 
-        this.animation.ms -= ms;
-        this.animation.frame += 1;
+            this.animation.ms -= ms;
+            this.animation.frame += 1;
 
-        // animation requested tile change
-        if (this.animation.frame >= this.meta[this.animation.id].frames.length) {
-            const next = this.animationQueue.shift();
-            this.animation.id = (next === undefined) ? this.defaultAnimation : next;
-            this.animation.frame = 0;
+            // animation requested tile change
+            if (this.animation.frame >= this.meta[this.animation.id].frames.length) {
+                const next = this.animationQueue.shift(),
+                      remaining = this.animation.ms;
+
+                // handle any animation completion events
+                if (this.meta[this.animation.id].event)
+                    Events.dispatch(this.meta[this.animation.id].event, this);
+
+                // finalize movement of previous animation
+                if (this.animation.destination !== undefined && this.animation.destination !== this.location)
+                    this.location = this.animation.destination;
+                
+                this.animation = (next === undefined) ? this.defaultAnimation : next;
+                this.animation.frame = 0;
+                this.animation.ms = remaining;
+
+                if (this.animation.movement) {
+                    Events.dispatch('sort', !!(this.animation.destination.x - this.location.x) ? 'Y' : 'X');
+                    // swap rendering location if we need to
+                    if (this.animation.destination.x > this.location.x || this.animation.destination.y > this.location.y)
+                        this.location = this.animation.destination;
+                }
+            }
         }
+
         // if (this.actions[0].sorting)
         //     this._broadcastAnimationSorting(this.actions[0]);
-
-        // if (this.actions[0].type === 'event')
-        //     return this._broadcastAnimationEvent(this.actions.shift());
 
         // let isAnimationComplete = false,
         //     msAccumulated = this.actions[0].sinceLast,
@@ -175,13 +225,13 @@ class Beast {
         // }
     }
     
-    render(delta, location) {
-        const x = Game.camera.position.x + location.posX() - (this.tw - location.tw) / 2,
-              y = Game.camera.position.y + location.posY() - (this.th - (location.td / 2) - location.th);
+    render(delta) {
+        const x = Game.camera.position.x + this.location.posX() - (this.tw - this.location.tw) / 2,
+              y = Game.camera.position.y + this.location.posY() - (this.th - (this.location.td / 2) - this.location.th);
 
-        let next = this.animation.id,
+        let next  = this.animation,
             frame = this.animation.frame,
-            idx = this.meta[next].frames[frame].idx;
+            idx   = this.meta[next.id].frames[frame].idx;
         
         // check if we should be rendering the next frame
         if ((this.animation.ms + delta) > this.meta[this.animation.id].frames[this.animation.frame].ms) {
@@ -193,26 +243,37 @@ class Beast {
                 frame = 0;
             }
 
-            idx = this.meta[next].frames[frame].idx;
+            idx = this.meta[next.id].frames[frame].idx;
         }
 
-        this.animation.ox = ~~this.meta[next].frames[frame].ox;
-        this.animation.oy = ~~this.meta[next].frames[frame].oy;
+        if (this.animation.movement) {
+            const framePercentage = Math.min((this.animation.ms + delta) / this.meta[this.animation.id].frames[this.animation.frame].ms, 1),
+                  totalXDistance = this.animation.tx - this.animation.ix,
+                  totalYDistance = this.animation.ty - this.animation.iy,
+                  totalZDistance = this.animation.tz - this.animation.iz;
+            
+            this.animation.cx = this.animation.ix + Math.round((this.animation.p  + framePercentage * (this.meta[this.animation.id].frames[this.animation.frame].p  || 0))  * totalXDistance);
+            this.animation.cy = this.animation.iy + Math.round((this.animation.p  + framePercentage * (this.meta[this.animation.id].frames[this.animation.frame].p  || 0))  * totalYDistance);
+            this.animation.cz = this.animation.iz + Math.round((this.animation.zp + framePercentage * (this.meta[this.animation.id].frames[this.animation.frame].zp || 0))  * totalZDistance);
+        }
+
+        this.animation.ox = ~~this.meta[next.id].frames[frame].ox;
+        this.animation.oy = ~~this.meta[next.id].frames[frame].oy;
 
         // move on if tile requested is empty
         if (idx === -1) 
             return;
 
         Game.ctx.save();
-        Game.ctx.translate(x + this.ox, y + this.oy + (~~location.slope() * (location.th / 2)));
+        Game.ctx.translate(x, y + (~~this.location.slope() * (this.location.th / 2)));
         Game.ctx.drawImage(
             this.tileset,
             idx * this.tw % this.tileset.width,
             Math.floor((idx * this.tw) / this.tileset.width) * (this.th),
             this.tw,
             this.th,
-            this.animation.ox,
-            this.animation.oy,
+            this.animation.ox + ~~this.animation.cx,
+            this.animation.oy + ~~this.animation.cy + ~~this.animation.cz,
             this.tw,
             this.th
         );
@@ -279,40 +340,40 @@ class Beast {
         return !(x == this.x && y == this.y) && this.range != null && this.range[x] != undefined && this.range[x][y] != undefined;
     }
     
-    moveTo({ x, y } = target) {
-        let sequence = this._getAnimationAction('move', true, { movement: true, x, y, z: 0 }),
-            previous = this.range[x][y];
+    // moveTo({ x, y } = target) {
+    //     let sequence = this._getAnimationAction('move', true, { movement: true, x, y, z: 0 }),
+    //         previous = this.range[x][y];
     
-        while (previous != undefined && previous.px != undefined) {
-            const action = this._getAnimationAction('move', false, {
-                movement: true,
-                x: previous.px,
-                y: previous.py,
-                z: 0
-            })[0];
+    //     while (previous != undefined && previous.px != undefined) {
+    //         const action = this._getAnimationAction('move', false, {
+    //             movement: true,
+    //             x: previous.px,
+    //             y: previous.py,
+    //             z: 0
+    //         })[0];
     
-            const tile = this.map.layout[previous.px][previous.py],
-                  nextTile = this.map.layout[sequence[0].x][sequence[0].y],
-                  zChange = tile.z - nextTile.z,
-                  xChange = tile.x - nextTile.x,
-                  animationId = (zChange != 0) ? 'jump' : 'move';
+    //         const tile = this.map.layout[previous.px][previous.py],
+    //               nextTile = this.map.layout[sequence[0].x][sequence[0].y],
+    //               zChange = tile.z - nextTile.z,
+    //               xChange = tile.x - nextTile.x,
+    //               animationId = (zChange != 0) ? 'jump' : 'move';
             
-            this.movement -= 1;
+    //         this.movement -= 1;
             
-            sequence[0].id = animationId;
-            sequence[0].z = zChange;
-            sequence[0].sorting = (xChange != 0) ? 'y' : 'x';
+    //         sequence[0].id = animationId;
+    //         sequence[0].z = zChange;
+    //         sequence[0].sorting = (xChange != 0) ? 'y' : 'x';
     
-            previous = this.range[previous.px][previous.py];
+    //         previous = this.range[previous.px][previous.py];
     
-            if (previous.px != undefined)
-                sequence.unshift(action);
-        }
+    //         if (previous.px != undefined)
+    //             sequence.unshift(action);
+    //     }
         
-        // TODO race condition ??
-        this.actions.push(...sequence);
-        return new Promise((resolve, reject) => Events.listen('move-complete', () => resolve()));
-    }
+    //     // TODO race condition ??
+    //     this.actions.push(...sequence);
+    //     return new Promise((resolve, reject) => Events.listen('move-complete', () => resolve()));
+    // }
 
     attack(target, skill) {
         this.queueAnimation('attack');

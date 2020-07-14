@@ -13,7 +13,7 @@ GAME_DATA.tilesets.beasts['slime'] = {
     "config": {
         "idle": {
             "frames": [
-                { "idx": 1, "ms": 250 },
+                { "idx": 1, "ms": 200 },
                 { "idx": 0, "ms": 200 }, 
                 { "idx": 2, "ms": 100, "oy": -1  },
                 { "idx": 3, "ms": 150, "oy": -9  },
@@ -24,15 +24,14 @@ GAME_DATA.tilesets.beasts['slime'] = {
                 { "idx": 4, "ms": 25,  "oy": -3  },
                 { "idx": 4, "ms": 25,  "oy": 0   },
                 { "idx": 7, "ms": 50,  "oy": 0   },
-                { "idx": 1, "ms": 200, "next": "idle" }
+                { "idx": 1, "ms": 250 }
             ]
         },
         "move": {
             "movement": true,
             "frames": [
-                { "idx": 0, "ms": 130, "p": 0   },
-                { "idx": 1, "ms": 200, "p": 0.9 },
-                { "idx": 0, "ms": 60,  "p": 0.1 }
+                { "idx": 0, "ms": 300, "p": 0.9 },
+                { "idx": 1, "ms": 200, "p": 0.1 }
             ]
         },
         "jump": {

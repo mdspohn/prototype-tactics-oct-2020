@@ -23,7 +23,7 @@ class Layout {
                 location.oy = () => map.tiles[ri][ci][location.z() - 1].oy;
                 location.posX = () => location.y * (location.tw / 2) - location.x * (location.tw / 2) + location.ox();
                 location.posY = () => location.y * (location.td / 2) + location.x * (location.td / 2) - (location.z() - 1) * location.th + location.oy();
-                location.getOccupants = () => entities.filter(entity => entity.x == location.x && entity.y == location.y);
+                location.getOccupants = () => entities.filter(entity => entity.location == location);
                 location.slope = () => Boolean(map.meta[map.tiles[ri][ci][location.z() - 1].id].slope);
 
                 this.boundaries.x1 = Math.min(this.boundaries.x1, location.posX());
@@ -35,18 +35,27 @@ class Layout {
             });
         });
         
-        this.order = new Array(2);
-        this.order[0] = [].concat(...this.structure).sort((a, b) => (a.x - b.x) ? a.x - b.x : a.y - b.y);
-        this.order[1] = [].concat(...this.structure).sort((a, b) => (a.y - b.y) ? a.y - b.y : a.x - b.x);
-        
-        this.sortingMethod = 0;
+        this.sorted = new Object();
+        this.sorted.X = [].concat(...this.structure).sort((a, b) => (a.x - b.x) ? a.x - b.x : a.y - b.y);
+        this.sorted.Y = [].concat(...this.structure).sort((a, b) => (a.y - b.y) ? a.y - b.y : a.x - b.x);
+
+        this.method = 'X';
+        this.listenerId = Events.listen('sort', (method) => this.method = method, true);
+    }
+
+    _destroy() {
+        Events.remove('sort', this.listenerId);
+    }
+
+    getLocation(x, y) {
+        return this.structure[x][y];
     }
 
     forEach(fn) {
-        this.order[this.sortingMethod].forEach(location => fn(location));
+        this.sorted[this.method].forEach(location => fn(location));
     }
 
     find(fn) {
-        return this.order[0].find(location => fn(location));
+        return this.sorted[this.method].find(location => fn(location));
     }
 }
