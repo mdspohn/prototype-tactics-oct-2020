@@ -8,6 +8,7 @@ class CombatController {
 
         // combat helpers
         this.markers = null;
+        this.cutscene = null;
     }
 
     async _prepare() {
@@ -24,6 +25,19 @@ class CombatController {
         this.decoration = scene.decoration;
         this.entities = scene.entities;
         this.layout = new Layout(this.map, this.entities);
+    }
+
+    onClick(event) {
+        //this.map.replace(1,4, 15);
+    }
+
+    onRightClick(event) {
+        //this.map.add(3,3, 10);
+    }
+
+    onKeyUp(event) {
+        //this.map.replace(1,1, 4,4,4,5);
+        //this.decoration.remove(1,2);
     }
     
     update(step) {

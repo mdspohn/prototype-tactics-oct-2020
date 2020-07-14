@@ -1,78 +1,85 @@
 class Beast {
     constructor(config) {
-        this.tileset;
+        // tileset config
         this.tileset_id = config.tileset;
+        this.tile_config = Data.getTileset(this.tileset_id, 'beasts');
+        this.tileset_src = `${ASSET_DIR}${OS_FILE_SEPARATOR}${this.tile_config.directory}${OS_FILE_SEPARATOR}${this.tile_config.src}`;
+        this.tileset = new Image();
 
-        // positioning
+        // sprite dimensions
+        this.tw = ~~this.tile_config.measurements.sprite.width;
+        this.td = ~~this.tile_config.measurements.sprite.depth;
+        this.th = ~~this.tile_config.measurements.sprite.height;
+
+        // animation data
+        this.meta = this.tile_config.config;
+
+        // beast location
         this.x = config.x;
         this.y = config.y;
 
-        // animation states
+        // initial movement offsets
         this.ix = 0;
         this.iy = 0;
         this.iz = 0;
 
+        // target movement offsets
         this.tx = 0;
         this.ty = 0;
         this.tz = 0;
 
+        // current movement offsets
         this.ox = 0;
         this.oy = 0;
+        this.oz = 0;
 
-        this.actions = new Array();
-        this.animations = config.animations;
-        this.frame = null;
+        // current movement progress
+        this.p = 0;
+        this.pd = 0;
+        this.pu = 0;
 
-        // display information
-        this.name = config.name || config.species;
-        this.species = config.species;
+        // current animation
+        this.animation = new Object();
+        this.animation.id = 'idle';
+        this.animation.frame = 0;
+        this.animation.ms = 0;
+        this.animation.ox = 0;
+        this.animation.oy = 0;
 
-        // base combat stats
-        this.hp = config.hp;
-        this.speed = config.speed;
-        this.initiative = config.initiative;
-        this.stamina = 0;
-        this.movement = this.speed;
+        this.defaultAnimation = 'idle';
 
-        // derived information
-        this.range = null;
-        this.currentAnim = { id: 'idle', frame: 0, ms: 0, ox: 0, oy: 0 }
+        // queued animations and actions
+        this.animationQueue = new Array();
+        this.movementQueue = new Array();
 
-        // if (!this.animations.idle.initialized) {
-        //     Object.entries(this.animations).forEach(entry => {
-        //         const animation = new Object();
-        //         animation.frames = entry[1].map(frame => {
-        //             return {
-        //                 id: frame.id,
-        //                 event: frame.event,
-        //                 ms: frame.ms,       // frame duration
-        //                 x:  frame.x  || 0,  // x offset
-        //                 y:  frame.y  || 0,  // y offset
-        //                 p:  frame.p  || 0,  // movement progress
-        //                 zd: frame.zd || 0,  // z down progress
-        //                 zu: frame.zu || 0   // z up progress
-        //             }
-        //         });
-        //         animation.initialized = true;
-        //         this.animations[entry[0]] = animation;
-        //     });
-        // }
-        
-        // this.frame = this.animations['idle'].frames[0];
-        // this.queueAnimation('idle', false, { repeat: true });
+        // current directional facing
+        this.direction = 'south';
     }
 
-    async _prepare(assets) {
-        this.tileset = assets[this.tileset_id];
-        if (this.tileset == undefined) {
-            this.tileset = new Tileset(Data.getTileset(this.tileset_id, 'beasts'));
-            await this.tileset._load();
-            assets[this.tileset_id] = this.tileset;
-        }
+    async _prepare() {
+        await new Promise(resolve => {
+            this.tileset.onload = resolve;
+            this.tileset.src = this.tileset_src;
+        });
     }
 
     update(step) {
-        this.tileset.update(step, this.currentAnim);
+        this.animation.ms += step;
+
+        // no frame change
+        const ms = this.meta[this.animation.id].frames[this.animation.frame].ms;
+        if (ms >= this.animation.ms)
+            return;
+
+        this.animation.ms -= ms;
+        this.animation.frame += 1;
+
+        // animation requested tile change
+        if (this.animation.frame >= this.meta[this.animation.id].frames.length) {
+            const next = this.animationQueue.shift();
+            this.animation.id = (next === undefined) ? this.defaultAnimation : next;
+            this.animation.frame = 0;
+        }
         // if (this.actions[0].sorting)
         //     this._broadcastAnimationSorting(this.actions[0]);
 
@@ -168,40 +175,48 @@ class Beast {
         // }
     }
     
-    render(delta, loc) {
-        const x = Game.camera.position.x + loc.posX() - ((this.tileset.tw - loc.tw) / 2),
-              y = Game.camera.position.y + loc.posY() - (this.tileset.th - (loc.td / 2) - loc.th);
-        Game.ctx.save();
-        Game.ctx.translate(
-            x + this.ox,
-            y + this.oy + (~~loc.slope * (loc.th / 2))
-        );
-        this.tileset.render(delta, this.currentAnim);
-        // Game.ctx.drawImage(
-        //     this.tileset.img,
-        //     animationCol * this.tileset.tw,
-        //     animationRow * this.tileset.th,
-        //     this.tileset.tw,
-        //     this.tileset.th,
-        //     0,
-        //     0,
-        //     this.tileset.tw,
-        //     this.tileset.th
-        // );
-        Game.ctx.restore();
-        // adjust translation for location height, beast width, and any current animation
-        // const x = translate.x + ((translate.w - this.sprite.width) / 2) + this.ox,
-        //       y = translate.y - ((location.z * translate.h) + this.sprite.height - 24) + this.oy;
+    render(delta, location) {
+        const x = Game.camera.position.x + location.posX() - (this.tw - location.tw) / 2,
+              y = Game.camera.position.y + location.posY() - (this.th - (location.td / 2) - location.th);
 
-        // const animationRow = Math.floor(this.frame.id / 10),
-        //       animationCol = this.frame.id % 10;
+        let next = this.animation.id,
+            frame = this.animation.frame,
+            idx = this.meta[next].frames[frame].idx;
         
-        // Game.ctx.save();
-        // Game.ctx.translate(x, y);
-        // Game.ctx.drawImage(this.sprite.img,
-        //                    animationCol * this.sprite.width, animationRow * this.sprite.height, this.sprite.width, this.sprite.height,
-        //                    0, 0, this.sprite.width, this.sprite.height);
-        // Game.ctx.restore();
+        // check if we should be rendering the next frame
+        if ((this.animation.ms + delta) > this.meta[this.animation.id].frames[this.animation.frame].ms) {
+            frame = this.animation.frame + 1;
+
+            // animation requested tile change
+            if (frame >= this.meta[this.animation.id].frames.length) {
+                next = (this.animationQueue[0] === undefined) ? this.defaultAnimation : this.animationQueue[0];
+                frame = 0;
+            }
+
+            idx = this.meta[next].frames[frame].idx;
+        }
+
+        this.animation.ox = ~~this.meta[next].frames[frame].ox;
+        this.animation.oy = ~~this.meta[next].frames[frame].oy;
+
+        // move on if tile requested is empty
+        if (idx === -1) 
+            return;
+
+        Game.ctx.save();
+        Game.ctx.translate(x + this.ox, y + this.oy + (~~location.slope() * (location.th / 2)));
+        Game.ctx.drawImage(
+            this.tileset,
+            idx * this.tw % this.tileset.width,
+            Math.floor((idx * this.tw) / this.tileset.width) * (this.th),
+            this.tw,
+            this.th,
+            this.animation.ox,
+            this.animation.oy,
+            this.tw,
+            this.th
+        );
+        Game.ctx.restore();
     }
 
     _getAnimationAction(id, hasEvent = true, properties = {}) {

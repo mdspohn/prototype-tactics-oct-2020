@@ -28,6 +28,7 @@ GAME_DATA.tilesets.beasts['slime'] = {
             ]
         },
         "move": {
+            "movement": true,
             "frames": [
                 { "idx": 0, "ms": 130, "p": 0   },
                 { "idx": 1, "ms": 200, "p": 0.9 },
@@ -35,6 +36,7 @@ GAME_DATA.tilesets.beasts['slime'] = {
             ]
         },
         "jump": {
+            "movement": true,
             "frames": [
                 { "idx": 1, "ms": 500 },
                 { "idx": 2, "ms": 100, "y": -2},
@@ -115,6 +117,7 @@ GAME_DATA.tilesets.beasts['mimic'] = {
             ]
         },
         "move": {
+            "movement": true,
             "frames": [
                 { "idx": 5, "ms": 25, "p": 0.05, "x": 1  },
                 { "idx": 5, "ms": 25, "p": 0.05, "x": 0  },
@@ -139,6 +142,7 @@ GAME_DATA.tilesets.beasts['mimic'] = {
             ]
         },
         "jump": {
+            "movement": true,
             "frames": [
                 { "idx": 3, "ms": 200, "p": .5, "zu": 1 },
                 { "idx": 4, "ms": 200, "p": .5, "zd": 1 }

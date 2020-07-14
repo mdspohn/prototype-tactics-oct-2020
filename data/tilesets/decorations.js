@@ -47,6 +47,26 @@ GAME_DATA.tilesets.decorations['woodlands'] = {
                 { "idx": 6, "ms": 200, "oy": 72 },
                 { "idx": 7, "ms": 200, "oy": 72, "next": 6 }
             ]
+        },
+        "7": {
+            "name": "Waterfall 3-2",
+            "mirror": true,
+            "frames": [
+                { "idx": 10, "ms": 200, "oy": 48 },
+                { "idx": 11, "ms": 200, "oy": 48 },
+                { "idx": 12, "ms": 200, "oy": 48 },
+                { "idx": 13, "ms": 200, "oy": 48, "next": 7 }
+            ]
+        },
+        "8": {
+            "name": "Waterfall 3-1",
+            "mirror": true,
+            "frames": [
+                { "idx": 4, "ms": 200, "oy": 72 },
+                { "idx": 5, "ms": 200, "oy": 72 },
+                { "idx": 6, "ms": 200, "oy": 72 },
+                { "idx": 7, "ms": 200, "oy": 72, "next": 8 }
+            ]
         }
     }
 };

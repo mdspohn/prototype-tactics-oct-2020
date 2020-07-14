@@ -17,7 +17,7 @@ GAME_DATA.tilesets.maps['woodlands'] = {
         "2": { "name": "Dirt Slope",  "idx": 1, "slope": true },
         "3": { "name": "Water",       "idx": 2, "water": true },
         "4": { "name": "Dirt", "idx": 3 },
-        "5": { "name": "Waterfall",   "idx": 4 },
+        "5": { "name": "Ice",   "idx": 4 },
         "6": { "name": "Stump",       "idx": 5 },
         "10": {
             "name": "Bottom Half Rising",
@@ -31,7 +31,7 @@ GAME_DATA.tilesets.maps['woodlands'] = {
                 { "idx": 0, "ms": 50, "oy": 2 },
                 { "idx": 0, "ms": 50, "oy": 1 },
                 { "idx": 0, "ms": 50, "oy": 0 },
-                { "idx": 0, "ms": 50, "oy": 0, "next": 12 },
+                { "idx": 0, "ms": 50, "oy": 0, "next": 1 },
             ]
         },
         "11": {
@@ -56,7 +56,7 @@ GAME_DATA.tilesets.maps['woodlands'] = {
                 { "idx": 0, "ms": 25, "oy": 0 },
                 { "idx": 0, "ms": 25, "oy": 0 },
                 { "idx": 0, "ms": 25, "oy": 0 },
-                { "idx": 0, "ms": 25, "oy": 0, "next": 13 },
+                { "idx": 0, "ms": 25, "oy": 0, "next": 1 },
             ]
         },
         "12": {
@@ -97,6 +97,19 @@ GAME_DATA.tilesets.maps['woodlands'] = {
                 { "idx": 0, "ms": 25, "oy": 16 },
                 { "idx": 0, "ms": 25, "oy": 16 },
                 { "idx": 0, "ms": 25, "oy": 16, "next": 11 },
+            ]
+        },
+        "15": {
+            "name": "Quake",
+            "frames": [
+                { "idx": 0, "ms": 50, "oy": 0 },
+                { "idx": 0, "ms": 50, "oy": -1 },
+                { "idx": 0, "ms": 50, "oy": -2 },
+                { "idx": 0, "ms": 50, "oy": -3 },
+                { "idx": 0, "ms": 50, "oy": -4 },
+                { "idx": 0, "ms": 50, "oy": -3 },
+                { "idx": 0, "ms": 50, "oy": -2 },
+                { "idx": 0, "ms": 50, "oy": -1 }
             ]
         }
     }

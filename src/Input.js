@@ -25,16 +25,19 @@ class InputManager {
 
         // keyboard and mouse event listeners
         document.addEventListener('click', event => {
-            this.actions.push({ key: 'Click', data: event });
+            Game.onClick(event);
+            //this.actions.push({ key: 'Click', data: event });
         });
         document.addEventListener('mousemove', event => this.actions.push({ key: 'MouseMove', data: event }));
         document.addEventListener('keyup', event => {
-            if (this.KEYBOARD[event.key])
-                this.actions.push({ key: this.KEYBOARD[event.key], data: event.key });
+            Game.onKeyUp(event);
+            // if (this.KEYBOARD[event.key])
+            //     this.actions.push({ key: this.KEYBOARD[event.key], data: event.key });
         });
         document.addEventListener('contextmenu', (event) => {
             event.preventDefault();
-            this.actions.push({ key: 'RightClick', data: event });
+            Game.onRightClick(event);
+            //this.actions.push({ key: 'RightClick', data: event });
         });
     }
 

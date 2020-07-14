@@ -43,12 +43,23 @@ class GameManager {
         this.camera.toCenter(this.canvas, this.controllers[this.types[this.scene.type]].layout);
         this.state = this.types[this.scene.type];
     }
+
+    onClick(event) {
+        this.controllers[this.state].onClick(event);
+    }
+    onRightClick(event) {
+        this.controllers[this.state].onRightClick(event);
+    }
+    onKeyUp(event) {
+        this.controllers[this.state].onKeyUp(event);
+    }
     
     update(step) {
         this.input.update(step)
         this.camera.update(step);
         this.controllers[this.state].update(step);
 
+        // fps counter
         this.elapsed += step;
         if (this.elapsed > 1000) {
             this.fpsCounter.innerText = this.frames;
@@ -61,6 +72,7 @@ class GameManager {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.controllers[this.state].render(delta);
 
+        // fps counter
         this.frames += 1;
     }
 }

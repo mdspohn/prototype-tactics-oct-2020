@@ -1,38 +1,162 @@
 class Map {
     constructor(config) {
-        this.tileset;
+        // tileset config
         this.tileset_id = config.tileset;
+        this.tile_config = Data.getTileset(this.tileset_id, 'maps');
+        this.tileset_src = `${ASSET_DIR}${OS_FILE_SEPARATOR}${this.tile_config.directory}${OS_FILE_SEPARATOR}${this.tile_config.src}`;
+        this.tileset = new Image();
+
+        // tile dimensions
+        this.tw = ~~this.tile_config.measurements.sprite.width;
+        this.td = ~~this.tile_config.measurements.sprite.depth;
+        this.th = ~~this.tile_config.measurements.sprite.height;
+
+        // tile animation data
+        this.meta = this.tile_config.config;
+
+        // map layout
         this.tiles = config.tiles.map(row => {
-            return row.map(tiles => {
-                if (Array.isArray(tiles))
-                    return tiles.map(id => Object.create({ id, frame: 0, ms: 0, ox: 0, oy: 0 }));
-                return [Object.create({ id: tiles, frame: 0, ms: 0, ox: 0, oy: 0 })];
-            })
+            return row.map(col => {
+                return (Array.isArray(col) ? col : Array.of(col)).map(id => {
+                    const tile = new Object();
+                    tile.id = id;
+                    tile.ox = ~~this.meta[tile.id].ox;
+                    tile.oy = ~~this.meta[tile.id].oy;
+
+                    if (this.meta[tile.id].idx)
+                        return tile;
+                    
+                    tile.frame = 0;
+                    tile.ms = ~~this.meta[tile.id].delay;
+                    return tile;
+                });
+            });
         });
     }
 
-    async _prepare(assets) {
-        this.tileset = assets[this.tileset_id];
-        if (this.tileset == undefined) {
-            this.tileset = new Tileset(Data.getTileset(this.tileset_id, 'maps'));
-            await this.tileset._load();
-            assets[this.tileset_id] = this.tileset;
-        }
+    async _prepare() {
+        await new Promise(resolve => {
+            this.tileset.onload = resolve;
+            this.tileset.src = this.tileset_src;
+        });
     }
 
-    update(step, loc) {
-        this.tiles[loc.x][loc.y].forEach((tile, index) => this.tileset.update(step, tile));
+    update(step, location) {
+        this.tiles[location.x][location.y].forEach(tile => {
+            // not animated, nothing to do
+            if (this.meta[tile.id].idx !== undefined)
+                return;
+
+            tile.ms += step;
+
+            // no frame change
+            const ms = this.meta[tile.id].frames[tile.frame].ms;
+            if (ms >= tile.ms)
+                return;
+
+            const next = this.meta[tile.id].frames[tile.frame].next;
+            
+            tile.ms -= ms;
+            tile.frame = (tile.frame + 1) % this.meta[tile.id].frames.length;
+
+            // animation requested tile change
+            if (next === undefined)
+                return;
+            
+            tile.id = next;
+            tile.frame = 0;
+        });
     }
 
-    render(delta, loc) {
-        const x = Game.camera.position.x - ((loc.x - loc.y) * (this.tileset.tw / 2)),
-              y = Game.camera.position.y + ((loc.x + loc.y) * (this.tileset.td / 2));
+    render(delta, location) {
+        const x = Game.camera.position.x - ((location.x - location.y) * (this.tw / 2)),
+              y = Game.camera.position.y + ((location.x + location.y) * (this.td / 2));
         
-        this.tiles[loc.x][loc.y].forEach((tile, index) => {
+        this.tiles[location.x][location.y].forEach((tile, index) => {
+            let idx = this.meta[tile.id].idx;
+
+            if (idx === undefined) {
+                let next = tile.id,
+                    frame = tile.frame;
+                
+                // check if we should be rendering the next frame
+                if ((tile.ms + delta) > this.meta[tile.id].frames[tile.frame].ms) {
+                    frame = (tile.frame + 1) % this.meta[tile.id].frames.length;
+
+                    if (this.meta[tile.id].frames[tile.frame].next !== undefined) {
+                        next = this.meta[tile.id].frames[tile.frame].next;
+                        frame = 0;
+                    }
+                }
+
+                // get the correct image index based off next tile id to be rendered
+                if (this.meta[next].idx !== undefined) {
+                    idx = this.meta[next].idx;
+                    tile.ox = ~~this.meta[next].ox;
+                    tile.oy = ~~this.meta[next].oy;
+                } else {
+                    idx = this.meta[next].frames[frame].idx;
+                    tile.ox = ~~this.meta[next].frames[frame].ox;
+                    tile.oy = ~~this.meta[next].frames[frame].oy;
+                }
+            }
+
+            // move on if tile requested is empty
+            if (idx === -1) 
+                return;
+            
             Game.ctx.save();
-            Game.ctx.translate(x, y - (index * this.tileset.th));
-            this.tileset.render(delta, tile);
+            Game.ctx.translate(x, y - (index * this.th));
+            Game.ctx.drawImage(
+                this.tileset,
+                idx * this.tw % this.tileset.width,
+                Math.floor((idx * this.tw) / this.tileset.width) * (this.th + this.td),
+                this.tw,
+                this.th + this.td,
+                tile.ox,
+                tile.oy,
+                this.tw,
+                this.th + this.td
+            );
             Game.ctx.restore();
         });
+    }
+
+    add(x, y, ...ids) {
+        ids.forEach(id => {
+            const tile = new Object();
+            tile.id = id;
+            tile.ox = ~~this.meta[tile.id].ox;
+            tile.oy = ~~this.meta[tile.id].oy;
+
+            if (this.meta[tile.id].idx == undefined) {
+                tile.frame = 0;
+                tile.ms = ~~this.meta[tile.id].delay;
+            }
+            
+            this.tiles[x][y].push(tile);
+        });
+    }
+
+    remove(x, y) {
+        this.tiles[x][y] = [{ id: 0, ox: 0, oy: 0 }];
+    }
+
+    replace(x, y, ...ids) {
+        const newTiles = new Array();
+        ids.forEach(id => {
+            const tile = new Object();
+            tile.id = id;
+            tile.ox = ~~this.meta[tile.id].ox;
+            tile.oy = ~~this.meta[tile.id].oy;
+
+            if (this.meta[tile.id].idx == undefined) {
+                tile.frame = 0;
+                tile.ms = ~~this.meta[tile.id].delay;
+            }
+            
+            newTiles.push(tile);
+        });
+        this.tiles[x][y] = newTiles;
     }
 }
