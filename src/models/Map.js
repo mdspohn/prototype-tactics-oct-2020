@@ -107,7 +107,9 @@ class Map {
                 return;
             
             Game.ctx.save();
-            Game.ctx.translate(x, y - (index * this.th));
+            Game.ctx.translate(x + (~~this.meta[tile.id].mirror * this.tw), y - (index * this.th));
+            if (this.meta[tile.id].mirror)
+                Game.ctx.scale(-1, 1);
             Game.ctx.drawImage(
                 this.tileset,
                 idx * this.tw % this.tileset.width,

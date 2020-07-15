@@ -38,10 +38,32 @@ class Beast {
         await new Promise(loader);
     }
 
-    _setMovementType(animation, start, end) {
-        // if (!!start.slope() || !!end.slope()) {
+    _verifyAnimationId(animation, mod) {
+        if (this.meta[animation.id + mod] != undefined) {
+            animation.id += mod;
+            return '';
+        }
+        return mod;
+    }
 
-        //     return;
+    _setMovementType(animation, start, end) {
+        // const z = start.z() - end.z(),
+        //       axis = ((start.x - end.x) != 0) ? 'X' : 'Y',
+        //       orientation = (((start.x + start.y) - (end.x + end.y)) > 0) ? 'UP' : 'DOWN';
+        
+        // animation.id = 'walk';
+        // let mod = '';
+
+        // if (z != 0) {
+        //     animation.id = 'jump';
+        //     mod = this._verifyAnimationId(animation, (z < 0) ? '-up' : '-down');
+        // }
+        // if (Math.abs(z) >= 2) {
+        //     animation.id = 'jump';
+        //     mod = this._verifyAnimationId(animation, (z < 0) ? '-up' : '-down');
+        // } else if (z != 0) {
+        //     animation.id = 'jump';
+        //     mod = this._verifyAnimationId(animation, (z < 0) ? '-up' : '-down');
         // }
 
 
@@ -59,19 +81,19 @@ class Beast {
     }
 
     _setMovementData(animation, start, end) {
-        const swap = (end.x > start.x || end.y > start.y), // swap rendering to new tile
-              w    = (start.tw / 2),
+        const w    = (start.tw / 2),
               d    = (start.td / 2),
               h    = (start.th / 2),
               x    = (end.x - start.x),
               y    = (end.y - start.y),
               z    = (start.z()) - (end.z()),
-              s    = (~~end.slope()) - (~~start.slope());
+              s    = (~~end.slope()) - (~~start.slope()),
+              swap = (end.x > start.x || end.y > start.y) && (z === 0); // swap rendering to new tile immediately;
 
         // derived initial and current offset
-        animation.ix = ~~swap *  ((x - y) * w);
-        animation.iy = ~~swap * -((x - y) * d);
-        animation.iz = ~~swap *  ((s * h) - (z * start.th));
+        animation.ix = ~~swap * ((x  - y) * w);
+        animation.iy = ~~swap * ((-x - y) * d);
+        animation.iz = ~~swap * (-(s  * h) - (z * start.th));
 
         animation.cx = animation.ix;
         animation.cy = animation.iy;
@@ -115,6 +137,13 @@ class Beast {
         this.animationQueue.push(this._getAnimationData(animationId, destination));
     }
 
+    _reverseOffsets(animation) {
+        this.location = animation.destination;
+        [animation.ix, animation.tx] = [-animation.tx, -animation.ix];
+        [animation.iy, animation.ty] = [-animation.ty, -animation.iy];
+        [animation.iz, animation.tz] = [-animation.tz, -animation.iz];
+    }
+
     update(step) {
         this.animation.ms += step;
 
@@ -130,6 +159,11 @@ class Beast {
                 this.animation.px += this.meta[this.animation.id].frames[this.animation.frame].px || 0;
                 this.animation.py += this.meta[this.animation.id].frames[this.animation.frame].py || 0;
                 this.animation.pz += this.meta[this.animation.id].frames[this.animation.frame].pz || 0;
+
+                // if (this.animation.pz != 0 && this.location.z() != this.animation.destination.z()) {
+                //     if (((this.location.z() - this.animation.destination.z()) > 0 && this.animation.pz == 1) || ((this.location.z() - this.animation.destination.z()) < 0))
+                //         this._reverseOffsets(this.animation);
+                // }
             }
 
             this.animation.ms -= ms;
@@ -155,14 +189,31 @@ class Beast {
                 if (this.animation.movement) {
                     Events.dispatch('sort', !!(this.animation.destination.x - this.location.x) ? 'Y' : 'X');
                     // swap rendering location if we need to
-                    if (this.animation.destination.x > this.location.x || this.animation.destination.y > this.location.y)
-                        this.location = this.animation.destination;
+                    if ((this.location.z() - this.animation.destination.z()) == 0) {
+                        if (this.animation.destination.x > this.location.x || this.animation.destination.y > this.location.y)
+                            this.location = this.animation.destination;
+                    }
                 }
             }
         }
     }
     
     render(delta) {
+        let framePercentage;
+        if (this.animation.movement) {
+            framePercentage = Math.min((this.animation.ms + delta) / this.meta[this.animation.id].frames[this.animation.frame].ms, 1);
+            const zProgress = this.animation.pz + framePercentage * (this.meta[this.animation.id].frames[this.animation.frame].pz || 0);
+
+            const slopething = ((this.location.x + this.location.y) - (this.animation.destination.x + this.animation.destination.y) < 0) && this.animation.destination.slope();
+
+            if (zProgress != 0 && this.location.z() != this.animation.destination.z()) {
+                if (((this.location.z() - this.animation.destination.z()) < 0 && (zProgress == 1 || slopething)) || ((this.location.z() - this.animation.destination.z()) > 0)) {
+                    if (!((this.location.x + this.location.y) - (this.animation.destination.x + this.animation.destination.y) > 0) || !this.location.slope())
+                            this._reverseOffsets(this.animation);
+                }
+            }
+        }
+
         const x = Game.camera.position.x + this.location.posX() - (this.tw - this.location.tw) / 2,
               y = Game.camera.position.y + this.location.posY() - (this.th - (this.location.td / 2) - this.location.th);
 
@@ -184,8 +235,7 @@ class Beast {
         }
 
         if (this.animation.movement) {
-            const framePercentage = Math.min((this.animation.ms + delta) / this.meta[this.animation.id].frames[this.animation.frame].ms, 1),
-                  totalXDistance = this.animation.tx - this.animation.ix,
+            const totalXDistance = this.animation.tx - this.animation.ix,
                   totalYDistance = this.animation.ty - this.animation.iy,
                   totalZDistance = this.animation.tz - this.animation.iz;
             

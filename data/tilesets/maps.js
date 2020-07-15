@@ -19,6 +19,9 @@ GAME_DATA.tilesets.maps['woodlands'] = {
         "4": { "name": "Dirt", "idx": 3 },
         "5": { "name": "Ice",   "idx": 4 },
         "6": { "name": "Stump",       "idx": 5 },
+        "7": { "name": "Dirt Slope 2",       "idx": 6, "slope": true },
+        "8": { "name": "Dirt Slope 2 Mirror",       "idx": 6, "slope": true, "mirror": true },
+        "9": { "name": "Dirt Slope Mirror",  "idx": 1, "slope": true, "mirror": true },
         "10": {
             "name": "Bottom Half Rising",
             "frames": [

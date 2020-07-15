@@ -30,6 +30,39 @@ class CombatController {
         this.entities[0].moveTo(this.layout.getLocation(4,0));
         this.entities[0].moveTo(this.layout.getLocation(3,0));
         this.entities[0].moveTo(this.layout.getLocation(2,0));
+        this.entities[0].moveTo(this.layout.getLocation(3,0));
+        this.entities[0].moveTo(this.layout.getLocation(4,0));
+        this.entities[0].moveTo(this.layout.getLocation(5,0));
+        this.entities[0].moveTo(this.layout.getLocation(6,0));
+        this.entities[0].moveTo(this.layout.getLocation(6,1));
+        this.entities[0].moveTo(this.layout.getLocation(5,1));
+        this.entities[0].moveTo(this.layout.getLocation(5,2));
+        this.entities[0].moveTo(this.layout.getLocation(5,3));
+        this.entities[0].moveTo(this.layout.getLocation(5,4));
+        this.entities[0].moveTo(this.layout.getLocation(4,4));
+        this.entities[0].moveTo(this.layout.getLocation(3,4));
+        this.entities[0].moveTo(this.layout.getLocation(4,4));
+        this.entities[0].moveTo(this.layout.getLocation(5,4));
+        this.entities[0].moveTo(this.layout.getLocation(6,4));
+        this.entities[0].moveTo(this.layout.getLocation(7,4));
+        // this.entities[0].moveTo(this.layout.getLocation(6,1));
+        // this.entities[0].moveTo(this.layout.getLocation(5,1));
+        // this.entities[0].moveTo(this.layout.getLocation(5,2));
+        // this.entities[0].moveTo(this.layout.getLocation(5,3));
+        // this.entities[0].moveTo(this.layout.getLocation(5,4));
+        // this.entities[0].moveTo(this.layout.getLocation(4,4));
+        // this.entities[0].moveTo(this.layout.getLocation(3,4));
+        // this.entities[0].moveTo(this.layout.getLocation(2,4));
+        // this.entities[0].moveTo(this.layout.getLocation(1,4));
+        // this.entities[0].moveTo(this.layout.getLocation(0,4));
+        // this.entities[0].moveTo(this.layout.getLocation(0,3));
+        // this.entities[0].moveTo(this.layout.getLocation(0,2));
+        // this.entities[0].moveTo(this.layout.getLocation(0,1));
+        // this.entities[0].moveTo(this.layout.getLocation(0,0));
+        // this.entities[0].moveTo(this.layout.getLocation(0,1));
+        // this.entities[0].moveTo(this.layout.getLocation(0,2));
+        // this.entities[0].moveTo(this.layout.getLocation(0,3));
+        // this.entities[0].moveTo(this.layout.getLocation(0,4));
     }
 
     onClick(event) {
