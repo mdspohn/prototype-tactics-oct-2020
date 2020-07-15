@@ -16,8 +16,8 @@ class Beast {
 
         // beast location
         this.location;
-        this.initialX = config.x;
-        this.initialY = config.y;
+        this.x = () => this.location != null ? this.location.x : config.x;
+        this.y = () => this.location != null ? this.location.y : config.y;
 
         // queued animations and movement
         this.animationQueue = new Array();
@@ -31,51 +31,78 @@ class Beast {
     }
 
     async _prepare() {
-        await new Promise(resolve => {
+        const loader = (resolve) => {
             this.tileset.onload = resolve;
             this.tileset.src = this.tileset_src;
-        });
+        };
+        await new Promise(loader);
     }
 
-    _getAnimationData(id, dest = this.location) {
-        const animation = new Object();
-        animation.id = id;
-        animation.frame = 0;
-        animation.ms = 0;
-        animation.destination = dest;
+    _setMovementType(animation, start, end) {
+        // if (!!start.slope() || !!end.slope()) {
 
-        const referenceLocation = this.animationQueue[this.animationQueue.length - 1] ? this.animationQueue[this.animationQueue.length - 1].destination : this.location;
+        //     return;
+        // }
 
-        if (dest != referenceLocation) {
-            // TODO (doesn't account for slope direction) derive animation type if not set - walk-south, jump-north, etc
-            if (animation.id === null) {
-                if (referenceLocation.z() == dest.z()) {
-                    animation.id = 'move';
-                } else if (Math.abs(referenceLocation.z() - dest.z()) > 1) {
-                    animation.id = 'jump';
-                } else if (referenceLocation.slope() || dest.slope()) {
-                    animation.id = 'move';
-                } else {
-                    animation.id = 'jump';
-                }
-            }
 
-            const swapLocation = (dest.x > referenceLocation.x || dest.y > referenceLocation.y);
-
-            // derived initial and current offset
-            animation.ix = animation.cx = ~~swapLocation * ((dest.x - referenceLocation.x) * (dest.tw / 2) - (dest.y - referenceLocation.y) * (dest.tw / 2));
-            animation.iy = animation.cy = ~~swapLocation * (-(dest.x - referenceLocation.x) * (dest.td / 2) - (dest.y - referenceLocation.y) * (dest.td / 2));
-            animation.iz = animation.cz = ~~swapLocation * ((referenceLocation.z() - dest.z()) * dest.th);
-    
-            // derived target offset
-            animation.tx = ~~!swapLocation * ((dest.y - referenceLocation.y) * (dest.tw / 2) - (dest.x - referenceLocation.x) * (dest.tw / 2));
-            animation.ty = ~~!swapLocation * ((dest.x - referenceLocation.x) * (dest.td / 2) + (dest.y - referenceLocation.y) * (dest.td / 2));
-            animation.tz = ~~!swapLocation * ((referenceLocation.z() - dest.z()) * (dest.th));
-    
-            // current movement progress
-            animation.p = 0;
-            animation.zp = 0;
+        if (start.z() == end.z()) {
+            animation.id = 'move';
+        } else if (Math.abs(start.z() - end.z()) > 1) {
+            animation.id = 'jump-';
+            animation.id += (start.z() - end.z() < 0) ? 'up' : 'down';
+        } else if (start.slope() || end.slope()) {
+            animation.id = 'move';
+        } else {
+            animation.id = 'jump-';
+            animation.id += (start.z() - end.z() < 0) ? 'up' : 'down';
         }
+    }
+
+    _setMovementData(animation, start, end) {
+        const swap = (end.x > start.x || end.y > start.y), // swap rendering to new tile
+              w    = (start.tw / 2),
+              d    = (start.td / 2),
+              h    = (start.th / 2),
+              x    = (end.x - start.x),
+              y    = (end.y - start.y),
+              z    = (start.z()) - (end.z()),
+              s    = (~~end.slope()) - (~~start.slope());
+
+        // derived initial and current offset
+        animation.ix = ~~swap *  ((x - y) * w);
+        animation.iy = ~~swap * -((x - y) * d);
+        animation.iz = ~~swap *  ((s * h) - (z * start.th));
+
+        animation.cx = animation.ix;
+        animation.cy = animation.iy;
+        animation.cz = animation.iz;
+
+        // derived target offset
+        animation.tx = ~~!swap * ((y - x) * w);
+        animation.ty = ~~!swap * ((x + y) * d);
+        animation.tz = ~~!swap * ((s * h) + (z * start.th));
+
+        // current movement progress
+        animation.px = 0;
+        animation.py = 0;
+        animation.pz = 0;
+    }
+
+    _getAnimationData(animationId, destination) {
+        const animation = new Object();
+        animation.id    = animationId;
+        animation.ms    = 0;
+        animation.frame = 0;
+
+        // need to derive animation and movement data
+        const start = this.animationQueue[(this.animationQueue.length - 1)]?.destination || this.location,
+              end   = animation.destination = destination || this.location;
+
+        if (animation.id === null)
+            this._setMovementType(animation, start, end);
+
+        if (end !== start)
+            this._setMovementData(animation, start, end);
 
         animation.ox = ~~this.meta[animation.id].ox;
         animation.oy = ~~this.meta[animation.id].oy;
@@ -84,8 +111,8 @@ class Beast {
         return animation;
     }
 
-    moveTo(destination) {
-        this.animationQueue.push(this._getAnimationData(null, destination));
+    moveTo(destination, animationId = null) {
+        this.animationQueue.push(this._getAnimationData(animationId, destination));
     }
 
     update(step) {
@@ -100,8 +127,9 @@ class Beast {
             
             if (this.animation.movement) {
                 // add all movement progress from this frame
-                this.animation.p  += this.meta[this.animation.id].frames[this.animation.frame].p  || 0;
-                this.animation.zp += this.meta[this.animation.id].frames[this.animation.frame].zp || 0;
+                this.animation.px += this.meta[this.animation.id].frames[this.animation.frame].px || 0;
+                this.animation.py += this.meta[this.animation.id].frames[this.animation.frame].py || 0;
+                this.animation.pz += this.meta[this.animation.id].frames[this.animation.frame].pz || 0;
             }
 
             this.animation.ms -= ms;
@@ -132,97 +160,6 @@ class Beast {
                 }
             }
         }
-
-        // if (this.actions[0].sorting)
-        //     this._broadcastAnimationSorting(this.actions[0]);
-
-        // let isAnimationComplete = false,
-        //     msAccumulated = this.actions[0].sinceLast,
-        //     animationProgress = 0,
-        //     zProgress = 0;
-
-        // this.animations[this.actions[0].id].frames.some((frame, index) => {
-        //     if (this.actions[0].movement) {
-        //         const progress = Math.min(msAccumulated / frame.ms, 1);
-        //         if (frame.p !== 0)
-        //             animationProgress += progress * frame.p;
-                
-        //         if (this.actions[0].z > 0 && frame.zd) {
-        //             zProgress += progress * frame.zd;
-        //         } else if (this.actions[0].z < 0 && frame.zu) {
-        //             zProgress += progress * frame.zu;
-        //         }
-        //     }
-
-        //     msAccumulated -= frame.ms;
-            
-        //     if (msAccumulated <= 0) {
-        //         if (this.actions[0].sinceLast === 0 && this.actions[0].movement) {
-        //             this.tx = -(this.actions[0].x - this.x) * (TILE_WIDTH / 2);
-        //             this.tx += (this.actions[0].y - this.y) * (TILE_WIDTH / 2);
-        //             this.ty =  (this.actions[0].x - this.x) * (TILE_DEPTH / 2);
-        //             this.ty += (this.actions[0].y - this.y) * (TILE_DEPTH / 2);
-        //             this.tz =  (this.actions[0].z * TILE_HEIGHT);
-        //         }
-        //         return this.frame = frame;
-        //     }
-            
-        //     if (msAccumulated > 0) {
-        //         const hasEvent = msAccumulated < step && this.frame.event != undefined,
-        //               isLastFrame = (this.animations[this.actions[0].id].frames.length - 1) == index;
-                
-        //         if (hasEvent)
-        //             this._broadcastAnimationEvent({ id: this.frame.event });
-                
-        //         if (isLastFrame) {
-        //             if (this.actions[0].movement) {
-        //                 this.x = this.actions[0].x;
-        //                 this.y = this.actions[0].y;
-        //                 this.ox = this.oy = 0;
-        //                 this.tx = this.ty = this.tz = 0;
-        //                 this.ix = this.iy = this.iz = 0;
-        //             }
-
-        //             const previousAction = this.actions.shift();
-
-        //             if (previousAction.repeat) {
-        //                 previousAction.sinceLast = 0;
-        //                 this.actions.push(previousAction);
-        //             }
-        //             return isAnimationComplete = true;
-        //         }
-        //     }
-        // });
-
-        // // should current render tile be switched if moving
-        // if (!isAnimationComplete) {
-        //     const hasProgress = (this.x != this.actions[0].x || this.y != this.actions[0].y) && animationProgress > 0;
-
-        //     if (hasProgress) {
-        //         const isRenderedAfter = (this.actions[0].y + this.actions[0].x - this.x - this.y) > 0,
-        //               isAlmostDoneJumpingUp = !(this.actions[0].z < 0) || zProgress > 0.9,
-        //               isAlmostDoneJumpingDown = this.actions[0].z > 0 && (this.actions[0].x > this.x || animationProgress > 0.3);
-                
-        //         if ((isRenderedAfter && isAlmostDoneJumpingUp) || isAlmostDoneJumpingDown) {
-        //             this.ix =  -(this.x - this.actions[0].x) * (TILE_WIDTH / 2);
-        //             this.ix +=  (this.y - this.actions[0].y) * (TILE_WIDTH / 2);
-        //             this.iy =   (this.x - this.actions[0].x) * (TILE_DEPTH / 2);
-        //             this.iy +=  (this.y - this.actions[0].y) * (TILE_DEPTH / 2);
-        //             this.iz =  -(this.actions[0].z * TILE_HEIGHT);
-        //             this.tx = 0;
-        //             this.ty = 0;
-        //             this.tz = 0;
-
-        //             this.x = this.actions[0].x;
-        //             this.y = this.actions[0].y;
-        //         }
-        //     }
-
-        //     this.ox = this.ix + Math.ceil(animationProgress * (this.tx - this.ix)) + (this.frame.x || 0);
-        //     this.oy = this.iy + Math.ceil(animationProgress * (this.ty - this.iy)) + (this.iz + Math.ceil(zProgress * (this.tz - this.iz))) + (this.frame.y || 0);
-
-        //     this.actions[0].sinceLast += step;
-        // }
     }
     
     render(delta) {
@@ -252,10 +189,11 @@ class Beast {
                   totalYDistance = this.animation.ty - this.animation.iy,
                   totalZDistance = this.animation.tz - this.animation.iz;
             
-            this.animation.cx = this.animation.ix + Math.round((this.animation.p  + framePercentage * (this.meta[this.animation.id].frames[this.animation.frame].p  || 0))  * totalXDistance);
-            this.animation.cy = this.animation.iy + Math.round((this.animation.p  + framePercentage * (this.meta[this.animation.id].frames[this.animation.frame].p  || 0))  * totalYDistance);
-            this.animation.cz = this.animation.iz + Math.round((this.animation.zp + framePercentage * (this.meta[this.animation.id].frames[this.animation.frame].zp || 0))  * totalZDistance);
+            this.animation.cx = this.animation.ix + Math.round((this.animation.px + framePercentage * (this.meta[this.animation.id].frames[this.animation.frame].px || 0)) * totalXDistance);
+            this.animation.cy = this.animation.iy + Math.round((this.animation.py + framePercentage * (this.meta[this.animation.id].frames[this.animation.frame].py || 0)) * totalYDistance);
+            this.animation.cz = this.animation.iz + Math.round((this.animation.pz + framePercentage * (this.meta[this.animation.id].frames[this.animation.frame].pz || 0)) * totalZDistance);
         }
+
 
         this.animation.ox = ~~this.meta[next.id].frames[frame].ox;
         this.animation.oy = ~~this.meta[next.id].frames[frame].oy;

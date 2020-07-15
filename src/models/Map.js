@@ -35,10 +35,11 @@ class Map {
     }
 
     async _prepare() {
-        await new Promise(resolve => {
+        const loader = (resolve) => {
             this.tileset.onload = resolve;
             this.tileset.src = this.tileset_src;
-        });
+        };
+        await new Promise(loader);
     }
 
     update(step, location) {

@@ -25,11 +25,11 @@ class CombatController {
         this.decoration = scene.decoration;
         this.entities = scene.entities;
         this.layout = new Layout(this.map, this.entities);
-        this.entities.forEach(entity => entity.location = this.layout.getLocation(entity.initialX, entity.initialY));
-        this.entities[0].moveTo(this.layout.getLocation(3,4));
-        this.entities[0].moveTo(this.layout.getLocation(2,4));
-        this.entities[0].moveTo(this.layout.getLocation(2,3));
-        this.entities[0].moveTo(this.layout.getLocation(3,3));
+        this.entities.forEach(entity => entity.location = this.layout.getLocation(entity.x(), entity.y()));
+        this.entities[0].moveTo(this.layout.getLocation(5,0));
+        this.entities[0].moveTo(this.layout.getLocation(4,0));
+        this.entities[0].moveTo(this.layout.getLocation(3,0));
+        this.entities[0].moveTo(this.layout.getLocation(2,0));
     }
 
     onClick(event) {

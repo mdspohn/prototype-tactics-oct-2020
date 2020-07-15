@@ -67,6 +67,7 @@ GAME_DATA.tilesets.decorations['woodlands'] = {
                 { "idx": 6, "ms": 200, "oy": 72 },
                 { "idx": 7, "ms": 200, "oy": 72, "next": 8 }
             ]
-        }
+        },
+        "9": { "name": "Offset Grass", "idx": 8, "ox": -3, "oy": -8 }
     }
 };
