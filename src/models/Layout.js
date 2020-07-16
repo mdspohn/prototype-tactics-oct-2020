@@ -48,7 +48,7 @@ class Layout {
     }
 
     getLocation(x, y) {
-        return this.structure[x][y];
+        return this.structure[x]?.[y];
     }
 
     forEach(fn) {
