@@ -27,7 +27,7 @@ class Beast {
         this.defaultAnimation = new Object(this.animation);
 
         // current directional facing
-        this.direction = 'south';
+        this.orientation = 's';
     }
 
     async _prepare() {
@@ -38,46 +38,125 @@ class Beast {
         await new Promise(loader);
     }
 
-    _verifyAnimationId(animation, mod) {
-        if (this.meta[animation.id + mod] != undefined) {
-            animation.id += mod;
-            return '';
+    _verifyAnimation(id, fallback) {
+        return (this.meta[id] !== undefined) ? id : fallback;
+    }
+
+    _getOrientationToTarget(target, location = this.location) {
+        const DX = target.x - location.x,
+              DY = target.y - location.y;
+        
+        return [
+            ['n', -DX],
+            ['s', +DX],
+            ['e', +DY],
+            ['w', -DY]
+        ].sort((a, b) => b[1] - a[1])[0][0];
+    }
+
+    _getOppositeOrientation(orientation) {
+        switch(orientation) {
+            case 'n':
+                return 's';
+            case 'e':
+                return 'w';
+            case 's':
+                return 'n';
+            case 'w':
+                return 'e';
+            default:
+                console.warn('No orientation given.');
         }
-        return mod;
     }
 
     _setMovementType(animation, start, end) {
-        // const z = start.z() - end.z(),
-        //       axis = ((start.x - end.x) != 0) ? 'X' : 'Y',
-        //       orientation = (((start.x + start.y) - (end.x + end.y)) > 0) ? 'UP' : 'DOWN';
-        
-        // animation.id = 'walk';
-        // let mod = '';
+        const O = animation.orientation = this._getOrientationToTarget(end, start),
+              SO = start.orientation(),
+              EO = end.orientation(),
+              DIFF_Z = end.z() - start.z();
 
-        // if (z != 0) {
-        //     animation.id = 'jump';
-        //     mod = this._verifyAnimationId(animation, (z < 0) ? '-up' : '-down');
-        // }
-        // if (Math.abs(z) >= 2) {
-        //     animation.id = 'jump';
-        //     mod = this._verifyAnimationId(animation, (z < 0) ? '-up' : '-down');
-        // } else if (z != 0) {
-        //     animation.id = 'jump';
-        //     mod = this._verifyAnimationId(animation, (z < 0) ? '-up' : '-down');
-        // }
+        let id = null;
 
-
-        if (start.z() == end.z()) {
-            animation.id = 'move';
-        } else if (Math.abs(start.z() - end.z()) > 1) {
-            animation.id = 'jump-';
-            animation.id += (start.z() - end.z() < 0) ? 'up' : 'down';
-        } else if (start.slope() || end.slope()) {
-            animation.id = 'move';
-        } else {
-            animation.id = 'jump-';
-            animation.id += (start.z() - end.z() < 0) ? 'up' : 'down';
+        if (DIFF_Z === 0) {
+            // same vertical heights
+            if (start.slope()) {
+                id = 'jump-up';
+                if (end.slope()) {
+                    if (SO == EO) {
+                        id = !([SO, this._getOppositeOrientation(SO)].includes(O)) ? 'walk' : (O == SO) ? 'jump-down' : 'jump-up';
+                    } else {
+                        id = (O == this._getOppositeOrientation(EO)) ? 'jump-up' : 'jump-down';
+                    }
+                } else if (end.water()) {
+                    id = this._verifyAnimation('land-to-water', 'jump-down');
+                } else if (SO == O) {
+                    // id = this._verifyAnimation('slope-to-walk', 'walk');
+                    id = 'walk';
+                }
+            } else if (end.slope()) {
+                id = 'jump-down';
+                if (start.water()) {
+                    id = this._verifyAnimation('water-to-land', 'jump-up');
+                } else if (this._getOppositeOrientation(EO) == O) {
+                    // id = this._verifyAnimation('walk-to-slope', 'walk');
+                    id = 'walk';
+                }
+            } else {
+                id = 'walk';
+                if (start.water()) {
+                    if (end.water()) {
+                        id = this._verifyAnimation('swim', 'walk');
+                    } else {
+                        id = this._verifyAnimation('water-to-land', 'walk');
+                    }
+                } else if (end.water()) {
+                    id = this._verifyAnimation('land-to-water', 'jump-down');
+                }
+            }
+        } else if (Math.abs(DIFF_Z) === 1) {
+            if (start.slope()) {
+                id = 'jump';
+                if (end.slope()) {
+                    id = (SO == EO && ([SO, this._getOppositeOrientation(SO)].includes(O))) ? 'walk' : 'jump';
+                } else if (end.water()) {
+                    // XXX: jumping up to a water tile from land would probably never happen
+                    id = this._verifyAnimation('land-to-water', 'jump');
+                } else if (this._getOppositeOrientation(SO) == O && DIFF_Z === -1) {
+                    // id = this._verifyAnimation('slope-to-walk', 'walk');
+                    id = 'walk';
+                }
+            } else if (end.slope()) {
+                id = 'jump';
+                if (start.water()) {
+                    id = this._verifyAnimation('water-to-land', 'jump');
+                } else if (EO == O && DIFF_Z === 1) {
+                    // id = this._verifyAnimation('walk-to-slope', 'walk');
+                    id = 'walk';
+                }
+            } else {
+                id = 'jump';
+                if (start.water()) {
+                    if (end.water()) {
+                        id = this._verifyAnimation('water-to-water', 'jump');
+                    } else {
+                        id = this._verifyAnimation('water-to-land', 'jump');
+                    }
+                } else if (end.water()) {
+                    // XXX: jumping up to a water tile from land would probably never happen
+                    id = this._verifyAnimation('land-to-water', 'jump');
+                }
+            }
         }
+        
+        if (id == null)
+            id = 'jump';
+        
+        if (id == 'jump')
+            id += (DIFF_Z > 0) ? '-up' : '-down';
+
+        animation.id = this._verifyAnimation(id, '-' + animation.orientation);
+
+        console.log(animation.id, O, SO, EO)
     }
 
     _setMovementData(animation, start, end) {
@@ -94,13 +173,9 @@ class Beast {
         animation.swap = swap;
 
         // derived initial and current offset
-        animation.ix = ~~swap * ((x  - y) * w);
-        animation.iy = ~~swap * ((-x - y) * d);
-        animation.iz = ~~swap * (-(s * h) - (z * start.th));
-
-        animation.cx = animation.ix;
-        animation.cy = animation.iy;
-        animation.cz = animation.iz;
+        animation.ix = animation.cx = ~~swap * ((x  - y) * w);
+        animation.iy = animation.cy = ~~swap * ((-x - y) * d);
+        animation.iz = animation.cz = ~~swap * (-(s * h) - (z * start.th));
 
         // derived target offset
         animation.tx = ~~!swap * ((y - x) * w);
@@ -113,7 +188,7 @@ class Beast {
         animation.pz = 0;
     }
 
-    _getAnimationData(animationId, destination) {
+    _getAnimationData(animationId, destination = this.location) {
         const animation = new Object();
         animation.id    = animationId;
         animation.ms    = 0;
@@ -121,7 +196,7 @@ class Beast {
 
         // need to derive animation and movement data
         const start = this.animationQueue[(this.animationQueue.length - 1)]?.destination || this.location,
-              end   = animation.destination = destination || this.location;
+              end = animation.destination = destination;
 
         if (animation.id === null)
             this._setMovementType(animation, start, end);
@@ -131,7 +206,7 @@ class Beast {
 
         animation.ox = ~~this.meta[animation.id].ox;
         animation.oy = ~~this.meta[animation.id].oy;
-        animation.movement = Boolean(this.meta[animation.id].movement);
+        animation.movement = start != end;
 
         return animation;
     }
@@ -141,10 +216,6 @@ class Beast {
         [animation.ix, animation.tx] = [-animation.tx, -animation.ix];
         [animation.iy, animation.ty] = [-animation.ty, -animation.iy];
         [animation.iz, animation.tz] = [-animation.tz, -animation.iz];
-    }
-
-    moveTo(destination, animationId = null) {
-        this.animationQueue.push(this._getAnimationData(animationId, destination));
     }
 
     _handleAnimationComplete(META) {
@@ -158,18 +229,23 @@ class Beast {
         if (this.animation.destination !== undefined && this.animation.destination !== this.location)
             this.location = this.animation.destination;
         
-        this.animation = (NEXT !== undefined) ? NEXT : this.defaultAnimation;
+        this.animation = NEXT || this.defaultAnimation;
         this.animation.ms = REMAINING_MS;
         this.animation.frame = 0;
+
+        if (this.animation.orientation !== undefined)
+            this.orientation = this.animation.orientation;
 
         if (!this.animation.movement)
             return;
 
-        // immediately swap rendering location if we need to
-        this.location = (this.animation.swap) ? this.animation.destination : this.location;
-
         // broadcast new sorting order
         Events.dispatch('sort', ((this.animation.destination.x - this.location.x) !== 0) ? 'Y' : 'X');
+
+        // immediately swap rendering location if we need to
+        if (this.animation.swap)
+            this.location = this.animation.destination;
+
     }
 
     _handleFrameComplete(META, FRAME_META) {
@@ -189,29 +265,27 @@ class Beast {
 
         // still in the same animation, nothing more to update
         if (this.animation.frame >= META.frames.length)
-            return this._handleAnimationComplete(META);
+            this._handleAnimationComplete(META);
     }
 
     update(step) {
-        const META = this.meta[this.animation.id],
-              FRAME_META = META.frames[this.animation.frame];
+        let FRAME_META = this.meta[this.animation.id].frames[this.animation.frame];
 
         this.animation.ms += step;
 
-        if (this.animation.ms > FRAME_META.ms)
-            return this._handleFrameComplete(META, FRAME_META);
+        while (this.animation.ms > FRAME_META.ms) {
+            this._handleFrameComplete(this.meta[this.animation.id], FRAME_META);
+            FRAME_META = this.meta[this.animation.id].frames[this.animation.frame];
+        }
     }
     
     render(delta) {
-        let META = this.meta[this.animation.id],
-            FRAME_META = META.frames[this.animation.frame];
+        let FRAME_META = this.meta[this.animation.id].frames[this.animation.frame];
         
         // check if frame should swap
-        if (FRAME_META.ms <= (this.animation.ms + delta)) {
-            this._handleFrameComplete(META, FRAME_META);
-            
-            META = this.meta[this.animation.id];
-            FRAME_META = META.frames[this.animation.frame];
+        while ((this.animation.ms + delta) > FRAME_META.ms) {
+            this._handleFrameComplete(this.meta[this.animation.id], FRAME_META);
+            FRAME_META = this.meta[this.animation.id].frames[this.animation.frame];
         }
         
         // nothing to do
@@ -220,7 +294,7 @@ class Beast {
 
         // update movement offsets
         if (this.animation.movement) {
-            const PROGRESS_FRAME = Math.min(((this.animation.ms + delta) / FRAME_META.ms), 1),
+            const PROGRESS_FRAME = Math.min(1, ((this.animation.ms + delta) / FRAME_META.ms)),
                   PROGRESS_X = this.animation.px + (PROGRESS_FRAME * (FRAME_META.px || 0)),
                   PROGRESS_Y = this.animation.py + (PROGRESS_FRAME * (FRAME_META.py || 0)),
                   PROGRESS_Z = this.animation.pz + (PROGRESS_FRAME * (FRAME_META.pz || 0));
@@ -228,16 +302,16 @@ class Beast {
             if (PROGRESS_Z !== 0 && this.location.z() != this.animation.destination.z()) {
                 const DIFF_Z = (this.location.z() - this.animation.destination.z()),
                       DIFF_XY = (this.location.x + this.location.y) - (this.animation.destination.x + this.animation.destination.y),
-                      SLOPE_CASE = (DIFF_XY < 0) && this.animation.destination.slope();
+                      SLOPE_CASE = ((DIFF_XY < 0) && (Math.abs(DIFF_Z) === 1) && this.animation.destination.slope());
                 
                 // reverse offsets and change render location
-                if ((DIFF_Z < 0 && (PROGRESS_Z === 1 || SLOPE_CASE) || DIFF_Z > 0) && (DIFF_XY <= 0 || !this.location.slope()))
+                if ((DIFF_Z < 0 && (PROGRESS_Z === 1 || SLOPE_CASE) || DIFF_Z > 0) && (DIFF_XY <= 0 || (!this.location.slope() || DIFF_Z > 0)))
                     this._reverseOffsets(this.animation);
             }
 
-            this.animation.cx = this.animation.ix + Math.round(PROGRESS_X * (this.animation.tx - this.animation.ix));
-            this.animation.cy = this.animation.iy + Math.round(PROGRESS_Y * (this.animation.ty - this.animation.iy));
-            this.animation.cz = this.animation.iz + Math.round(PROGRESS_Z * (this.animation.tz - this.animation.iz));
+            this.animation.cx = this.animation.ix + Math.ceil(PROGRESS_X * (this.animation.tx - this.animation.ix));
+            this.animation.cy = this.animation.iy + Math.ceil(PROGRESS_Y * (this.animation.ty - this.animation.iy));
+            this.animation.cz = this.animation.iz + Math.ceil(PROGRESS_Z * (this.animation.tz - this.animation.iz));
         }
 
         const x = Game.camera.position.x + this.location.posX() - ((this.tw - this.location.tw) / 2),
@@ -258,6 +332,27 @@ class Beast {
         );
         Game.ctx.restore();
     }
+
+    moveTo(destination, animationId = null) {
+        this.animationQueue.push(this._getAnimationData(animationId, destination));
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // getMovementRange(layout, entities) {
     //     this.range = new Object();

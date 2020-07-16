@@ -99,8 +99,8 @@ class Decoration {
                     tile.oy = ~~this.meta[next].oy;
                 } else {
                     idx = this.meta[next].frames[frame].idx;
-                    tile.ox = ~~this.meta[next].frames[frame].ox;
-                    tile.oy = ~~this.meta[next].frames[frame].oy;
+                    tile.ox = ~~this.meta[next].ox + ~~this.meta[next].frames[frame].ox;
+                    tile.oy = ~~this.meta[next].oy + ~~this.meta[next].frames[frame].oy;
                 }
             }
 

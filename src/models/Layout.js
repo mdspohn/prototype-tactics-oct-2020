@@ -24,7 +24,9 @@ class Layout {
                 location.posX = () => location.y * (location.tw / 2) - location.x * (location.tw / 2) + location.ox();
                 location.posY = () => location.y * (location.td / 2) + location.x * (location.td / 2) - (location.z() - 1) * location.th + location.oy();
                 location.getOccupants = () => entities.filter(entity => entity.location == location);
+                location.water = () => Boolean(map.meta[map.tiles[ri][ci][location.z() - 1].id].water);
                 location.slope = () => Boolean(map.meta[map.tiles[ri][ci][location.z() - 1].id].slope);
+                location.orientation = () => map.meta[map.tiles[ri][ci][location.z() - 1].id].orientation;
 
                 this.boundaries.x1 = Math.min(this.boundaries.x1, location.posX());
                 this.boundaries.x2 = Math.max(this.boundaries.x2, location.posX());

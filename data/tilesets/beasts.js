@@ -27,15 +27,35 @@ GAME_DATA.tilesets.beasts['slime'] = {
                 { "idx": 1, "ms": 250 }
             ]
         },
-        "move": {
-            "movement": true,
+        "move": { /* get rid of this */
             "frames": [
-                { "idx": 0, "ms": 300, "px": 0.9, "py": 0.9, "pz": 1 },
-                { "idx": 1, "ms": 200, "px": 0.1, "py": 0.1, "pz": 0 }
+                { "idx": 0, "ms": 250, "px": 1, "py": 1, "pz": 1 },
+                { "idx": 1, "ms": 200 }
             ]
         },
-        "jump-down": {
-            "movement": true,
+        "walk": {
+            "frames": [
+                // { "idx": 0, "ms": 300, "px": 0.9, "py": 0.9, "pz": 1 },
+                // { "idx": 1, "ms": 200, "px": 0.1, "py": 0.1, "pz": 0 }
+                { "idx": 0, "ms": 250, "px": 1, "py": 1, "pz": 1 },
+                { "idx": 1, "ms": 200 }
+            ]
+        },
+        "walk-to-slope": {
+            "frames": [
+                { "idx": 0, "ms": 150, "px": 0.5, "py": 0.5 },
+                { "idx": 0, "ms": 250, "px": 0.5, "py": 0.5, "pz": 1 },
+                { "idx": 1, "ms": 200 }
+            ]
+        },
+        "slope-to-walk": {
+            "frames": [
+                { "idx": 0, "ms": 250, "px": 0.5, "py": 0.5, "pz": 1 },
+                { "idx": 0, "ms": 150, "px": 0.5, "py": 0.5 },
+                { "idx": 1, "ms": 200 }
+            ]
+        },
+        "jump-to-water": {
             "frames": [
                 { "idx": 1, "ms": 500 },
                 { "idx": 2, "ms": 100, "oy": -2},
@@ -46,8 +66,19 @@ GAME_DATA.tilesets.beasts['slime'] = {
                 { "idx": 7, "ms": 50,                       "py": 0.3, "pz": 0.3 }
             ]
         },
+        "jump-down": {
+            "frames": [
+                { "idx": 1, "ms": 500 },
+                { "idx": 2, "ms": 100, "oy": -2},
+                { "idx": 3, "ms": 100, "oy": -6, "px": 0.5 },
+                { "idx": 4, "ms": 200, "oy": -8, "px": 0.4, "pz": 0.1 },
+                { "idx": 5, "ms": 100, "oy": -6, "px": 0.1, "py": 0.2, "pz": 0.1 },
+                { "idx": 6, "ms": 100, "oy": -2,            "py": 0.5, "pz": 0.5 },
+                { "idx": 7, "ms": 50,                       "py": 0.3, "pz": 0.3 },
+                { "idx": 1, "ms": 250 }
+            ]
+        },
         "jump-up": {
-            "movement": true,
             "frames": [
                 { "idx": 1, "ms": 25,  "ox": 0 },
                 { "idx": 1, "ms": 25,  "ox": 1 },
@@ -60,7 +91,7 @@ GAME_DATA.tilesets.beasts['slime'] = {
                 { "idx": 2, "ms": 100, "oy": -3,  "py": 0.5, "pz": 0.5, "px": 0.2  },
                 { "idx": 3, "ms": 100, "oy": -11, "py": 0.3, "pz": 0.3, "px": 0.2  },
                 { "idx": 4, "ms": 200, "oy": -13, "py": 0.2, "pz": 0.2, "px": 0.5  },
-                { "idx": 4, "ms": 150, "oy": -11,  "px": 0.1 },
+                { "idx": 4, "ms": 150, "oy": -11, "px": 0.1 },
                 { "idx": 4, "ms": 100,  "oy": -7,   },
                 { "idx": 4, "ms": 50,  "oy": -1,  },
                 { "idx": 1, "ms": 250 }

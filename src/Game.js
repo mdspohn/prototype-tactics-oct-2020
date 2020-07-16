@@ -33,7 +33,7 @@ class GameManager {
     }
 
     async _prepare() {
-        await this.scene._prepare('test');
+        await this.scene._prepare('arena');
         await this.controllers[this.types[this.scene.type]]._prepare();
         await this._initialize();
     }

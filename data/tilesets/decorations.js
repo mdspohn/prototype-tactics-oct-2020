@@ -32,42 +32,70 @@ GAME_DATA.tilesets.decorations['woodlands'] = {
         },
         "5": {
             "name": "Waterfall 2-2",
+            "oy": 56,
+            "ox": 15,
             "frames": [
-                { "idx": 10, "ms": 200, "oy": 48 },
-                { "idx": 11, "ms": 200, "oy": 48 },
-                { "idx": 12, "ms": 200, "oy": 48 },
-                { "idx": 13, "ms": 200, "oy": 48, "next": 5 }
+                { "idx": 10, "ms": 200 },
+                { "idx": 11, "ms": 200 },
+                { "idx": 12, "ms": 200 },
+                { "idx": 13, "ms": 200, "next": 5 }
             ]
         },
         "6": {
             "name": "Waterfall 2-1",
+            "oy": 80,
+            "ox": 15,
             "frames": [
-                { "idx": 4, "ms": 200, "oy": 72 },
-                { "idx": 5, "ms": 200, "oy": 72 },
-                { "idx": 6, "ms": 200, "oy": 72 },
-                { "idx": 7, "ms": 200, "oy": 72, "next": 6 }
+                { "idx": 4, "ms": 200 },
+                { "idx": 5, "ms": 200 },
+                { "idx": 6, "ms": 200 },
+                { "idx": 7, "ms": 200, "next": 6 }
             ]
         },
         "7": {
             "name": "Waterfall 3-2",
             "mirror": true,
+            "oy": 48,
             "frames": [
-                { "idx": 10, "ms": 200, "oy": 48 },
-                { "idx": 11, "ms": 200, "oy": 48 },
-                { "idx": 12, "ms": 200, "oy": 48 },
-                { "idx": 13, "ms": 200, "oy": 48, "next": 7 }
+                { "idx": 10, "ms": 200 },
+                { "idx": 11, "ms": 200 },
+                { "idx": 12, "ms": 200 },
+                { "idx": 13, "ms": 200, "next": 7 }
             ]
         },
         "8": {
             "name": "Waterfall 3-1",
             "mirror": true,
+            "oy": 72,
             "frames": [
-                { "idx": 4, "ms": 200, "oy": 72 },
-                { "idx": 5, "ms": 200, "oy": 72 },
-                { "idx": 6, "ms": 200, "oy": 72 },
-                { "idx": 7, "ms": 200, "oy": 72, "next": 8 }
+                { "idx": 4, "ms": 200 },
+                { "idx": 5, "ms": 200 },
+                { "idx": 6, "ms": 200 },
+                { "idx": 7, "ms": 200, "next": 8 }
             ]
         },
-        "9": { "name": "Offset Grass", "idx": 8, "ox": -3, "oy": -8 }
+        "9": { "name": "Offset Grass", "idx": 8, "ox": -3, "oy": -8 },
+        "10": {
+            "name": "Waterfall 2-2",
+            "oy": 32,
+            "ox": 15,
+            "frames": [
+                { "idx": 10, "ms": 200 },
+                { "idx": 11, "ms": 200 },
+                { "idx": 12, "ms": 200 },
+                { "idx": 13, "ms": 200, "next": 10 }
+            ]
+        },
+        "11": {
+            "name": "Waterfall 2-2",
+            "oy": 32,
+            "ox": 15,
+            "frames": [
+                { "idx": 4, "ms": 200 },
+                { "idx": 5, "ms": 200 },
+                { "idx": 6, "ms": 200 },
+                { "idx": 7, "ms": 200, "next": 11 }
+            ]
+        }
     }
 };
