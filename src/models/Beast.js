@@ -108,7 +108,8 @@ class Beast {
               y    = (end.y - start.y),
               z    = (start.z()) - (end.z()),
               s    = (~~end.slope()) - (~~start.slope()),
-              swap = (end.x > start.x || end.y > start.y) && (z === 0 || animation.sloped);
+              dist = Math.abs((end.x - start.x)) + Math.abs((end.y - start.y)),
+              swap = (end.x > start.x || end.y > start.y) && ((z === 0 && dist <= 1) || animation.sloped);
 
         // swap rendering location immediately on animation start
         animation.swap = swap;
@@ -228,10 +229,6 @@ class Beast {
             this._handleFrameComplete(this.meta[this.animation.id], FRAME_META);
             FRAME_META = this.meta[this.animation.id].frames[this.animation.frame];
         }
-        
-        // nothing to do
-        if (FRAME_META.idx === -1) 
-            return;
 
         // update movement offsets
         if (this.animation.movement) {
@@ -242,13 +239,17 @@ class Beast {
                   DIFF_Z  = this.location.z() - this.animation.destination.z();
 
             // figure out if we should swap to rendering from the destination location (height difference related stuff)
-            if (PROGRESS_Z !== 0 && DIFF_Z !== 0 && !this.animation.sloped && (PROGRESS_Z === 1 || DIFF_Z > 0))
+            if (PROGRESS_Z !== 0 && (this.animation.destination != this.location) && !this.animation.sloped && (PROGRESS_Z === 1 || DIFF_Z > 0))
                 this._reverseOffsets(this.animation);
 
             this.animation.cx = this.animation.ix + Math.ceil(PROGRESS_X * (this.animation.tx - this.animation.ix));
             this.animation.cy = this.animation.iy + Math.ceil(PROGRESS_Y * (this.animation.ty - this.animation.iy));
             this.animation.cz = this.animation.iz + Math.ceil(PROGRESS_Z * (this.animation.tz - this.animation.iz));
         }
+
+        // nothing to do
+        if (FRAME_META.idx === -1) 
+            return;
 
         const x = Game.camera.position.x + this.location.posX() - ((this.tw - this.location.tw) / 2),
               y = Game.camera.position.y + this.location.posY() - ((this.th - this.location.th) - (this.location.td / 2)) + (~~this.location.slope() * (this.location.th / 2));

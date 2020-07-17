@@ -21,6 +21,74 @@ GAME_DATA.tilesets.maps['woodlands'] = {
         "6": { "name": "Stump",            "idx": 5 },
         "7": { "name": "Dirt Slope South", "idx": 6,   "slope": true, "orientation": "s" },
         "8": { "name": "Dirt Slope East",  "idx": 8,   "slope": true, "orientation": "e" },
-        "3": { "name": "Water",            "idx": 2,   "water": true }
+        "3": { "name": "Water",            "idx": 2,   "water": true },
+        "10": {
+            "name": "Meteor Landing",
+            "frames": [
+                { "idx": 3, "ms": 200, "oy": 4 },
+                { "idx": 3, "ms": 100, "oy": 3 },
+                { "idx": 3, "ms": 75, "oy": 2 },
+                { "idx": 3, "ms": 50, "oy": 1, "next": 4 },
+            ]
+        },
+        "11": {
+            "name": "Meteor Debris North",
+            "frames": [
+                { "idx": 1, "ms": 200, "oy": 4 },
+                { "idx": 1, "ms": 200, "oy": 5 },
+                { "idx": 1, "ms": 200, "oy": 6 },
+                { "idx": 1, "ms": 100, "oy": 7, "next": 0 }
+            ]
+        },
+        "12": {
+            "name": "Meteor Debris West",
+            "frames": [
+                { "idx": 7, "ms": 200, "oy": 4 },
+                { "idx": 7, "ms": 200, "oy": 5 },
+                { "idx": 7, "ms": 200, "oy": 6 },
+                { "idx": 7, "ms": 100, "oy": 7, "next": 0 }
+            ]
+        },
+        "13": {
+            "name": "Meteor Debris South",
+            "frames": [
+                { "idx": 6, "ms": 200, "oy": 4 },
+                { "idx": 6, "ms": 200, "oy": 5 },
+                { "idx": 6, "ms": 200, "oy": 6 },
+                { "idx": 6, "ms": 100, "oy": 7, "next": 0 }
+            ]
+        },
+        "14": {
+            "name": "Meteor Debris East",
+            "frames": [
+                { "idx": 8, "ms": 200, "oy": 4 },
+                { "idx": 8, "ms": 200, "oy": 5 },
+                { "idx": 8, "ms": 200, "oy": 6 },
+                { "idx": 8, "ms": 100, "oy": 7, "next": 0 }
+            ]
+        },
+        "15": {
+            "name": "Meteor Debris All",
+            "frames": [
+                { "idx": 3, "ms": 200, "oy": -2 },
+                { "idx": 3, "ms": 100, "oy": -1, "next": 4 }
+            ]
+        },
+        "16": {
+            "name": "Meteor Landing",
+            "frames": [
+                { "idx": 2, "ms": 150, "oy": 4 },
+                { "idx": 2, "ms": 100, "oy": 3 },
+                { "idx": 2, "ms": 75, "oy": 2 },
+                { "idx": 2, "ms": 50, "oy": 1, "next": 3 },
+            ]
+        },
+        "17": {
+            "name": "Meteor Launch",
+            "frames": [
+                { "idx": 3, "ms": 150, "oy": 2 },
+                { "idx": 3, "ms": 100, "oy": 1, "next": 4 },
+            ]
+        }
     }
 };

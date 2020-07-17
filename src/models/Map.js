@@ -162,4 +162,23 @@ class Map {
         });
         this.tiles[x][y] = newTiles;
     }
+    
+    replaceTop(x, y, ...ids) {
+        const newTiles = new Array();
+        ids.forEach(id => {
+            const tile = new Object();
+            tile.id = id;
+            tile.ox = ~~this.meta[tile.id].ox;
+            tile.oy = ~~this.meta[tile.id].oy;
+
+            if (this.meta[tile.id].idx == undefined) {
+                tile.frame = 0;
+                tile.ms = ~~this.meta[tile.id].delay;
+            }
+            
+            newTiles.push(tile);
+        });
+        this.tiles[x][y].pop();
+        this.tiles[x][y].push(...newTiles);
+    }
 }
