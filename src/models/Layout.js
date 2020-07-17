@@ -45,6 +45,10 @@ class Layout {
         this.listenerId = Events.listen('sort', (method) => this.method = method, true);
     }
 
+    sort(method) {
+        this.method = method;
+    }
+
     _destroy() {
         Events.remove('sort', this.listenerId);
     }

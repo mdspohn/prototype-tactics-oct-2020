@@ -65,98 +65,39 @@ class Beast {
             case 'w':
                 return 'e';
             default:
-                console.warn('No orientation given.');
+                break;
         }
     }
 
     _setMovementType(animation, start, end) {
-        const O = animation.orientation = this._getOrientationToTarget(end, start),
-              SO = start.orientation(),
-              EO = end.orientation(),
+        const O   = animation.orientation = this._getOrientationToTarget(end, start),
+              SO  = start.orientation(),
+              EO  = end.orientation(),
+              OSO = this._getOppositeOrientation(SO),
+              OEO = this._getOppositeOrientation(EO),
               DIFF_Z = end.z() - start.z();
-
-        let id = null;
-
-        if (DIFF_Z === 0) {
-            // same vertical heights
-            if (start.slope()) {
-                id = 'jump-up';
-                if (end.slope()) {
-                    if (SO == EO) {
-                        id = !([SO, this._getOppositeOrientation(SO)].includes(O)) ? 'walk' : (O == SO) ? 'jump-down' : 'jump-up';
-                    } else {
-                        id = (O == this._getOppositeOrientation(EO)) ? 'jump-up' : 'jump-down';
-                    }
-                } else if (end.water()) {
-                    id = this._verifyAnimation('land-to-water', 'jump-down');
-                } else if (SO == O) {
-                    // id = this._verifyAnimation('slope-to-walk', 'walk');
-                    id = 'walk';
-                }
-            } else if (end.slope()) {
-                id = 'jump-down';
-                if (start.water()) {
-                    id = this._verifyAnimation('water-to-land', 'jump-up');
-                } else if (this._getOppositeOrientation(EO) == O) {
-                    // id = this._verifyAnimation('walk-to-slope', 'walk');
-                    id = 'walk';
-                }
-            } else {
-                id = 'walk';
-                if (start.water()) {
-                    if (end.water()) {
-                        id = this._verifyAnimation('swim', 'walk');
-                    } else {
-                        id = this._verifyAnimation('water-to-land', 'walk');
-                    }
-                } else if (end.water()) {
-                    id = this._verifyAnimation('land-to-water', 'jump-down');
-                }
-            }
-        } else if (Math.abs(DIFF_Z) === 1) {
-            if (start.slope()) {
-                id = 'jump';
-                if (end.slope()) {
-                    id = (SO == EO && ([SO, this._getOppositeOrientation(SO)].includes(O))) ? 'walk' : 'jump';
-                } else if (end.water()) {
-                    // XXX: jumping up to a water tile from land would probably never happen
-                    id = this._verifyAnimation('land-to-water', 'jump');
-                } else if (this._getOppositeOrientation(SO) == O && DIFF_Z === -1) {
-                    // id = this._verifyAnimation('slope-to-walk', 'walk');
-                    id = 'walk';
-                }
-            } else if (end.slope()) {
-                id = 'jump';
-                if (start.water()) {
-                    id = this._verifyAnimation('water-to-land', 'jump');
-                } else if (EO == O && DIFF_Z === 1) {
-                    // id = this._verifyAnimation('walk-to-slope', 'walk');
-                    id = 'walk';
-                }
-            } else {
-                id = 'jump';
-                if (start.water()) {
-                    if (end.water()) {
-                        id = this._verifyAnimation('water-to-water', 'jump');
-                    } else {
-                        id = this._verifyAnimation('water-to-land', 'jump');
-                    }
-                } else if (end.water()) {
-                    // XXX: jumping up to a water tile from land would probably never happen
-                    id = this._verifyAnimation('land-to-water', 'jump');
-                }
-            }
+          
+        if (Math.abs(DIFF_Z) <= 1 && (SO !== undefined || EO !== undefined)) {
+            animation.sloped |= (SO === EO        && ((DIFF_Z < 0 && OSO == O) || (DIFF_Z > 0  && SO  == O)));
+            animation.sloped |= (SO === undefined && ((DIFF_Z > 0 && EO  == O) || (DIFF_Z == 0 && OEO == O)));
+            animation.sloped |= (EO === undefined && ((DIFF_Z < 0 && OSO == O) || (DIFF_Z == 0 && SO  == O)));
         }
-        
-        if (id == null)
-            id = 'jump';
-        
-        if (id == 'jump')
-            id += (DIFF_Z > 0) ? '-up' : '-down';
 
-        animation.id = this._verifyAnimation(id, '-' + animation.orientation);
+        if (animation.sloped)
+            return this._verifyAnimation('walk', '-' + O);
 
-        console.log(animation.id, O, SO, EO)
+        if (Math.abs(DIFF_Z) > 0)
+            return this._verifyAnimation('jump-' + ((DIFF_Z > 0) ? 'up' : 'down'), '-' + O);
+
+        // at least one tile is a slope, but there is no z change if we're here
+        if (SO !== undefined && EO !== undefined) {
+            if (SO === EO && ![SO, OSO].includes(O))
+                return this._verifyAnimation('walk', '-' + O);
+            return this._verifyAnimation((SO == O) ? 'jump-down' : 'jump-up', '-' + O);
+        } else if (SO === undefined && EO === undefined) {
+            return this._verifyAnimation('walk', '-' + O);
+        }
+        return this._verifyAnimation((SO !== undefined) ? 'jump-up' : 'jump-down', '-' + O);
     }
 
     _setMovementData(animation, start, end) {
@@ -167,7 +108,7 @@ class Beast {
               y    = (end.y - start.y),
               z    = (start.z()) - (end.z()),
               s    = (~~end.slope()) - (~~start.slope()),
-              swap = (end.x > start.x || end.y > start.y) && (z === 0);
+              swap = (end.x > start.x || end.y > start.y) && (z === 0 || animation.sloped);
 
         // swap rendering location immediately on animation start
         animation.swap = swap;
@@ -199,7 +140,7 @@ class Beast {
               end = animation.destination = destination;
 
         if (animation.id === null)
-            this._setMovementType(animation, start, end);
+            animation.id = this._setMovementType(animation, start, end);
 
         if (end !== start)
             this._setMovementData(animation, start, end);
@@ -239,7 +180,7 @@ class Beast {
         if (!this.animation.movement)
             return;
 
-        // broadcast new sorting order
+        // TODO: doesn't update until the next rendering cycle, so maybe this shouldn't ever be called by the render function?
         Events.dispatch('sort', ((this.animation.destination.x - this.location.x) !== 0) ? 'Y' : 'X');
 
         // immediately swap rendering location if we need to
@@ -297,17 +238,12 @@ class Beast {
             const PROGRESS_FRAME = Math.min(1, ((this.animation.ms + delta) / FRAME_META.ms)),
                   PROGRESS_X = this.animation.px + (PROGRESS_FRAME * (FRAME_META.px || 0)),
                   PROGRESS_Y = this.animation.py + (PROGRESS_FRAME * (FRAME_META.py || 0)),
-                  PROGRESS_Z = this.animation.pz + (PROGRESS_FRAME * (FRAME_META.pz || 0));
+                  PROGRESS_Z = this.animation.pz + (PROGRESS_FRAME * (FRAME_META.pz || 0)),
+                  DIFF_Z  = this.location.z() - this.animation.destination.z();
 
-            if (PROGRESS_Z !== 0 && this.location.z() != this.animation.destination.z()) {
-                const DIFF_Z = (this.location.z() - this.animation.destination.z()),
-                      DIFF_XY = (this.location.x + this.location.y) - (this.animation.destination.x + this.animation.destination.y),
-                      SLOPE_CASE = ((DIFF_XY < 0) && (Math.abs(DIFF_Z) === 1) && this.animation.destination.slope());
-                
-                // reverse offsets and change render location
-                if ((DIFF_Z < 0 && (PROGRESS_Z === 1 || SLOPE_CASE) || DIFF_Z > 0) && (DIFF_XY <= 0 || (!this.location.slope() || DIFF_Z > 0)))
-                    this._reverseOffsets(this.animation);
-            }
+            // figure out if we should swap to rendering from the destination location (height difference related stuff)
+            if (PROGRESS_Z !== 0 && DIFF_Z !== 0 && !this.animation.sloped && (PROGRESS_Z === 1 || DIFF_Z > 0))
+                this._reverseOffsets(this.animation);
 
             this.animation.cx = this.animation.ix + Math.ceil(PROGRESS_X * (this.animation.tx - this.animation.ix));
             this.animation.cy = this.animation.iy + Math.ceil(PROGRESS_Y * (this.animation.ty - this.animation.iy));
