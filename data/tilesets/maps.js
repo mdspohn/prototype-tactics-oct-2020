@@ -12,83 +12,109 @@ GAME_DATA.tilesets.maps['woodlands'] = {
         }
     },
     "config": {
-        "0": { "name": "Empty",            "idx": -1,  "unreachable": true },
-        "1": { "name": "Grass",            "idx": 0 },
-        "2": { "name": "Dirt Slope North", "idx": 1,   "slope": true, "orientation": "n" },
-        "9": { "name": "Dirt Slope West",  "idx": 7,   "slope": true, "orientation": "w" },
-        "4": { "name": "Dirt",             "idx": 3 },
-        "5": { "name": "Ice",              "idx": 4 },
-        "6": { "name": "Stump",            "idx": 5 },
-        "7": { "name": "Dirt Slope South", "idx": 6,   "slope": true, "orientation": "s" },
-        "8": { "name": "Dirt Slope East",  "idx": 8,   "slope": true, "orientation": "e" },
-        "3": { "name": "Water",            "idx": 2,   "water": true },
-        "10": {
-            "name": "Meteor Landing",
+        0: {
+            "name": "Empty",
+            "idx": -1,
+            "unreachable": true
+        },
+        1: {
+            "name": "Grass",
+            "idx": 0
+        },
+        2: {
+            "name": "Raised Grass",
+            "idx": 0,
+            "oy": -2
+        },
+        6: {
+            "name": "Grass Slope - Rising North",
+            "idx": 1,
+            "slope": true,
+            "orientation": "n",
+        },
+        7: {
+            "name": "Grass Slope - Rising West",
+            "idx": 2,
+            "slope": true,
+            "orientation": "w"
+        },
+        8: {
+            "name": "Grass Slope - Rising South",
+            "idx": 3,
+            "slope": true,
+            "orientation": "s"
+        },
+        9: {
+            "name": "Grass Slope - Rising East",
+            "idx": 4,
+            "slope": true,
+            "orientation": "e"
+        },
+        11: {
+            "name": "Dirt",
+            "idx": 10
+        },
+        12: {
+            "name": "Raised Dirt",
+            "idx": 10,
+            "oy": -2
+        },
+        16: {
+            "name": "Dirt Slope - Rising North",
+            "idx": 11,
+            "slope": true,
+            "orientation": "n"
+        },
+        17: {
+            "name": "Dirt Slope - Rising West",
+            "idx": 12,
+            "slope": true,
+            "orientation": "w"
+        },
+        18: {
+            "name": "Dirt Slope - Rising South",
+            "idx": 13,
+            "slope": true,
+            "orientation": "s"
+        },
+        19: {
+            "name": "Dirt Slope - Rising East",
+            "idx": 14,
+            "slope": true,
+            "orientation": "e"
+        },
+        21: {
+            "name": "Water",
+            "idx": 20,
+            "water": true
+        },
+        "impact": {
             "frames": [
-                { "idx": 3, "ms": 200, "oy": 4 },
-                { "idx": 3, "ms": 100, "oy": 3 },
-                { "idx": 3, "ms": 75, "oy": 2 },
-                { "idx": 3, "ms": 50, "oy": 1, "next": 4 },
+                { "idx": 10, "ms": 200, "oy": 4 },
+                { "idx": 10, "ms": 100, "oy": 3 },
+                { "idx": 10, "ms": 75,  "oy": 2 },
+                { "idx": 10, "ms": 50,  "oy": 1, "next": 11 },
             ]
         },
-        "11": {
-            "name": "Meteor Debris North",
+        "impact-to-water": {
             "frames": [
-                { "idx": 1, "ms": 200, "oy": 4 },
-                { "idx": 1, "ms": 200, "oy": 5 },
-                { "idx": 1, "ms": 200, "oy": 6 },
-                { "idx": 1, "ms": 100, "oy": 7, "next": 0 }
+                { "idx": 20, "ms": 150, "oy": 4 },
+                { "idx": 20, "ms": 100, "oy": 3 },
+                { "idx": 20, "ms": 75,  "oy": 2 },
+                { "idx": 20, "ms": 50,  "oy": 1, "next": 21 },
             ]
         },
-        "12": {
-            "name": "Meteor Debris West",
+        "shockwave": {
             "frames": [
-                { "idx": 7, "ms": 200, "oy": 4 },
-                { "idx": 7, "ms": 200, "oy": 5 },
-                { "idx": 7, "ms": 200, "oy": 6 },
-                { "idx": 7, "ms": 100, "oy": 7, "next": 0 }
+                { "idx": 10, "ms": 200, "oy": -2 },
+                { "idx": 10, "ms": 100, "oy": -1, "next": 11 }
             ]
         },
-        "13": {
-            "name": "Meteor Debris South",
+        "push-off": {
             "frames": [
-                { "idx": 6, "ms": 200, "oy": 4 },
-                { "idx": 6, "ms": 200, "oy": 5 },
-                { "idx": 6, "ms": 200, "oy": 6 },
-                { "idx": 6, "ms": 100, "oy": 7, "next": 0 }
+                { "idx": 10, "ms": 150, "oy": 2 },
+                { "idx": 10, "ms": 100, "oy": 1, "next": 11 },
             ]
         },
-        "14": {
-            "name": "Meteor Debris East",
-            "frames": [
-                { "idx": 8, "ms": 200, "oy": 4 },
-                { "idx": 8, "ms": 200, "oy": 5 },
-                { "idx": 8, "ms": 200, "oy": 6 },
-                { "idx": 8, "ms": 100, "oy": 7, "next": 0 }
-            ]
-        },
-        "15": {
-            "name": "Meteor Debris All",
-            "frames": [
-                { "idx": 3, "ms": 200, "oy": -2 },
-                { "idx": 3, "ms": 100, "oy": -1, "next": 4 }
-            ]
-        },
-        "16": {
-            "name": "Meteor Landing",
-            "frames": [
-                { "idx": 2, "ms": 150, "oy": 4 },
-                { "idx": 2, "ms": 100, "oy": 3 },
-                { "idx": 2, "ms": 75, "oy": 2 },
-                { "idx": 2, "ms": 50, "oy": 1, "next": 3 },
-            ]
-        },
-        "17": {
-            "name": "Meteor Launch",
-            "frames": [
-                { "idx": 3, "ms": 150, "oy": 2 },
-                { "idx": 3, "ms": 100, "oy": 1, "next": 4 },
-            ]
-        }
     }
 };

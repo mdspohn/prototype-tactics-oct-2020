@@ -27,49 +27,34 @@ class CombatController {
         this.layout = new Layout(this.map, this.entities);
         this.entities.forEach(entity => entity.location = this.layout.getLocation(entity.x(), entity.y()));
         
-        // this.entities[0].moveTo(this.layout.getLocation(6,0));
-        // this.entities[0].moveTo(this.layout.getLocation(6,1));
-        // this.entities[0].moveTo(this.layout.getLocation(6,2));
-        // this.entities[0].moveTo(this.layout.getLocation(6,3));
-        // this.entities[0].moveTo(this.layout.getLocation(6,4));
-        // this.entities[0].moveTo(this.layout.getLocation(6,5));
-        // this.entities[0].moveTo(this.layout.getLocation(6,6));
-        // this.entities[0].moveTo(this.layout.getLocation(6,5));
-        // this.entities[0].moveTo(this.layout.getLocation(6,4));
-        // this.entities[0].moveTo(this.layout.getLocation(6,3));
-        // this.entities[0].moveTo(this.layout.getLocation(6,2));
-        // this.entities[0].moveTo(this.layout.getLocation(6,1));
-
-        // this.entities[0].moveTo(this.layout.getLocation(6,0));
-        // this.entities[0].moveTo(this.layout.getLocation(5,0));
-        // this.entities[0].moveTo(this.layout.getLocation(4,0));
-        // this.entities[0].moveTo(this.layout.getLocation(3,0));
-        // this.entities[0].moveTo(this.layout.getLocation(3,1));
-        // this.entities[0].moveTo(this.layout.getLocation(3,2));
-        // this.entities[0].moveTo(this.layout.getLocation(3,3));
-        // this.entities[0].moveTo(this.layout.getLocation(4,3));
-        // this.entities[0].moveTo(this.layout.getLocation(5,3));
+        this.entities[0].moveTo(this.layout.getLocation(1,3));
+        this.entities[0].moveTo(this.layout.getLocation(1,4));
+        this.entities[0].moveTo(this.layout.getLocation(1,5));
+        this.entities[0].moveTo(this.layout.getLocation(0,5));
+        this.entities[0].moveTo(this.layout.getLocation(0,4));
+        this.entities[0].moveTo(this.layout.getLocation(0,3));
+        this.entities[0].moveTo(this.layout.getLocation(1,3));
         Events.listen('launch', (entity) => {
             const loc = entity.location;
-            this.map.replaceTop(loc.x,     loc.y,    17);
+            this.map.replaceTop(loc.x, loc.y, "push-off");
         }, true);
         Events.listen('crash', (entity) => {
             const loc = entity.animation.destination;
-            this.map.replace(loc.x,     loc.y,    10);
-            this.map.replace(loc.x - 1, loc.y,    15);
-            this.map.replace(loc.x,     loc.y - 1,15);
-            this.map.replace(loc.x + 1, loc.y,    15);
-            this.map.replace(loc.x,     loc.y + 1,15);
+            this.map.replace(loc.x,     loc.y,    "impact");
+            this.map.replace(loc.x - 1, loc.y,    "shockwave");
+            this.map.replace(loc.x,     loc.y - 1,"shockwave");
+            this.map.replace(loc.x + 1, loc.y,    "shockwave");
+            this.map.replace(loc.x,     loc.y + 1,"shockwave");
             if (Math.abs(this.entities[1].x() + this.entities[1].y() - loc.x - loc.y) <= 1)
                 this.entities[1].animation = this.entities[1]._getAnimationData('impact');
         }, true);
         Events.listen('crash2', (entity) => {
             const loc = entity.animation.destination;
-            this.map.replace(loc.x,     loc.y,    16);
-            this.map.replace(loc.x - 1, loc.y,    15);
-            this.map.replace(loc.x,     loc.y - 1,15);
-            this.map.replace(loc.x + 1, loc.y,    15);
-            this.map.replace(loc.x,     loc.y + 1,15);
+            this.map.replace(loc.x,     loc.y,    "impact-to-water");
+            this.map.replace(loc.x - 1, loc.y,    "shockwave");
+            this.map.replace(loc.x,     loc.y - 1,"shockwave");
+            this.map.replace(loc.x + 1, loc.y,    "shockwave");
+            this.map.replace(loc.x,     loc.y + 1,"shockwave");
             this.entities[1].animation = this.entities[1]._getAnimationData('impact');
             this.entities[1].animationQueue.push(this.entities[1]._getAnimationData('intro'));
         }, true);

@@ -107,8 +107,9 @@ class Beast {
               x    = (end.x - start.x),
               y    = (end.y - start.y),
               z    = (start.z()) - (end.z()),
-              s    = (~~end.slope()) - (~~start.slope()),
-              dist = Math.abs((end.x - start.x)) + Math.abs((end.y - start.y)),
+              s    = (~~end.slope()) - (~~start.slope());
+
+        const dist = Math.abs((end.x - start.x)) + Math.abs((end.y - start.y)),
               swap = (end.x > start.x || end.y > start.y) && ((z === 0 && dist <= 1) || animation.sloped);
 
         // swap rendering location immediately on animation start
