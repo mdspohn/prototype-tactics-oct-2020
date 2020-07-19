@@ -27,13 +27,38 @@ class CombatController {
         this.layout = new Layout(this.map, this.entities);
         this.entities.forEach(entity => entity.location = this.layout.getLocation(entity.x(), entity.y()));
         
+        this.entities[0].moveTo(this.layout.getLocation(1,1));
+        this.entities[0].moveTo(this.layout.getLocation(1,0));
+        this.entities[0].moveTo(this.layout.getLocation(0,0));
+        this.entities[0].moveTo(this.layout.getLocation(1,0));
+        this.entities[0].moveTo(this.layout.getLocation(1,1));
+        this.entities[0].moveTo(this.layout.getLocation(1,2));
         this.entities[0].moveTo(this.layout.getLocation(1,3));
         this.entities[0].moveTo(this.layout.getLocation(1,4));
-        this.entities[0].moveTo(this.layout.getLocation(1,5));
+        this.entities[0].moveTo(this.layout.getLocation(0,4));
         this.entities[0].moveTo(this.layout.getLocation(0,5));
         this.entities[0].moveTo(this.layout.getLocation(0,4));
         this.entities[0].moveTo(this.layout.getLocation(0,3));
-        this.entities[0].moveTo(this.layout.getLocation(1,3));
+        this.entities[0].moveTo(this.layout.getLocation(0,2));
+        this.entities[0].moveTo(this.layout.getLocation(0,1));
+        this.entities[0].moveTo(this.layout.getLocation(1,1));
+        this.entities[0].moveTo(this.layout.getLocation(2,1));
+        this.entities[0].moveTo(this.layout.getLocation(3,1));
+        this.entities[0].moveTo(this.layout.getLocation(4,1));
+        this.entities[0].moveTo(this.layout.getLocation(3,1));
+        this.entities[0].moveTo(this.layout.getLocation(3,0));
+        this.entities[0].moveTo(this.layout.getLocation(2,0));
+        this.entities[0].moveTo(this.layout.getLocation(2,1));
+        this.entities[0].moveTo(this.layout.getLocation(1,1));
+
+
+        // this.entities[0].moveTo(this.layout.getLocation(1,3));
+        // this.entities[0].moveTo(this.layout.getLocation(1,4));
+        // this.entities[0].moveTo(this.layout.getLocation(1,5));
+        // this.entities[0].moveTo(this.layout.getLocation(0,5));
+        // this.entities[0].moveTo(this.layout.getLocation(0,4));
+        // this.entities[0].moveTo(this.layout.getLocation(0,3));
+        // this.entities[0].moveTo(this.layout.getLocation(1,3));
         Events.listen('launch', (entity) => {
             const loc = entity.location;
             this.map.replaceTop(loc.x, loc.y, "push-off");

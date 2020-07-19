@@ -110,19 +110,19 @@ class Beast {
               s    = (~~end.slope()) - (~~start.slope());
 
         const dist = Math.abs((end.x - start.x)) + Math.abs((end.y - start.y)),
-              swap = (end.x > start.x || end.y > start.y) && ((z === 0 && dist <= 1) || animation.sloped);
+              swap = (end.x > start.x || end.y > start.y) && ((z === 0 && dist <= 1 && s === 0) || animation.sloped);
 
         // swap rendering location immediately on animation start
         animation.swap = swap;
 
         // derived initial and current offset
-        animation.ix = animation.cx = ~~swap * ((x  - y) * w);
-        animation.iy = animation.cy = ~~swap * ((-x - y) * d);
+        animation.ix = animation.cx = ~~swap * ((x  - y) * w + (start.ox() - end.ox()));
+        animation.iy = animation.cy = ~~swap * ((-x - y) * d + (start.oy() - end.oy()));
         animation.iz = animation.cz = ~~swap * (-(s * h) - (z * start.th));
 
         // derived target offset
-        animation.tx = ~~!swap * ((y - x) * w);
-        animation.ty = ~~!swap * ((x + y) * d);
+        animation.tx = ~~!swap * ((y - x) * w + (end.ox() - start.ox()));
+        animation.ty = ~~!swap * ((x + y) * d + (end.oy() - start.oy()));
         animation.tz = ~~!swap * ((s * h) + (z * start.th));
 
         // current movement progress
@@ -270,10 +270,15 @@ class Beast {
         );
         Game.ctx.restore();
     }
+}
 
-    moveTo(destination, animationId = null) {
-        this.animationQueue.push(this._getAnimationData(animationId, destination));
-    }
+// ---------------------------
+// Entity commands and interactions
+// ------------------------
+
+Beast.prototype.moveTo = function(destination, animationId = null) {
+    this.animationQueue.push(this._getAnimationData(animationId, destination));
+};
 
 
 
@@ -387,4 +392,3 @@ class Beast {
     // AI(wait = 0) {
     //     return new Promise((resolve, reject) => setTimeout(() => resolve(), wait));
     // }
-}
