@@ -26,30 +26,38 @@ class CombatController {
         this.entities = scene.entities;
         this.layout = new Layout(this.map, this.entities);
         this.entities.forEach(entity => entity.location = this.layout.getLocation(entity.x(), entity.y()));
+        this.entities[2].defaultAnimation = this.entities[2]._getAnimationData('idle-e');
         
-        this.entities[0].moveTo(this.layout.getLocation(1,1));
-        this.entities[0].moveTo(this.layout.getLocation(1,0));
-        this.entities[0].moveTo(this.layout.getLocation(0,0));
-        this.entities[0].moveTo(this.layout.getLocation(1,0));
-        this.entities[0].moveTo(this.layout.getLocation(1,1));
-        this.entities[0].moveTo(this.layout.getLocation(1,2));
-        this.entities[0].moveTo(this.layout.getLocation(1,3));
-        this.entities[0].moveTo(this.layout.getLocation(1,4));
-        this.entities[0].moveTo(this.layout.getLocation(0,4));
-        this.entities[0].moveTo(this.layout.getLocation(0,5));
-        this.entities[0].moveTo(this.layout.getLocation(0,4));
-        this.entities[0].moveTo(this.layout.getLocation(0,3));
-        this.entities[0].moveTo(this.layout.getLocation(0,2));
-        this.entities[0].moveTo(this.layout.getLocation(0,1));
-        this.entities[0].moveTo(this.layout.getLocation(1,1));
-        this.entities[0].moveTo(this.layout.getLocation(2,1));
-        this.entities[0].moveTo(this.layout.getLocation(3,1));
-        this.entities[0].moveTo(this.layout.getLocation(4,1));
-        this.entities[0].moveTo(this.layout.getLocation(3,1));
-        this.entities[0].moveTo(this.layout.getLocation(3,0));
-        this.entities[0].moveTo(this.layout.getLocation(2,0));
-        this.entities[0].moveTo(this.layout.getLocation(2,1));
-        this.entities[0].moveTo(this.layout.getLocation(1,1));
+        // this.entities[0].moveTo(this.layout.getLocation(1,1));
+        // this.entities[0].moveTo(this.layout.getLocation(1,0));
+        // this.entities[0].moveTo(this.layout.getLocation(0,0));
+        // this.entities[0].moveTo(this.layout.getLocation(1,0));
+        // this.entities[0].moveTo(this.layout.getLocation(1,1));
+        // this.entities[0].moveTo(this.layout.getLocation(1,2));
+        // this.entities[0].moveTo(this.layout.getLocation(2,4));
+        // this.entities[0].moveTo(this.layout.getLocation(1,4));
+        // this.entities[0].moveTo(this.layout.getLocation(2,4));
+        // this.entities[0].moveTo(this.layout.getLocation(1,4));
+        // this.entities[0].moveTo(this.layout.getLocation(0,4));
+        // this.entities[0].moveTo(this.layout.getLocation(1,4));
+        // this.entities[0].moveTo(this.layout.getLocation(2,4));
+        // this.entities[0].moveTo(this.layout.getLocation(1,4));
+        // this.entities[0].moveTo(this.layout.getLocation(0,4));
+        // this.entities[0].moveTo(this.layout.getLocation(1,4));
+        // this.entities[0].moveTo(this.layout.getLocation(0,4));
+        // this.entities[0].moveTo(this.layout.getLocation(0,5));
+        // this.entities[0].moveTo(this.layout.getLocation(0,4));
+        // this.entities[0].moveTo(this.layout.getLocation(0,3));
+        // this.entities[0].moveTo(this.layout.getLocation(0,2));
+        // this.entities[0].moveTo(this.layout.getLocation(0,1));
+        // this.entities[0].moveTo(this.layout.getLocation(1,1));
+        // this.entities[0].moveTo(this.layout.getLocation(2,1));
+        // this.entities[0].moveTo(this.layout.getLocation(3,1));
+        // this.entities[0].moveTo(this.layout.getLocation(4,1));
+        // this.entities[0].moveTo(this.layout.getLocation(3,1));
+        // this.entities[0].moveTo(this.layout.getLocation(3,0));
+        // this.entities[0].moveTo(this.layout.getLocation(2,0));
+        // this.entities[0].moveTo(this.layout.getLocation(2,1));
 
 
         // this.entities[0].moveTo(this.layout.getLocation(1,3));
@@ -70,8 +78,13 @@ class CombatController {
             this.map.replace(loc.x,     loc.y - 1,"shockwave");
             this.map.replace(loc.x + 1, loc.y,    "shockwave");
             this.map.replace(loc.x,     loc.y + 1,"shockwave");
-            if (Math.abs(this.entities[1].x() + this.entities[1].y() - loc.x - loc.y) <= 1)
-                this.entities[1].animation = this.entities[1]._getAnimationData('impact');
+            // this.entities.forEach(entity => {
+            //     if (Math.abs(entity.x() + entity.y() - loc.x - loc.y) <= 1 && entity != this.entities[0]) {
+            //         entity.animation = entity._getAnimationData('impact');
+            //     }
+            // });
+            //if (Math.abs(this.entities[1].x() + this.entities[1].y() - loc.x - loc.y) <= 1)
+                //this.entities[1].animation = this.entities[1]._getAnimationData('impact');
         }, true);
         Events.listen('crash2', (entity) => {
             const loc = entity.animation.destination;
@@ -80,13 +93,13 @@ class CombatController {
             this.map.replace(loc.x,     loc.y - 1,"shockwave");
             this.map.replace(loc.x + 1, loc.y,    "shockwave");
             this.map.replace(loc.x,     loc.y + 1,"shockwave");
-            this.entities[1].animation = this.entities[1]._getAnimationData('impact');
-            this.entities[1].animationQueue.push(this.entities[1]._getAnimationData('intro'));
+            //this.entities[1].animation = this.entities[1]._getAnimationData('impact');
+            //this.entities[1].animationQueue.push(this.entities[1]._getAnimationData('intro'));
         }, true);
-        this.entities[0].moveTo(this.layout.getLocation(4,3), 'meteor');
-        this.entities[0].moveTo(this.layout.getLocation(3,1), 'meteor');
-        this.entities[0].moveTo(this.layout.getLocation(5,2), 'meteor');
-        this.entities[0].moveTo(this.layout.getLocation(3,2), 'meteor2');
+        this.entities[0].moveTo(this.layout.getLocation(4,2), 'meteor');
+        // this.entities[0].moveTo(this.layout.getLocation(3,1), 'meteor');
+        // this.entities[0].moveTo(this.layout.getLocation(5,2), 'meteor');
+        // this.entities[0].moveTo(this.layout.getLocation(3,2), 'meteor2');
 
 
         // this.entities[0].moveTo(this.layout.getLocation(3,5));

@@ -60,7 +60,7 @@ class Map {
                 return;
             
             tile.ms += step;
-            while (tile.ms > this.meta[tile.id].frames[tile.frame].ms)
+            while (this.meta[tile.id].frames !== undefined && tile.ms > this.meta[tile.id].frames[tile.frame].ms)
                 this._handleFrameComplete(tile);
         });
     }
@@ -70,13 +70,12 @@ class Map {
               y = Game.camera.position.y + ((location.x + location.y) * (this.td / 2));
         
         this.tiles[location.x][location.y].forEach((tile, z) => {
-            let index = this.meta[tile.id].idx;
-            if (this.meta[tile.id].idx === undefined) {
-                while (tile.ms !== 0 && (tile.ms + delta) > this.meta[tile.id].frames[tile.frame].ms)
+            if (this.meta[tile.id].frames !== undefined) {
+                while (this.meta[tile.id].frames !== undefined && (tile.ms + delta) > this.meta[tile.id].frames[tile.frame].ms)
                     this._handleFrameComplete(tile);
-                
-                index = this.meta[tile.id].idx !== undefined ? this.meta[tile.id].idx : this.meta[tile.id].frames[tile.frame].idx;
             }
+            
+            const index = (this.meta[tile.id].frames !== undefined) ? this.meta[tile.id].frames[tile.frame].idx : this.meta[tile.id].idx;
 
             // move on if tile requested is empty
             if (index === -1) 

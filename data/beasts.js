@@ -21,5 +21,37 @@ GAME_DATA.beasts['player'] = {
     "tileset": "player",
     "stats": {
         "movement": 5
+    }
+};
+
+GAME_DATA.beasts['player2'] = {
+    "id": "player",
+    "tileset": "player2",
+    "stats": {
+        "movement": 5
+    },
+};
+
+GAME_DATA.beasts['player3'] = {
+    "id": "player",
+    "tileset": "player3",
+    "stats": {
+        "movement": 5
+    },
+};
+
+GAME_DATA.beasts['player4'] = {
+    "id": "player",
+    "tileset": "player4",
+    "stats": {
+        "movement": 5
+    },
+};
+
+GAME_DATA.beasts['player5'] = {
+    "id": "player",
+    "tileset": "player5",
+    "stats": {
+        "movement": 5
     },
 };

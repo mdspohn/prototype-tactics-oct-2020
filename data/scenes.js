@@ -9,5 +9,10 @@ GAME_DATA.scenes['test'] = {
 GAME_DATA.scenes['arena'] = {
     type: 'COMBAT',
     area: 'arena',
-    entities: [{id: 'slime', x: 1, y: 2}, {id: 'mimic', x: 4, y: 2}]
+    entities: [
+        {id: 'slime', x: 1, y: 2},
+        //{id: 'mimic', x: 4, y: 2},
+        {id: 'player', x: 5, y: 2},
+        {id: 'player', x: 4, y: 3},
+    ]
 };

@@ -14,20 +14,23 @@ class Beast {
         // animation data
         this.meta = this.tile_config.config;
 
+
         // beast location
         this.location;
-        this.x = () => (this.location != null) ? this.location.x : config.x;
-        this.y = () => (this.location != null) ? this.location.y : config.y;
+        this.initialX = config.x;
+        this.initialY = config.y;
+        this.x = () => (this.location != null) ? this.location.x : this.initialX;
+        this.y = () => (this.location != null) ? this.location.y : this.initialY;
 
         // queued animations and movement
         this.animationQueue = new Array();
 
+        // current directional facing
+        this.orientation = 's';
+
         // current animation
         this.animation = this._getAnimationData('idle');
         this.defaultAnimation = new Object(this.animation);
-
-        // current directional facing
-        this.orientation = 's';
     }
 
     async _prepare() {
@@ -106,7 +109,7 @@ class Beast {
               h    = (start.th / 2),
               x    = (end.x - start.x),
               y    = (end.y - start.y),
-              z    = (start.z()) - (end.z()),
+              z    = (end.z() - start.z()),
               s    = (~~end.slope()) - (~~start.slope());
 
         const dist = Math.abs((end.x - start.x)) + Math.abs((end.y - start.y)),
@@ -118,12 +121,12 @@ class Beast {
         // derived initial and current offset
         animation.ix = animation.cx = ~~swap * ((x  - y) * w + (start.ox() - end.ox()));
         animation.iy = animation.cy = ~~swap * ((-x - y) * d + (start.oy() - end.oy()));
-        animation.iz = animation.cz = ~~swap * (-(s * h) - (z * start.th));
+        animation.iz = animation.cz = ~~swap * (-(s * h) + (z * start.th));
 
         // derived target offset
-        animation.tx = ~~!swap * ((y - x) * w + (end.ox() - start.ox()));
-        animation.ty = ~~!swap * ((x + y) * d + (end.oy() - start.oy()));
-        animation.tz = ~~!swap * ((s * h) + (z * start.th));
+        animation.tx = ~~!swap * ((y - x) * w - (start.ox() - end.ox()));
+        animation.ty = ~~!swap * ((x + y) * d - (start.oy() - end.oy()));
+        animation.tz = ~~!swap * ((s * h) - (z * start.th));
 
         // current movement progress
         animation.px = 0;
@@ -263,8 +266,8 @@ class Beast {
             Math.floor((FRAME_META.idx * this.tw) / this.tileset.width) * (this.th),
             this.tw,
             this.th,
-            ~~FRAME_META.ox + ~~this.animation.cx,
-            ~~FRAME_META.oy + ~~this.animation.cy + ~~this.animation.cz,
+            ~~this.animation.ox + ~~FRAME_META.ox + ~~this.animation.cx,
+            ~~this.animation.oy + ~~FRAME_META.oy + ~~this.animation.cy + ~~this.animation.cz,
             this.tw,
             this.th
         );
