@@ -41,8 +41,8 @@ class Beast {
         await new Promise(loader);
     }
 
-    _verifyAnimation(id, fallback) {
-        return (this.meta[id] !== undefined) ? id : fallback;
+    _verifyAnimation(id, mod) {
+        return (this.meta[id + mod] !== undefined) ? id + mod : id;
     }
 
     _getOrientationToTarget(target, location = this.location) {
@@ -85,6 +85,8 @@ class Beast {
             animation.sloped |= (SO === undefined && ((DIFF_Z > 0 && EO  == O) || (DIFF_Z == 0 && OEO == O)));
             animation.sloped |= (EO === undefined && ((DIFF_Z < 0 && OSO == O) || (DIFF_Z == 0 && SO  == O)));
         }
+
+        console.log(O)
 
         if (animation.sloped)
             return this._verifyAnimation('walk', '-' + O);

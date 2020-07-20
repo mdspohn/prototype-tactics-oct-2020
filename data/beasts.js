@@ -24,17 +24,17 @@ GAME_DATA.beasts['player'] = {
     }
 };
 
-GAME_DATA.beasts['player2'] = {
+GAME_DATA.beasts['john'] = {
     "id": "player",
-    "tileset": "player2",
+    "tileset": "john",
     "stats": {
         "movement": 5
     },
 };
 
-GAME_DATA.beasts['player3'] = {
-    "id": "player",
-    "tileset": "player3",
+GAME_DATA.beasts['player2'] = {
+    "id": "player2",
+    "tileset": "player2",
     "stats": {
         "movement": 5
     },
