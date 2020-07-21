@@ -29,8 +29,8 @@ class Beast {
         this.orientation = 's';
 
         // current animation
-        this.animation = this._getAnimationData('idle');
-        this.defaultAnimation = new Object(this.animation);
+        this.animation = this._getAnimationData(this._verifyAnimation('idle', '-' + this.orientation));
+        this.defaultAnimation = () => this._getAnimationData(this._verifyAnimation('idle', '-' + this.orientation));
     }
 
     async _prepare() {
@@ -85,8 +85,6 @@ class Beast {
             animation.sloped |= (SO === undefined && ((DIFF_Z > 0 && EO  == O) || (DIFF_Z == 0 && OEO == O)));
             animation.sloped |= (EO === undefined && ((DIFF_Z < 0 && OSO == O) || (DIFF_Z == 0 && SO  == O)));
         }
-
-        console.log(O)
 
         if (animation.sloped)
             return this._verifyAnimation('walk', '-' + O);
@@ -177,7 +175,7 @@ class Beast {
         if (this.animation.destination !== undefined && this.animation.destination !== this.location)
             this.location = this.animation.destination;
         
-        this.animation = NEXT || this.defaultAnimation;
+        this.animation = NEXT || this.defaultAnimation();
         this.animation.ms = REMAINING_MS;
         this.animation.frame = 0;
 

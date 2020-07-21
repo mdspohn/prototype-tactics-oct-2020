@@ -26,10 +26,12 @@ class CombatController {
         this.entities = scene.entities;
         this.layout = new Layout(this.map, this.entities);
         this.entities.forEach(entity => entity.location = this.layout.getLocation(entity.x(), entity.y()));
-        this.entities[1].defaultAnimation = this.entities[1]._getAnimationData('idle-n');
-        this.entities[2].defaultAnimation = this.entities[2]._getAnimationData('idle-w');
-        this.entities[3].defaultAnimation = this.entities[3]._getAnimationData('idle-e');
-        this.entities[4].defaultAnimation = this.entities[4]._getAnimationData('idle-s');
+        this.entities[1].moveTo(this.layout.getLocation(1,0));
+        this.entities[1].moveTo(this.layout.getLocation(2,0));
+        this.entities[1].moveTo(this.layout.getLocation(3,0));
+        this.entities[1].moveTo(this.layout.getLocation(4,0));
+        this.entities[1].moveTo(this.layout.getLocation(5,0));
+        this.entities[1].moveTo(this.layout.getLocation(5,1));
 
         Events.listen('launch', (entity) => {
             const loc = entity.location;

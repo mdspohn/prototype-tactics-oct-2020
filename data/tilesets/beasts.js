@@ -392,19 +392,14 @@ GAME_DATA.tilesets.beasts['player'] = {
                 { "idx": 1, "ms": 500, "event": "done-walking" }
             ]
         },
-        "idle-s": {
+        "idle-e": {
             "frames": [
                 { "idx": 0, "ms": 2000 }
             ]
         },
-        "idle-e": {
+        "idle-s": {
             "frames": [
                 { "idx": 1, "ms": 2000 }
-            ]
-        },
-        "idle-n": {
-            "frames": [
-                { "idx": 3, "ms": 2000 }
             ]
         },
         "idle-w": {
@@ -412,170 +407,40 @@ GAME_DATA.tilesets.beasts['player'] = {
                 { "idx": 2, "ms": 2000 }
             ]
         },
-        "walk-s": {
+        "idle-n": {
             "frames": [
-                { "idx": 0, "ms": 1000, "px": 1, "py": 1 }
+                { "idx": 3, "ms": 2000 }
             ]
         },
         "walk-e": {
             "frames": [
-                { "idx": 1, "ms": 1000, "px": 1, "py": 1 }
+                { "idx": 14, "ms": 140, "px": .2,  "py": .2,  "pz": .25 },
+                { "idx": 15, "ms": 105, "px": .15, "py": .15            },
+                { "idx": 16, "ms": 105, "px": .15, "py": .15, "pz": .25 },
+                { "idx": 17, "ms": 140, "px": .2,  "py": .2,  "pz": .25 },
+                { "idx": 16, "ms": 105, "px": .15, "py": .15            },
+                { "idx": 15, "ms": 105, "px": .15, "py": .15, "pz": .25 }
             ]
         },
-        "walk-n": {
+        "walk-s": {
             "frames": [
-                { "idx": 3, "ms": 1000, "px": 1, "py": 1 }
+                { "idx": 10, "ms": 140, "px": .2,  "py": .2,  "pz": .25 },
+                { "idx": 11, "ms": 105, "px": .15, "py": .15            },
+                { "idx": 12, "ms": 105, "px": .15, "py": .15, "pz": .25 },
+                { "idx": 13, "ms": 140, "px": .2,  "py": .2,  "pz": .25 },
+                { "idx": 12, "ms": 105, "px": .15, "py": .15            },
+                { "idx": 11, "ms": 105, "px": .15, "py": .15, "pz": .25 }
             ]
         },
         "walk-w": {
             "frames": [
                 { "idx": 2, "ms": 1000, "px": 1, "py": 1 }
             ]
-        }
-    }
-};
-
-
-
-GAME_DATA.tilesets.beasts['player2'] = {
-    "src": "player.png",
-    "measurements": {
-        "sprite": {
-            "height": 48,
-            "width": 32
-        }
-    },
-    "config": {
-        "rotate": {
-            "frames": [
-                { "idx": 5, "ms": 500 },
-                { "idx": 4, "ms": 500 },
-                { "idx": 6, "ms": 500 },
-                { "idx": 7, "ms": 500 }
-            ]
-        },
-        "idle": {
-            "frames": [
-                { "idx": 5, "ms": 500 }
-            ]
-        },
-        "idle-s": {
-            "frames": [
-                { "idx": 4, "ms": 2000 }
-            ]
-        },
-        "idle-e": {
-            "frames": [
-                { "idx": 5, "ms": 2000 }
-            ]
-        },
-        "idle-n": {
-            "frames": [
-                { "idx": 7, "ms": 2000 }
-            ]
-        },
-        "idle-w": {
-            "frames": [
-                { "idx": 6, "ms": 2000 }
-            ]
-        },
-        "walk-s": {
-            "frames": [
-                { "idx": 4, "ms": 1000, "px": 1, "py": 1 }
-            ]
-        },
-        "walk-e": {
-            "frames": [
-                { "idx": 5, "ms": 1000, "px": 1, "py": 1 }
-            ]
         },
         "walk-n": {
             "frames": [
-                { "idx": 7, "ms": 1000, "px": 1, "py": 1 }
-            ]
-        },
-        "walk-w": {
-            "frames": [
-                { "idx": 6, "ms": 1000, "px": 1, "py": 1 }
+                { "idx": 3, "ms": 1000, "px": 1, "py": 1 }
             ]
         }
     }
 };
-
-// GAME_DATA.tilesets.beasts['player3'] = {
-//     "src": "player-styles.png",
-//     "measurements": {
-//         "sprite": {
-//             "height": 48,
-//             "width": 32
-//         }
-//     },
-//     "config": {
-//         "idle": {
-//             "oy": -5,
-//             "frames": [
-//                 { "idx": 2, "ms": 2000 }
-//             ]
-//         },
-//         "move": {
-//             "frames": [
-//                 { "idx": 2, "ms": 125, "p": 0.25 },
-//                 { "idx": 3, "ms": 125, "p": 0.25 },
-//                 { "idx": 2, "ms": 125, "p": 0.25 },
-//                 { "idx": 3, "ms": 125, "p": 0.25 }
-//             ]
-//         }
-//     }
-// };
-
-// GAME_DATA.tilesets.beasts['player4'] = {
-//     "src": "player-styles.png",
-//     "measurements": {
-//         "sprite": {
-//             "height": 48,
-//             "width": 32
-//         }
-//     },
-//     "config": {
-//         "idle": {
-//             "oy": -5,
-//             "frames": [
-//                 { "idx": 3, "ms": 2000 }
-//             ]
-//         },
-//         "move": {
-//             "frames": [
-//                 { "idx": 2, "ms": 125, "p": 0.25 },
-//                 { "idx": 3, "ms": 125, "p": 0.25 },
-//                 { "idx": 2, "ms": 125, "p": 0.25 },
-//                 { "idx": 3, "ms": 125, "p": 0.25 }
-//             ]
-//         }
-//     }
-// };
-
-// GAME_DATA.tilesets.beasts['player5'] = {
-//     "src": "player-styles.png",
-//     "measurements": {
-//         "sprite": {
-//             "height": 48,
-//             "width": 32
-//         }
-//     },
-//     "config": {
-//         "idle": {
-//             "oy": -5,
-//             "frames": [
-//                 { "idx": 4, "ms": 2000 }
-//             ]
-//         },
-//         "move": {
-//             "frames": [
-//                 { "idx": 2, "ms": 125, "p": 0.25 },
-//                 { "idx": 3, "ms": 125, "p": 0.25 },
-//                 { "idx": 2, "ms": 125, "p": 0.25 },
-//                 { "idx": 3, "ms": 125, "p": 0.25 }
-//             ]
-//         }
-//     }
-// };
