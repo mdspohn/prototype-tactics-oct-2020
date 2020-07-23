@@ -36,6 +36,10 @@ class CombatController {
         this.entities[1].moveTo(this.layout.getLocation(2,0));
         this.entities[1].moveTo(this.layout.getLocation(3,0));
         this.entities[1].moveTo(this.layout.getLocation(4,0));
+        this.entities[1].moveTo(this.layout.getLocation(4,1));
+        this.entities[1].moveTo(this.layout.getLocation(4,2));
+        this.entities[1].moveTo(this.layout.getLocation(3,2));
+        this.entities[1].moveTo(this.layout.getLocation(3,3));
         // this.entities[1].moveTo(this.layout.getLocation(3,0));
         // this.entities[1].moveTo(this.layout.getLocation(4,0));
         // this.entities[1].moveTo(this.layout.getLocation(5,0));
