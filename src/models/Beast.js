@@ -29,8 +29,8 @@ class Beast {
         this.orientation = config.orientation || 's';
 
         // current animation
-        this.animation = this._getAnimationData(this._verifyAnimation('idle', '-' + this.orientation));
-        this.defaultAnimation = () => this._getAnimationData(this._verifyAnimation('idle', '-' + this.orientation));
+        this.animation = this._getAnimationData(this._verifyAnimation('idle', this.orientation));
+        this.defaultAnimation = () => this._getAnimationData(this._verifyAnimation('idle', this.orientation));
     }
 
     async _prepare() {
@@ -41,8 +41,13 @@ class Beast {
         await new Promise(loader);
     }
 
-    _verifyAnimation(id, mod) {
-        return (this.meta[id + mod] !== undefined) ? id + mod : id;
+    _verifyAnimation(id, ...mods) {
+        const full = id + '-' + mods.join('-'),
+              partial = id + '-' + mods[0];
+
+        // if (this.meta[full] !== undefined)
+        //     return full;
+        return (this.meta[partial] !== undefined) ? partial : id;
     }
 
     _getOrientationToTarget(target, location = this.location) {
@@ -78,7 +83,8 @@ class Beast {
               EO  = end.orientation(),
               OSO = this._getOppositeOrientation(SO),
               OEO = this._getOppositeOrientation(EO),
-              DIFF_Z = end.z() - start.z();
+              DIFF_Z = end.z() - start.z(),
+              TILE_MOD = (end.x + end.y) % 2;
           
         if (Math.abs(DIFF_Z) <= 1 && (SO !== undefined || EO !== undefined)) {
             animation.sloped |= (SO === EO        && ((DIFF_Z < 0 && OSO == O) || (DIFF_Z > 0  && SO  == O)));
@@ -87,20 +93,20 @@ class Beast {
         }
 
         if (animation.sloped)
-            return this._verifyAnimation('walk', '-' + O);
+            return this._verifyAnimation('walk', O, TILE_MOD);
 
         if (Math.abs(DIFF_Z) > 0)
-            return this._verifyAnimation('jump-' + ((DIFF_Z > 0) ? 'up' : 'down'), '-' + O);
+            return this._verifyAnimation('jump-' + ((DIFF_Z > 0) ? 'up' : 'down'), O);
 
         // at least one tile is a slope, but there is no z change if we're here
         if (SO !== undefined && EO !== undefined) {
             if (SO === EO && ![SO, OSO].includes(O))
-                return this._verifyAnimation('walk', '-' + O);
-            return this._verifyAnimation((SO == O) ? 'jump-down' : 'jump-up', '-' + O);
+                return this._verifyAnimation('walk', O, TILE_MOD);
+            return this._verifyAnimation((SO == O) ? 'jump-down' : 'jump-up', O);
         } else if (SO === undefined && EO === undefined) {
-            return this._verifyAnimation('walk', '-' + O);
+            return this._verifyAnimation('walk', O, TILE_MOD);
         }
-        return this._verifyAnimation((SO !== undefined) ? 'jump-up' : 'jump-down', '-' + O);
+        return this._verifyAnimation((SO !== undefined) ? 'jump-up' : 'jump-down', O);
     }
 
     _setMovementData(animation, start, end) {
