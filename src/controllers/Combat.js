@@ -27,24 +27,32 @@ class CombatController {
         this.layout = new Layout(this.map, this.entities);
         this.entities.forEach(entity => entity.location = this.layout.getLocation(entity.x(), entity.y()));
         this.entities[1].moveTo(this.layout.getLocation(1,0));
+        this.entities[1].moveTo(this.layout.getLocation(1,1));
+        this.entities[1].moveTo(this.layout.getLocation(1,2));
+        this.entities[1].moveTo(this.layout.getLocation(1,3));
+        this.entities[1].moveTo(this.layout.getLocation(1,2), 'walk-e');
+        this.entities[1].moveTo(this.layout.getLocation(1,1), 'walk-e');
+        this.entities[1].moveTo(this.layout.getLocation(1,0), 'walk-e');
         this.entities[1].moveTo(this.layout.getLocation(2,0));
         this.entities[1].moveTo(this.layout.getLocation(3,0));
         this.entities[1].moveTo(this.layout.getLocation(4,0));
-        this.entities[1].moveTo(this.layout.getLocation(5,0));
-        this.entities[1].moveTo(this.layout.getLocation(5,1));
+        // this.entities[1].moveTo(this.layout.getLocation(3,0));
+        // this.entities[1].moveTo(this.layout.getLocation(4,0));
+        // this.entities[1].moveTo(this.layout.getLocation(5,0));
+        // this.entities[1].moveTo(this.layout.getLocation(5,1));
 
-        Events.listen('launch', (entity) => {
-            const loc = entity.location;
-            this.map.replaceTop(loc.x, loc.y, "push-off");
-        }, true);
-        Events.listen('crash', (entity) => {
-            const loc = entity.animation.destination;
-            this.map.replace(loc.x,     loc.y,    "impact");
-            this.map.replace(loc.x - 1, loc.y,    "shockwave");
-            this.map.replace(loc.x,     loc.y - 1,"shockwave");
-            this.map.replace(loc.x,     loc.y + 1,"shockwave");
-            this.map.replace(loc.x + 1, loc.y,"shockwave");
-        }, true);
+        // Events.listen('launch', (entity) => {
+        //     const loc = entity.location;
+        //     this.map.replaceTop(loc.x, loc.y, "push-off");
+        // }, true);
+        // Events.listen('crash', (entity) => {
+        //     const loc = entity.animation.destination;
+        //     this.map.replace(loc.x,     loc.y,    "impact");
+        //     this.map.replace(loc.x - 1, loc.y,    "shockwave");
+        //     this.map.replace(loc.x,     loc.y - 1,"shockwave");
+        //     this.map.replace(loc.x,     loc.y + 1,"shockwave");
+        //     this.map.replace(loc.x + 1, loc.y,"shockwave");
+        // }, true);
         // Events.listen('crash2', (entity) => {
         //     const loc = entity.animation.destination;
         //     this.map.replace(loc.x,     loc.y,    "impact-to-water");
@@ -55,9 +63,9 @@ class CombatController {
         //     //this.entities[1].animation = this.entities[1]._getAnimationData('impact');
         //     //this.entities[1].animationQueue.push(this.entities[1]._getAnimationData('intro'));
         // }, true);
-        Events.listen('done-walking', (entity) => {
-            this.entities[0].moveTo(this.layout.getLocation(5,2), 'meteor');
-        }, true);
+        // Events.listen('done-walking', (entity) => {
+        //     this.entities[0].moveTo(this.layout.getLocation(5,2), 'meteor');
+        // }, true);
     }
 
     onClick(event) {

@@ -26,7 +26,7 @@ class Beast {
         this.animationQueue = new Array();
 
         // current directional facing
-        this.orientation = 's';
+        this.orientation = config.orientation || 's';
 
         // current animation
         this.animation = this._getAnimationData(this._verifyAnimation('idle', '-' + this.orientation));
