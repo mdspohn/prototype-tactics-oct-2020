@@ -45,8 +45,8 @@ class Beast {
         const full = id + '-' + mods.join('-'),
               partial = id + '-' + mods[0];
 
-        // if (this.meta[full] !== undefined)
-        //     return full;
+        if (this.meta[full] !== undefined)
+            return full;
         return (this.meta[partial] !== undefined) ? partial : id;
     }
 
@@ -84,7 +84,7 @@ class Beast {
               OSO = this._getOppositeOrientation(SO),
               OEO = this._getOppositeOrientation(EO),
               DIFF_Z = end.z() - start.z(),
-              TILE_MOD = (end.x + end.y) % 2;
+              TILE_MOD = (start.x != end.x) ? end.x % 2 : end.y % 2;
           
         if (Math.abs(DIFF_Z) <= 1 && (SO !== undefined || EO !== undefined)) {
             animation.sloped |= (SO === EO        && ((DIFF_Z < 0 && OSO == O) || (DIFF_Z > 0  && SO  == O)));
@@ -249,12 +249,12 @@ class Beast {
                   DIFF_Z  = this.location.z() - this.animation.destination.z();
 
             // figure out if we should swap to rendering from the destination location (height difference related stuff)
-            if (PROGRESS_Z !== 0 && (this.animation.destination != this.location) && !this.animation.sloped && (PROGRESS_Z === 1 || DIFF_Z > 0))
+            if (PROGRESS_Z !== 0 && (this.animation.destination != this.location) && !this.animation.sloped && (PROGRESS_Z >= 1 || DIFF_Z > 0))
                 this._reverseOffsets(this.animation);
 
-            this.animation.cx = this.animation.ix + Math.ceil(PROGRESS_X * (this.animation.tx - this.animation.ix));
-            this.animation.cy = this.animation.iy + Math.ceil(PROGRESS_Y * (this.animation.ty - this.animation.iy));
-            this.animation.cz = this.animation.iz + Math.ceil(PROGRESS_Z * (this.animation.tz - this.animation.iz));
+            this.animation.cx = this.animation.ix + Math.round(PROGRESS_X * (this.animation.tx - this.animation.ix));
+            this.animation.cy = this.animation.iy + Math.round(PROGRESS_Y * (this.animation.ty - this.animation.iy));
+            this.animation.cz = this.animation.iz + Math.round(PROGRESS_Z * (this.animation.tz - this.animation.iz));
         }
 
         // nothing to do

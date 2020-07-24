@@ -110,6 +110,13 @@ GAME_DATA.tilesets.maps['woodlands'] = {
                 { "idx": 10, "ms": 100, "oy": -1, "next": 11 }
             ]
         },
+        "shockwave-2": {
+            "frames": [
+                { "idx": 10, "ms": 50, "oy": 4 },
+                { "idx": 10, "ms": 50, "oy": 2 },
+                { "idx": 10, "ms": 50, "oy": 0, "next": 11 }
+            ]
+        },
         "push-off": {
             "frames": [
                 { "idx": 10, "ms": 150, "oy": 2 },

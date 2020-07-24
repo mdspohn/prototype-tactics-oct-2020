@@ -27,62 +27,84 @@ class CombatController {
         this.layout = new Layout(this.map, this.entities);
         this.entities.forEach(entity => entity.location = this.layout.getLocation(entity.x(), entity.y()));
 
-        this.entities[0].moveTo(this.layout.getLocation(4,3));
-        this.entities[0].moveTo(this.layout.getLocation(5,3));
-        this.entities[0].moveTo(this.layout.getLocation(6,3));
-        this.entities[0].moveTo(this.layout.getLocation(6,2));
-        this.entities[0].moveTo(this.layout.getLocation(6,1));
-        this.entities[0].moveTo(this.layout.getLocation(5,1));
-        this.entities[0].moveTo(this.layout.getLocation(4,1));
-        this.entities[0].moveTo(this.layout.getLocation(4,2));
+        //this.entities[1].animationQueue.push(this.entities[1]._getAnimationData('armored'));
+
+
+        Events.listen('launch', (entity) => {
+            const loc = entity.location;
+            this.map.replaceTop(loc.x, loc.y, "push-off");
+        }, true);
+        Events.listen('special-walk-done', (entity) => {
+            this.entities[1].moveTo(this.layout.getLocation(5,2), 'meteor');
+        }, true);
+        Events.listen('crash', (entity) => {
+            const loc = entity.animation.destination;
+            this.map.replace(loc.x,     loc.y,    "impact");
+            this.map.add(loc.x - 1, loc.y,    "shockwave-2");
+            this.map.add(loc.x,     loc.y - 1,"shockwave-2");
+            this.map.add(loc.x,     loc.y + 1,"shockwave-2");
+            this.map.add(loc.x + 1, loc.y,"shockwave-2");
+            this.entities[0].moveTo(this.layout.getLocation(4,0));
+            this.entities[0].moveTo(this.layout.getLocation(4,1));
+            this.entities[0].moveTo(this.layout.getLocation(4,2));
+            this.entities[0].moveTo(this.layout.getLocation(4,3));
+            this.entities[0].moveTo(this.layout.getLocation(4,4));
+        }, true);
+        this.entities[0].moveTo(this.layout.getLocation(2,0));
+        this.entities[0].moveTo(this.layout.getLocation(3,0), 'special-walk');
+
+
+
+        // this.entities[0].moveTo(this.layout.getLocation(4,3));
+        // this.entities[0].moveTo(this.layout.getLocation(5,3));
+        // this.entities[0].moveTo(this.layout.getLocation(6,3));
+        // this.entities[0].moveTo(this.layout.getLocation(6,4));
+        // this.entities[0].moveTo(this.layout.getLocation(6,3));
+        // this.entities[0].moveTo(this.layout.getLocation(5,3));
+        // this.entities[0].moveTo(this.layout.getLocation(4,3));
+        // this.entities[0].moveTo(this.layout.getLocation(4,2));
+
+
+        // this.entities[0].moveTo(this.layout.getLocation(2,2));
+        // this.entities[0].moveTo(this.layout.getLocation(3,2));
+        // this.entities[0].moveTo(this.layout.getLocation(3,3));
+
+
+        // this.entities[0].moveTo(this.layout.getLocation(5,3));
+        // this.entities[0].moveTo(this.layout.getLocation(6,3));
+        // this.entities[0].moveTo(this.layout.getLocation(6,2));
+        // this.entities[0].moveTo(this.layout.getLocation(6,1));
+        // this.entities[0].moveTo(this.layout.getLocation(5,1));
+        // this.entities[0].moveTo(this.layout.getLocation(4,1));
+        // this.entities[0].moveTo(this.layout.getLocation(4,2));
 
         
-        this.entities[1].moveTo(this.layout.getLocation(6,3));
-        this.entities[1].moveTo(this.layout.getLocation(6,2));
-        this.entities[1].moveTo(this.layout.getLocation(6,1));
-        this.entities[1].moveTo(this.layout.getLocation(5,1));
-        this.entities[1].moveTo(this.layout.getLocation(4,1));
-        this.entities[1].moveTo(this.layout.getLocation(4,2));
-        this.entities[1].moveTo(this.layout.getLocation(4,3));
-        this.entities[1].moveTo(this.layout.getLocation(5,3));
-        
-        this.entities[2].moveTo(this.layout.getLocation(4,1));
-        this.entities[2].moveTo(this.layout.getLocation(4,2));
-        this.entities[2].moveTo(this.layout.getLocation(4,3));
-        this.entities[2].moveTo(this.layout.getLocation(5,3));
-        this.entities[2].moveTo(this.layout.getLocation(6,3));
-        this.entities[2].moveTo(this.layout.getLocation(6,2));
-        this.entities[2].moveTo(this.layout.getLocation(6,1));
-        this.entities[2].moveTo(this.layout.getLocation(5,1));
-        
-        this.entities[3].moveTo(this.layout.getLocation(6,1));
-        this.entities[3].moveTo(this.layout.getLocation(5,1));
-        this.entities[3].moveTo(this.layout.getLocation(4,1));
-        this.entities[3].moveTo(this.layout.getLocation(4,2));
-        this.entities[3].moveTo(this.layout.getLocation(4,3));
-        this.entities[3].moveTo(this.layout.getLocation(5,3));
-        this.entities[3].moveTo(this.layout.getLocation(6,3));
-        this.entities[3].moveTo(this.layout.getLocation(6,2));
-        // this.entities[0].moveTo(this.layout.getLocation(1,0));
-        // this.entities[0].moveTo(this.layout.getLocation(2,0));
-        // this.entities[0].moveTo(this.layout.getLocation(3,0));
-        // this.entities[0].moveTo(this.layout.getLocation(4,0));
-        // this.entities[0].moveTo(this.layout.getLocation(4,1));
-        // this.entities[0].moveTo(this.layout.getLocation(4,2));
-        // this.entities[0].moveTo(this.layout.getLocation(4,3));
-        // this.entities[0].moveTo(this.layout.getLocation(4,4));
-        // this.entities[0].moveTo(this.layout.getLocation(4,3));
-        // this.entities[0].moveTo(this.layout.getLocation(4,2));
-        // this.entities[0].moveTo(this.layout.getLocation(4,1));
-        // this.entities[0].moveTo(this.layout.getLocation(3,1));
-        // this.entities[0].moveTo(this.layout.getLocation(2,1));
-        // this.entities[0].moveTo(this.layout.getLocation(2,0));
-        // this.entities[0].moveTo(this.layout.getLocation(1,0));
-        // this.entities[0].moveTo(this.layout.getLocation(0,0));
-        // this.entities[1].moveTo(this.layout.getLocation(3,0));
-        // this.entities[1].moveTo(this.layout.getLocation(4,0));
-        // this.entities[1].moveTo(this.layout.getLocation(5,0));
+        // this.entities[1].moveTo(this.layout.getLocation(6,3));
+        // this.entities[1].moveTo(this.layout.getLocation(6,2));
+        // this.entities[1].moveTo(this.layout.getLocation(6,1));
         // this.entities[1].moveTo(this.layout.getLocation(5,1));
+        // this.entities[1].moveTo(this.layout.getLocation(4,1));
+        // this.entities[1].moveTo(this.layout.getLocation(4,2));
+        // this.entities[1].moveTo(this.layout.getLocation(4,3));
+        // this.entities[1].moveTo(this.layout.getLocation(5,3));
+        
+        // this.entities[2].moveTo(this.layout.getLocation(4,1));
+        // this.entities[2].moveTo(this.layout.getLocation(4,2));
+        // this.entities[2].moveTo(this.layout.getLocation(4,3));
+        // this.entities[2].moveTo(this.layout.getLocation(5,3));
+        // this.entities[2].moveTo(this.layout.getLocation(6,3));
+        // this.entities[2].moveTo(this.layout.getLocation(6,2));
+        // this.entities[2].moveTo(this.layout.getLocation(6,1));
+        // this.entities[2].moveTo(this.layout.getLocation(5,1));
+        
+        // this.entities[3].moveTo(this.layout.getLocation(6,1));
+        // this.entities[3].moveTo(this.layout.getLocation(5,1));
+        // this.entities[3].moveTo(this.layout.getLocation(4,1));
+        // this.entities[3].moveTo(this.layout.getLocation(4,2));
+        // this.entities[3].moveTo(this.layout.getLocation(4,3));
+        // this.entities[3].moveTo(this.layout.getLocation(5,3));
+        // this.entities[3].moveTo(this.layout.getLocation(6,3));
+        // this.entities[3].moveTo(this.layout.getLocation(6,2));
 
         // Events.listen('launch', (entity) => {
         //     const loc = entity.location;
