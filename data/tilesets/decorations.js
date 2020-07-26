@@ -1,7 +1,3 @@
-if (GAME_DATA.tilesets == undefined)
-    GAME_DATA.tilesets = new Object();
-
-GAME_DATA.tilesets.decorations = new Object();
 GAME_DATA.tilesets.decorations['woodlands'] = {
     "src": "woodlands.png",
     "measurements": {

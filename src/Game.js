@@ -8,6 +8,9 @@ class GameManager {
         this.camera = new Camera(this.canvas);
         this.scene  = new SceneLoader();
 
+        //this.inventory = new InventoryManager();
+        this.equipment = new EquipmentManager();
+
         this.controllers = new Array(4);
         this.controllers[0] = new MenuController();
         this.controllers[1] = new CombatController();

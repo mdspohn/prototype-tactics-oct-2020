@@ -1,5 +1,58 @@
 class Beast {
     constructor(config) {
+
+        // ----------------------
+        // STATS
+        // ----------------------------
+
+        this.level = 1;
+        this.experience = 0;
+
+        this.health  = 1;
+        this.attack  = 1;
+        this.defense = 0;
+        this.spirit  = 1;
+        this.resist  = 0;
+
+        this.tp = 0;
+
+        this.block = 0;
+        this.evasion = 0;
+        this.move = 5;
+        this.jump = 2;
+        this.speed = 50;
+
+        // ----------------------
+        // EQUIPMENT
+        // ---------------------------
+
+        this.weapon = Game.equipment.get('weapon', config.weapon);
+        this.helm   = Game.equipment.get('helm', config.helm);
+        this.armor  = Game.equipment.get('armor', config.armor);
+        this.accessory_1 = Game.equipment.get('accessory', config.accessory_1);
+        this.accessory_2 = Game.equipment.get('accessory', config.accessory_2);
+
+        // this.anima_1 = Game.equipment.get('anima', config.anima_1);
+        // this.anima_2 = Game.equipment.get('anima', config.anima_2);
+        // this.anima_3 = Game.equipment.get('anima', config.anima_3);
+
+        // ----------------------
+        // POSITION
+        // ---------------------------
+        
+        this.location;
+        this.initialX = config.x;
+        this.initialY = config.y;
+        this.x = () => (this.location != null) ? this.location.x : this.initialX;
+        this.y = () => (this.location != null) ? this.location.y : this.initialY;
+
+        // current directional facing
+        this.orientation = config.orientation || 's';
+
+        // ----------------------
+        // ANIMATIONS
+        // ---------------------------
+
         // tileset config
         this.tileset_id = config.tileset;
         this.tile_config = Data.getTileset(this.tileset_id, 'beasts');
@@ -14,22 +67,13 @@ class Beast {
         // animation data
         this.meta = this.tile_config.config;
 
-        // beast location
-        this.location;
-        this.initialX = config.x;
-        this.initialY = config.y;
-        this.x = () => (this.location != null) ? this.location.x : this.initialX;
-        this.y = () => (this.location != null) ? this.location.y : this.initialY;
-
         // queued animations and movement
         this.animationQueue = new Array();
-
-        // current directional facing
-        this.orientation = config.orientation || 's';
 
         // current animation
         this.animation = this._getAnimationData(this._verifyAnimation('idle', this.orientation));
         this.defaultAnimation = () => this._getAnimationData(this._verifyAnimation('idle', this.orientation));
+
     }
 
     async _prepare() {
@@ -139,7 +183,7 @@ class Beast {
         animation.pz = 0;
     }
 
-    _getAnimationData(animationId, destination = this.location) {
+    _getAnimationData(animationId, destination) {
         const animation = new Object();
         animation.id    = animationId;
         animation.ms    = 0;
@@ -147,7 +191,7 @@ class Beast {
 
         // need to derive animation and movement data
         const start = this.animationQueue[(this.animationQueue.length - 1)]?.destination || this.location,
-              end = animation.destination = destination;
+              end = animation.destination = (destination !== undefined) ? destination : (this.animationQueue[(this.animationQueue.length - 1)]?.destination || this.location);
 
         if (animation.id === null)
             animation.id = this._setMovementType(animation, start, end);
@@ -260,23 +304,34 @@ class Beast {
         if (FRAME_META.idx === -1) 
             return;
 
-        const x = Game.camera.position.x + this.location.posX() - ((this.tw - this.location.tw) / 2),
-              y = Game.camera.position.y + this.location.posY() - ((this.th - this.location.th) - (this.location.td / 2)) + (~~this.location.slope() * (this.location.th / 2));
+        const X = Game.camera.position.x + this.location.posX() - ((this.tw - this.location.tw) / 2),
+              Y = Game.camera.position.y + this.location.posY() - ((this.th - this.location.th) - (this.location.td / 2)) + (~~this.location.slope() * (this.location.th / 2)),
+              OFFSET_X = ~~this.animation.ox + ~~FRAME_META.ox + ~~this.animation.cx,
+              OFFSET_Y = ~~this.animation.oy + ~~FRAME_META.oy + ~~this.animation.cy + ~~this.animation.cz,
+              IS_MIRRORED = this.meta[this.animation.id].mirror;
         
+        //this.equipment.renderBG(x, y, this.animation);
+
         Game.ctx.save();
-        Game.ctx.translate(x, y);
+        Game.ctx.translate(X + (~~IS_MIRRORED * this.tw) + OFFSET_X, Y + OFFSET_Y);
+
+        if (IS_MIRRORED)
+            Game.ctx.scale(-1, 1);
+        
         Game.ctx.drawImage(
             this.tileset,
             FRAME_META.idx * this.tw % this.tileset.width,
             Math.floor((FRAME_META.idx * this.tw) / this.tileset.width) * (this.th),
             this.tw,
             this.th,
-            ~~this.animation.ox + ~~FRAME_META.ox + ~~this.animation.cx,
-            ~~this.animation.oy + ~~FRAME_META.oy + ~~this.animation.cy + ~~this.animation.cz,
+            0,
+            0,
             this.tw,
             this.th
         );
         Game.ctx.restore();
+
+        //this.equipment.renderFG(x, y, this.animation);
     }
 }
 

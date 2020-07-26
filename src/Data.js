@@ -4,6 +4,20 @@ class DataManager {
         // as long as the methods return javascript objects when data is requested, nothing in the app changes
         this.mission = 0;
         this.roster = [];
+
+        // ---------------
+        // ASSETS AND DATA
+        // ------------------
+
+        this.areas = GAME_DATA.areas;
+        this.scenes = GAME_DATA.scenes;
+        this.beasts = GAME_DATA.beasts;
+        this.equipment = GAME_DATA.equipment;
+        this.tilesets = GAME_DATA.tilesets;
+    }
+
+    async _load() {
+        
     }
 
     getRoster() {

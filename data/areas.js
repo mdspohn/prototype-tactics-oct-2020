@@ -1,5 +1,3 @@
-GAME_DATA.areas = new Object();
-
 GAME_DATA.areas['woodlands'] = {
 	"map": {
 		"tileset": "woodlands",

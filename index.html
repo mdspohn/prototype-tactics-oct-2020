@@ -12,7 +12,17 @@
   </body>
 
   <script type="text/javascript">
-    GAME_DATA = {};
+    GAME_DATA = new Object();
+    GAME_DATA.beasts = new Object();
+    GAME_DATA.equipment = new Object();
+    GAME_DATA.areas = new Object();
+    GAME_DATA.scenes = new Object();
+    GAME_DATA.tilesets = new Object();
+    GAME_DATA.tilesets.beasts = new Object();
+    GAME_DATA.tilesets.decorations = new Object();
+    GAME_DATA.tilesets.maps = new Object();
+    GAME_DATA.tilesets.equipment = new Object();
+    
     ASSET_DIR = 'assets';
     OS_FILE_SEPARATOR = '/';
   </script>
@@ -21,9 +31,11 @@
   <script type="text/javascript" src="data/scenes.js"></script>
   <script type="text/javascript" src="data/areas.js"></script>
   <script type="text/javascript" src="data/beasts.js"></script>
+  <script type="text/javascript" src="data/equipment.js"></script>
   <script type="text/javascript" src="data/tilesets/maps.js"></script>
   <script type="text/javascript" src="data/tilesets/decorations.js"></script>
   <script type="text/javascript" src="data/tilesets/beasts.js"></script>
+  <script type="text/javascript" src="data/tilesets/equipment.js"></script>
 
 
   <!-- GAME OBJECTS -->
@@ -58,6 +70,6 @@
           Game   = new GameManager(),
           Engine = new GameEngine();
     
-    Game._prepare().then(() => Engine.start());
+    Data._load().then(() => Game._prepare().then(() => Engine.start()));
   </script>
 </html>
