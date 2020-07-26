@@ -601,5 +601,12 @@ GAME_DATA.tilesets.beasts['player'] = {
                 { "idx": 8, "ms": 125, "px": .25, "py": .25, "pz": .25, "event": "special-walk-done" }
             ]
         },
+        "slash": {
+            "frames": [
+                { "idx": 3, "ms": 500 },
+                { "idx": 29, "ms": 500, "ox": -6, "oy": -2 },
+                { "idx": 28, "ms": 1250, "oy": -1, "ox": 2 }
+            ]
+        },
     }
 };

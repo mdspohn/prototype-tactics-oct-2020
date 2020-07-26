@@ -48,10 +48,35 @@ class CombatController {
             this.entities[0].moveTo(this.layout.getLocation(4,1));
             this.entities[0].moveTo(this.layout.getLocation(4,2));
             this.entities[0].moveTo(this.layout.getLocation(4,3));
-            this.entities[0].moveTo(this.layout.getLocation(4,4));
+            this.entities[0].moveTo(this.layout.getLocation(5,3));
+            this.entities[0].moveTo(this.layout.getLocation(6,3));
+            this.entities[0].moveTo(this.layout.getLocation(6,2));
+            this.entities[0].moveTo(this.layout.getLocation(6,1));
+            this.entities[0].moveTo(this.layout.getLocation(5,1));
+            this.entities[0].moveTo(this.layout.getLocation(4,1));
+            this.entities[0].moveTo(this.layout.getLocation(4,2));
+            this.entities[0].moveTo(this.layout.getLocation(4,3));
+            this.entities[0].moveTo(this.layout.getLocation(5,3));
+            this.entities[0].moveTo(this.layout.getLocation(6,3));
+            this.entities[0].moveTo(this.layout.getLocation(6,2));
+            this.entities[0].moveTo(this.layout.getLocation(6,1));
+            this.entities[0].moveTo(this.layout.getLocation(5,1));
+            this.entities[0].moveTo(this.layout.getLocation(4,1));
+            this.entities[0].moveTo(this.layout.getLocation(4,2));
+            this.entities[0].moveTo(this.layout.getLocation(4,3));
+            this.entities[0].moveTo(this.layout.getLocation(5,3));
+            this.entities[0].moveTo(this.layout.getLocation(6,3));
+            this.entities[0].moveTo(this.layout.getLocation(6,2));
+            this.entities[0].moveTo(this.layout.getLocation(6,1));
+            this.entities[0].moveTo(this.layout.getLocation(5,1));
+            this.entities[0].moveTo(this.layout.getLocation(4,1));
         }, true);
-        this.entities[0].moveTo(this.layout.getLocation(2,0));
-        this.entities[0].moveTo(this.layout.getLocation(3,0), 'special-walk');
+        // this.entities[0].moveTo(this.layout.getLocation(2,0));
+        // this.entities[0].moveTo(this.layout.getLocation(3,0));
+        // this.entities[0].moveTo(this.layout.getLocation(4,0));
+        this.entities[0].animationQueue.push(this.entities[0]._getAnimationData('slash'));
+        this.entities[0].animationQueue.push(this.entities[0]._getAnimationData('slash'));
+        this.entities[0].animationQueue.push(this.entities[0]._getAnimationData('slash'));
 
 
 

@@ -14,7 +14,6 @@ class Beast {
         // animation data
         this.meta = this.tile_config.config;
 
-
         // beast location
         this.location;
         this.initialX = config.x;
