@@ -1,5 +1,5 @@
 class Beast {
-    constructor(config) {
+    constructor(config, tileset) {
 
         // ----------------------
         // STATS
@@ -26,11 +26,7 @@ class Beast {
         // EQUIPMENT
         // ---------------------------
 
-        this.weapon = Game.equipment.get('weapon', config.weapon);
-        this.helm   = Game.equipment.get('helm', config.helm);
-        this.armor  = Game.equipment.get('armor', config.armor);
-        this.accessory_1 = Game.equipment.get('accessory', config.accessory_1);
-        this.accessory_2 = Game.equipment.get('accessory', config.accessory_2);
+        this.equipment = new EquipmentManager();
 
         // this.anima_1 = Game.equipment.get('anima', config.anima_1);
         // this.anima_2 = Game.equipment.get('anima', config.anima_2);
@@ -53,19 +49,15 @@ class Beast {
         // ANIMATIONS
         // ---------------------------
 
-        // tileset config
-        this.tileset_id = config.tileset;
-        this.tile_config = Data.getTileset(this.tileset_id, 'beasts');
-        this.tileset_src = `${ASSET_DIR}${OS_FILE_SEPARATOR}${this.tile_config.directory}${OS_FILE_SEPARATOR}${this.tile_config.src}`;
-        this.tileset = new Image();
+        this.tileset = tileset.img;
 
         // sprite dimensions
-        this.tw = ~~this.tile_config.measurements.sprite.width;
-        this.td = ~~this.tile_config.measurements.sprite.depth;
-        this.th = ~~this.tile_config.measurements.sprite.height;
+        this.tw = tileset.tw;
+        this.td = tileset.td;
+        this.th = tileset.th;
 
-        // animation data
-        this.meta = this.tile_config.config;
+        // sprite animation data
+        this.meta = tileset.config;
 
         // queued animations and movement
         this.animationQueue = new Array();
@@ -77,11 +69,7 @@ class Beast {
     }
 
     async _prepare() {
-        const loader = (resolve) => {
-            this.tileset.onload = resolve;
-            this.tileset.src = this.tileset_src;
-        };
-        await new Promise(loader);
+        // reset beast
     }
 
     _verifyAnimation(id, ...mods) {
@@ -310,7 +298,7 @@ class Beast {
               OFFSET_Y = ~~this.animation.oy + ~~FRAME_META.oy + ~~this.animation.cy + ~~this.animation.cz,
               IS_MIRRORED = this.meta[this.animation.id].mirror;
         
-        //this.equipment.renderBG(x, y, this.animation);
+        //this.equipment.render(-1, this.animation, X + OFFSET_X, Y + OFFSET_Y);
 
         Game.ctx.save();
         Game.ctx.translate(X + (~~IS_MIRRORED * this.tw) + OFFSET_X, Y + OFFSET_Y);
@@ -331,7 +319,7 @@ class Beast {
         );
         Game.ctx.restore();
 
-        //this.equipment.renderFG(x, y, this.animation);
+        this.equipment.render(1, this.animation, X + OFFSET_X, Y + OFFSET_Y);
     }
 }
 

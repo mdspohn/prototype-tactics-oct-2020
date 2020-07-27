@@ -71,9 +71,9 @@ class CombatController {
             this.entities[0].moveTo(this.layout.getLocation(5,1));
             this.entities[0].moveTo(this.layout.getLocation(4,1));
         }, true);
-        // this.entities[0].moveTo(this.layout.getLocation(2,0));
-        // this.entities[0].moveTo(this.layout.getLocation(3,0));
-        // this.entities[0].moveTo(this.layout.getLocation(4,0));
+        this.entities[0].moveTo(this.layout.getLocation(2,0));
+        this.entities[0].moveTo(this.layout.getLocation(3,0));
+        this.entities[0].moveTo(this.layout.getLocation(4,0));
         // this.entities[0].animationQueue.push(this.entities[0]._getAnimationData('slash-e'));
         // this.entities[0].animationQueue.push(this.entities[0]._getAnimationData('slash-s'));
         // this.entities[0].animationQueue.push(this.entities[0]._getAnimationData('slash-e'));

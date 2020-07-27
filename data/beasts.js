@@ -16,6 +16,7 @@ GAME_DATA.beasts['mimic'] = {
 
 GAME_DATA.beasts['player'] = {
     "id": "player",
+    "species": "humanoid",
     "tileset": "player",
     "stats": {
         "movement": 5

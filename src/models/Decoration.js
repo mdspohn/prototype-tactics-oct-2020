@@ -1,17 +1,14 @@
 class Decoration {
-    constructor(config) {
-        // tileset config
-        this.tileset_id = config.tileset;
-        this.tile_config = Data.getTileset(this.tileset_id, 'decorations');
-        this.tileset_src = `${ASSET_DIR}${OS_FILE_SEPARATOR}${this.tile_config.directory}${OS_FILE_SEPARATOR}${this.tile_config.src}`;
-        this.tileset = new Image();
+    constructor(config, tileset) {
+        this.tileset = tileset.img;
 
         // tile dimensions
-        this.tw = ~~this.tile_config.measurements.sprite.width;
-        this.th = ~~this.tile_config.measurements.sprite.height;
+        this.tw = tileset.tw;
+        this.td = tileset.td;
+        this.th = tileset.th;
 
         // tile animation data
-        this.meta = this.tile_config.config;
+        this.meta = tileset.config;
 
         // map layout
         this.tiles = config.tiles.map(row => {
@@ -31,14 +28,6 @@ class Decoration {
                 });
             });
         });
-    }
-    
-    async _prepare() {
-        const loader = (resolve) => {
-            this.tileset.onload = resolve;
-            this.tileset.src = this.tileset_src;
-        };
-        await new Promise(loader);
     }
 
     _handleFrameComplete(tile) {

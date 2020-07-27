@@ -235,26 +235,28 @@ GAME_DATA.tilesets.equipment['shields'] = {
     "config": {
         "idle-e": {
             "layer": -1,
-            "ox": 8,
+            "ox": 5,
             "oy": 12,
             "frames": [
-                { "idx": 1, "ms": 125 },
-                { "idx": 1, "ms": 250, "oy": 1 },
-                { "idx": 1, "ms": 250 },
-                { "idx": 1, "ms": 250, "oy": 1 },
-                { "idx": 1, "ms": 125 },
+                { "idx": 1 },
+                { "idx": 1, "oy": 1 },
+                { "idx": 1 },
+                { "idx": 1 },
+                { "idx": 1, "oy": 1 },
+                { "idx": 1 },
             ]
         },
         "idle-s": {
             "layer": 1,
-            "ox": 8,
+            "ox": 5,
             "oy": 12,
             "frames": [
-                { "idx": 0, "ms": 125 },
-                { "idx": 0, "ms": 250, "oy": 1 },
-                { "idx": 0, "ms": 250 },
-                { "idx": 0, "ms": 250, "oy": 1 },
-                { "idx": 0, "ms": 125 },
+                { "idx": 0 },
+                { "idx": 0, "oy": 1 },
+                { "idx": 0 },
+                { "idx": 0 },
+                { "idx": 0, "oy": 1 },
+                { "idx": 0 },
             ]
         },
         "idle-w": {
@@ -293,19 +295,23 @@ GAME_DATA.tilesets.equipment['shields'] = {
             ]
         },
         "walk-s-0": {
-            "mirror": true,
+            "layer": 1,
+            "ox": 5,
+            "oy": 12,
             "frames": [
-                { "idx": 2, "ms": 125, "px": .25, "py": .25, "pz": .25 },
-                { "idx": 1, "ms": 250, "px": .5,  "py": .5,  "pz": .50 },
-                { "idx": 2, "ms": 125, "px": .25, "py": .25, "pz": .25 }
+                { "idx": 0 },
+                { "idx": 0, "oy": 1 },
+                { "idx": 0 },
             ]
         },
         "walk-s-1": {
-            "mirror": true,
+            "layer": 1,
+            "ox": 5,
+            "oy": 12,
             "frames": [
-                { "idx": 3, "ms": 125, "px": .25, "py": .25, "pz": .25 },
-                { "idx": 4, "ms": 250, "px": .5,  "py": .5,  "pz": .50 },
-                { "idx": 3, "ms": 125, "px": .25, "py": .25, "pz": .25 }
+                { "idx": 0 },
+                { "idx": 0, "oy": 1 },
+                { "idx": 0 },
             ]
         },
         "walk-w-0": {

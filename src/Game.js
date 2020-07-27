@@ -6,10 +6,7 @@ class GameManager {
         
         this.input  = new InputManager();
         this.camera = new Camera(this.canvas);
-        this.scene  = new SceneLoader();
-
-        //this.inventory = new InventoryManager();
-        this.equipment = new EquipmentManager();
+        this.scene  = null;
 
         this.controllers = new Array(4);
         this.controllers[0] = new MenuController();
@@ -36,7 +33,7 @@ class GameManager {
     }
 
     async _prepare() {
-        await this.scene._prepare('arena');
+        this.scene = Data.getScene('arena');
         await this.controllers[this.types[this.scene.type]]._prepare();
         await this._initialize();
     }

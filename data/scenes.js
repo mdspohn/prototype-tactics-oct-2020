@@ -13,7 +13,13 @@ GAME_DATA.scenes['arena'] = {
     type: 'COMBAT',
     area: 'arena',
     entities: [
-        {id: 'player', x: 1, y: 0, orientation: 's'},
+        {
+            id: 'player',
+            x: 1,
+            y: 0,
+            orientation: 's',
+            accessory_1: 'buckler'
+        },
         //{id: 'slime', x: 4, y: 0, orientation: 's'},
         // {id: 'player', x: 5, y: 3, orientation: 's'},
         // {id: 'player', x: 5, y: 2, orientation: 'n'},
