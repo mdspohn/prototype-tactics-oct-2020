@@ -254,23 +254,23 @@ GAME_DATA.tilesets.equipment['shields'] = {
             1: { "layer": 1,  "idx": 0, "ox": 4, "oy": 13 }
         },
         5: {
-            0: { "layer": 1,  "idx": 0, "ox": -5, "oy": 13 },
+            0: { "layer": 1,  "idx": 0, "ox": -7, "oy": 13, "mirrored": true },
             1: { "layer": -1, "idx": 1, "ox": -5, "oy": 10 }
         },
         6: {
-            0: {"layer": 1,  "idx": 0, "ox": -5, "oy": 14 },
+            0: {"layer": 1,  "idx": 0, "ox": -7, "oy": 14, "mirrored": true },
             1: { "layer": -1, "idx": 1, "ox": -5, "oy": 11 }
         },
         7: {
-            0: { "layer": 1,  "idx": 0, "ox": -5, "oy": 13 },
+            0: { "layer": 1,  "idx": 0, "ox": -7, "oy": 13, "mirrored": true },
             1: { "layer": -1, "idx": 1, "ox": -5, "oy": 10 }
         },
         8: {
-            0: { "layer": 1,  "idx": 0, "ox": -4, "oy": 13 },
+            0: { "layer": 1,  "idx": 0, "ox": -6, "oy": 13, "mirrored": true },
             1: { "layer": -1, "idx": 1, "ox": -4, "oy": 10 }
         },
         9: {
-            0: { "layer": 1,  "idx": 0, "ox": -4, "oy": 14 },
+            0: { "layer": 1,  "idx": 0, "ox": -6, "oy": 14, "mirrored": true },
             1: { "layer": -1, "idx": 1, "ox": -4, "oy": 11 }
         },
         10: {
@@ -282,11 +282,11 @@ GAME_DATA.tilesets.equipment['shields'] = {
             1: { "layer": 1,  "idx": 0, "ox": 5, "oy": 12 }
         },
         12: {
-            0: { "layer": 1,  "idx": 0, "ox": -6, "oy": 16 },
+            0: { "layer": 1,  "idx": 0, "ox": -8, "oy": 16, "mirrored": true },
             1: { "layer": -1, "idx": 1, "ox": -6, "oy": 13 }
         },
         13: {
-            0: { "layer": 1,  "idx": 0, "ox": -6, "oy": 13 },
+            0: { "layer": 1,  "idx": 0, "ox": -8, "oy": 13, "mirrored": true },
             1: { "layer": -1, "idx": 1, "ox": -5, "oy": 12 }
         }
     }
@@ -419,12 +419,12 @@ GAME_DATA.tilesets.equipment['hair-pins'] = {
             1: { "layer": -1, "idx": 0, "ox": 0,  "oy": -9 }
         },
         12: {
-            0: { "layer": -1, "idx": 0, "ox": 0, "oy": 0 },
-            1: { "layer": 1,  "idx": 0, "ox": 0, "oy": 0 }
+            0: { "layer": -1, "idx": 0, "ox": 5, "oy": -4 },
+            1: { "layer": 1,  "idx": 0, "ox": 3, "oy": -1 }
         },
         13: {
-            0: { "layer": -1, "idx": 0, "ox": 0, "oy": 0 },
-            1: { "layer": 1,  "idx": 0, "ox": 0, "oy": 0 }
+            0: { "layer": -1, "idx": 0, "ox": 5, "oy": -7 },
+            1: { "layer": 1,  "idx": 0, "ox": 3, "oy": -4 }
         }
     }
 };

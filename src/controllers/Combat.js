@@ -9,6 +9,45 @@ class CombatController {
         // combat helpers
         this.markers = null;
         this.cutscene = null;
+
+        document.getElementById('armor').addEventListener('click', (event) => {
+            if (event.target.classList.contains('selected')) {
+                this.entities[0].equipment.remove('armor');
+            } else {
+                this.entities[0].equipment.set('armor', Data.getEquipment('iron-armor'));
+            }
+            event.target.classList.toggle('selected');
+        });
+        document.getElementById('buckler').addEventListener('click', (event) => {
+            if (event.target.classList.contains('selected')) {
+                this.entities[0].equipment.remove('accessory_1');
+            } else {
+                this.entities[0].equipment.set('accessory_1', Data.getEquipment('buckler'));
+            }
+            event.target.classList.toggle('selected');
+        });
+        document.getElementById('rose').addEventListener('click', (event) => {
+            if (event.target.classList.contains('selected')) {
+                this.entities[0].equipment.remove('headgear');
+            } else {
+                this.entities[0].equipment.set('headgear', Data.getEquipment('rose'));
+            }
+            event.target.classList.toggle('selected');
+        });
+        
+        document.querySelector('.strut-button').addEventListener('click', (event) => {
+            this.entities[0].moveTo(this.layout.getLocation(1,1));
+            this.entities[0].moveTo(this.layout.getLocation(1,2));
+            this.entities[0].moveTo(this.layout.getLocation(1,3));
+            this.entities[0].moveTo(this.layout.getLocation(1,4));
+            this.entities[0].moveTo(this.layout.getLocation(2,4));
+            this.entities[0].moveTo(this.layout.getLocation(2,3));
+            this.entities[0].moveTo(this.layout.getLocation(1,3));
+            this.entities[0].moveTo(this.layout.getLocation(1,2));
+            this.entities[0].moveTo(this.layout.getLocation(1,1));
+            this.entities[0].moveTo(this.layout.getLocation(1,0));
+            this.entities[0].moveTo(this.layout.getLocation(1,0), 'idle', 'east');
+        });
     }
 
     async _prepare() {
