@@ -1,7 +1,6 @@
 class Map {
     constructor(config, tileset) {
         this.tileset = tileset.img;
-        console.log(config, tileset)
 
         // tile dimensions
         this.tw = tileset.tw;

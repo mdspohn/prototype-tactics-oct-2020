@@ -43,7 +43,7 @@ class Beast {
         this.y = () => (this.location != null) ? this.location.y : this.initialY;
 
         // current directional facing
-        this.orientation = config.orientation || 's';
+        this.orientation = config.orientation || 'south';
 
         // ----------------------
         // ANIMATIONS
@@ -63,59 +63,61 @@ class Beast {
         this.animationQueue = new Array();
 
         // current animation
-        this.animation = this._getAnimationData(this._verifyAnimation('idle', this.orientation));
-        this.defaultAnimation = () => this._getAnimationData(this._verifyAnimation('idle', this.orientation));
-
+        this.animation = this._getDefaultAnimation();
     }
 
     async _prepare() {
         // reset beast
     }
 
-    _verifyAnimation(id, ...mods) {
-        const full = id + '-' + mods.join('-'),
-              partial = id + '-' + mods[0];
+    _getDefaultAnimation() {
+       return this._getAnimationData(this._verifyAnimation('idle', this.orientation));
+    }
 
-        if (this.meta[full] !== undefined)
-            return full;
-        return (this.meta[partial] !== undefined) ? partial : id;
+    _verifyAnimation(id, orientation, variation = false) {
+        const animation = new Object();
+        animation.id = id;
+        animation.orientation = this.meta[id][orientation] !== undefined ? orientation : this.orientation;
+        animation.variation = this.meta[id][orientation].variation !== undefined;
+        animation.meta = this.meta[id][orientation] || this.meta[id];
+
+        return animation;
     }
 
     _getOrientationToTarget(target, location = this.location) {
-        const DX = target.x - location.x,
-              DY = target.y - location.y;
+        const DX = (target.x - location.x),
+              DY = (target.y - location.y);
         
         return [
-            ['n', -DX],
-            ['s', +DX],
-            ['e', +DY],
-            ['w', -DY]
+            ['north', -DX],
+            ['south', +DX],
+            ['east',  +DY],
+            ['west',  -DY]
         ].sort((a, b) => b[1] - a[1])[0][0];
     }
 
     _getOppositeOrientation(orientation) {
         switch(orientation) {
-            case 'n':
-                return 's';
-            case 'e':
-                return 'w';
-            case 's':
-                return 'n';
-            case 'w':
-                return 'e';
+            case 'north':
+                return 'south';
+            case 'east':
+                return 'west';
+            case 'south':
+                return 'north';
+            case 'west':
+                return 'east';
             default:
                 break;
         }
     }
 
     _setMovementType(animation, start, end) {
-        const O   = animation.orientation = this._getOrientationToTarget(end, start),
+        const O   = this._getOrientationToTarget(end, start),
               SO  = start.orientation(),
               EO  = end.orientation(),
               OSO = this._getOppositeOrientation(SO),
               OEO = this._getOppositeOrientation(EO),
-              DIFF_Z = end.z() - start.z(),
-              TILE_MOD = (start.x != end.x) ? end.x % 2 : end.y % 2;
+              DIFF_Z = end.z() - start.z();
           
         if (Math.abs(DIFF_Z) <= 1 && (SO !== undefined || EO !== undefined)) {
             animation.sloped |= (SO === EO        && ((DIFF_Z < 0 && OSO == O) || (DIFF_Z > 0  && SO  == O)));
@@ -123,21 +125,24 @@ class Beast {
             animation.sloped |= (EO === undefined && ((DIFF_Z < 0 && OSO == O) || (DIFF_Z == 0 && SO  == O)));
         }
 
+        animation.orientation = O;
+
         if (animation.sloped)
-            return this._verifyAnimation('walk', O, TILE_MOD);
+            return 'walk';
 
         if (Math.abs(DIFF_Z) > 0)
-            return this._verifyAnimation('jump-' + ((DIFF_Z > 0) ? 'up' : 'down'), O);
+            return (DIFF_Z > 0) ? 'jump-up' : 'jump-down';
 
         // at least one tile is a slope, but there is no z change if we're here
         if (SO !== undefined && EO !== undefined) {
             if (SO === EO && ![SO, OSO].includes(O))
-                return this._verifyAnimation('walk', O, TILE_MOD);
-            return this._verifyAnimation((SO == O) ? 'jump-down' : 'jump-up', O);
+                return 'walk';
+            return (SO == O) ? 'jump-down' : 'jump-up';
         } else if (SO === undefined && EO === undefined) {
-            return this._verifyAnimation('walk', O, TILE_MOD);
+            return 'walk';
         }
-        return this._verifyAnimation((SO !== undefined) ? 'jump-up' : 'jump-down', O);
+
+        return (SO !== undefined) ? 'jump-up' : 'jump-down';
     }
 
     _setMovementData(animation, start, end) {
@@ -171,25 +176,31 @@ class Beast {
         animation.pz = 0;
     }
 
-    _getAnimationData(animationId, destination) {
-        const animation = new Object();
-        animation.id    = animationId;
-        animation.ms    = 0;
-        animation.frame = 0;
-
+    _getAnimationData({ id, orientation = this.orientation, destination } = opts) {
         // need to derive animation and movement data
-        const start = this.animationQueue[(this.animationQueue.length - 1)]?.destination || this.location,
-              end = animation.destination = (destination !== undefined) ? destination : (this.animationQueue[(this.animationQueue.length - 1)]?.destination || this.location);
+        const PREVIOUS = this.animationQueue[this.animationQueue.length - 1] || this.animation,
+              START = PREVIOUS?.destination || this.location,
+              END = destination || START;
+        
+        const animation = new Object();
+        animation.id = id;
+        animation.ms = 0;
+        animation.frame = 0;
+        animation.destination = END;
+        animation.orientation = orientation;
 
-        if (animation.id === null)
-            animation.id = this._setMovementType(animation, start, end);
+        if (id === null)
+            animation.id = this._setMovementType(animation, START, END);
+        
+        Object.assign(animation, this._verifyAnimation(animation.id, animation.orientation));
+        animation.variation &= !PREVIOUS?.variation;
 
-        if (end !== start)
-            this._setMovementData(animation, start, end);
+        if (END !== START)
+            this._setMovementData(animation, START, END);
 
-        animation.ox = ~~this.meta[animation.id].ox;
-        animation.oy = ~~this.meta[animation.id].oy;
-        animation.movement = start != end;
+        animation.ox = ~~animation.meta.ox;
+        animation.oy = ~~animation.meta.oy;
+        animation.movement = START != END;
 
         return animation;
     }
@@ -212,12 +223,11 @@ class Beast {
         if (this.animation.destination !== undefined && this.animation.destination !== this.location)
             this.location = this.animation.destination;
         
-        this.animation = NEXT || this.defaultAnimation();
+        this.animation = NEXT || this._getDefaultAnimation();
         this.animation.ms = REMAINING_MS;
         this.animation.frame = 0;
 
-        if (this.animation.orientation !== undefined)
-            this.orientation = this.animation.orientation;
+        this.orientation = this.animation.orientation || this.orientation;
 
         if (!this.animation.movement)
             return;
@@ -228,7 +238,6 @@ class Beast {
         // immediately swap rendering location if we need to
         if (this.animation.swap)
             this.location = this.animation.destination;
-
     }
 
     _handleFrameComplete(META, FRAME_META) {
@@ -251,24 +260,28 @@ class Beast {
             this._handleAnimationComplete(META);
     }
 
+    _getFrameMeta(animation) {
+        return animation.meta[(animation.variation ? 'variation' : 'frames')][animation.frame];
+    }
+
     update(step) {
-        let FRAME_META = this.meta[this.animation.id].frames[this.animation.frame];
+        let FRAME_META = this._getFrameMeta(this.animation);
 
         this.animation.ms += step;
 
         while (this.animation.ms > FRAME_META.ms) {
-            this._handleFrameComplete(this.meta[this.animation.id], FRAME_META);
-            FRAME_META = this.meta[this.animation.id].frames[this.animation.frame];
+            this._handleFrameComplete(this.animation.meta, FRAME_META);
+            FRAME_META = this._getFrameMeta(this.animation);
         }
     }
     
     render(delta) {
-        let FRAME_META = this.meta[this.animation.id].frames[this.animation.frame];
+        let FRAME_META = this._getFrameMeta(this.animation);
         
         // check if frame should swap
         while ((this.animation.ms + delta) > FRAME_META.ms) {
-            this._handleFrameComplete(this.meta[this.animation.id], FRAME_META);
-            FRAME_META = this.meta[this.animation.id].frames[this.animation.frame];
+            this._handleFrameComplete(this.animation.meta, FRAME_META);
+            FRAME_META = this._getFrameMeta(this.animation);
         }
 
         // update movement offsets
@@ -296,7 +309,7 @@ class Beast {
               Y = Game.camera.position.y + this.location.posY() - ((this.th - this.location.th) - (this.location.td / 2)) + (~~this.location.slope() * (this.location.th / 2)),
               OFFSET_X = ~~this.animation.ox + ~~FRAME_META.ox + ~~this.animation.cx,
               OFFSET_Y = ~~this.animation.oy + ~~FRAME_META.oy + ~~this.animation.cy + ~~this.animation.cz,
-              IS_MIRRORED = this.meta[this.animation.id].mirror;
+              IS_MIRRORED = this.animation.meta.mirrored;
         
         //this.equipment.render(-1, this.animation, X + OFFSET_X, Y + OFFSET_Y);
 
@@ -327,8 +340,8 @@ class Beast {
 // Entity commands and interactions
 // ------------------------
 
-Beast.prototype.moveTo = function(destination, animationId = null) {
-    this.animationQueue.push(this._getAnimationData(animationId, destination));
+Beast.prototype.moveTo = function(destination, animation_id = null, orientation = null) {
+    this.animationQueue.push(this._getAnimationData({ id: animation_id, orientation, destination }));
 };
 
 

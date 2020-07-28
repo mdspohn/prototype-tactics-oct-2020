@@ -73,7 +73,6 @@ class EquipmentManager {
     }
 
     set(type, data, tileset) {
-        console.log(type, data, tileset)
         this.equipment[type] = new Equipment(data, tileset);
         this._addBonuses(this.equipment[type]);
     }
@@ -119,13 +118,17 @@ class EquipmentManager {
 
     render(layer, animation, x, y) {
         Object.values(this.equipment).forEach(item => {
-            if (item === null || item.meta[animation.id] === undefined || item.meta[animation.id].layer !== layer)
+            if (item === null)
+                return;
+            
+            const META = item.meta[animation.id][animation.orientation] || item.meta[animation.id];
+            if (META === undefined || META.layer !== layer)
                 return;
 
-            const FRAME_META = item.meta[animation.id].frames[animation.frame];
+            const FRAME_META = META[(animation.variation ? 'variation' : 'frames')][animation.frame];
 
             Game.ctx.save();
-            Game.ctx.translate(x + ~~item.meta[animation.id].ox, y + ~~item.meta[animation.id].oy);
+            Game.ctx.translate(x + ~~META.ox, y + ~~META.oy);
             Game.ctx.drawImage(
                 item.tileset,
                 (FRAME_META.idx * item.tw) % item.tileset.width,

@@ -26,25 +26,25 @@ GAME_DATA.tilesets.maps['woodlands'] = {
             "name": "Grass Slope - Rising North",
             "idx": 1,
             "slope": true,
-            "orientation": "n",
+            "orientation": "north",
         },
         7: {
             "name": "Grass Slope - Rising West",
             "idx": 2,
             "slope": true,
-            "orientation": "w"
+            "orientation": "west"
         },
         8: {
             "name": "Grass Slope - Rising South",
             "idx": 3,
             "slope": true,
-            "orientation": "s"
+            "orientation": "south"
         },
         9: {
             "name": "Grass Slope - Rising East",
             "idx": 4,
             "slope": true,
-            "orientation": "e"
+            "orientation": "east"
         },
         11: {
             "name": "Dirt",
@@ -59,25 +59,25 @@ GAME_DATA.tilesets.maps['woodlands'] = {
             "name": "Dirt Slope - Rising North",
             "idx": 11,
             "slope": true,
-            "orientation": "n"
+            "orientation": "north"
         },
         17: {
             "name": "Dirt Slope - Rising West",
             "idx": 12,
             "slope": true,
-            "orientation": "w"
+            "orientation": "west"
         },
         18: {
             "name": "Dirt Slope - Rising South",
             "idx": 13,
             "slope": true,
-            "orientation": "s"
+            "orientation": "south"
         },
         19: {
             "name": "Dirt Slope - Rising East",
             "idx": 14,
             "slope": true,
-            "orientation": "e"
+            "orientation": "east"
         },
         21: {
             "name": "Water",
