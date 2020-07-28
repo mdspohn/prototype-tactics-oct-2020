@@ -233,247 +233,198 @@ GAME_DATA.tilesets.equipment['shields'] = {
         }
     },
     "config": {
-        "idle": {
-            "east": {
-                "layer": -1,
-                "ox": 5,
-                "oy": 12,
-                "frames": [
-                    { "idx": 1 },
-                    { "idx": 1, "oy": 1 },
-                    { "idx": 1 }
-                ],
-                "variation": [
-                    { "idx": 1 },
-                    { "idx": 1, "oy": 1 },
-                    { "idx": 1 }
-                ]
-            },
-            "south": {
-                "layer": 1,
-                "ox": 5,
-                "oy": 12,
-                "frames": [
-                    { "idx": 0 },
-                    { "idx": 0, "oy": 1 },
-                    { "idx": 0 }
-                ],
-                "variation": [
-                    { "idx": 0 },
-                    { "idx": 0, "oy": 1 },
-                    { "idx": 0 }
-                ]
-            },
-            "west": {
-                "frames": [
-                    { "idx": 7, "ms": 125, "px": .125, "py": .125 },
-                    { "idx": 6, "ms": 250, "px": .25,  "py": .25 },
-                    { "idx": 7, "ms": 125, "px": .125, "py": .125 },
-                    { "idx": 8, "ms": 125, "px": .125, "py": .125 },
-                    { "idx": 9, "ms": 250, "px": .25,  "py": .25 },
-                    { "idx": 8, "ms": 125, "px": .125, "py": .125 }
-                ]
-            },
-            "north": {
-                "mirrored": true,
-                "frames": [
-                    { "idx": 7, "ms": 125, "px": .125, "py": .125 },
-                    { "idx": 6, "ms": 250, "px": .25,  "py": .25 },
-                    { "idx": 7, "ms": 125, "px": .125, "py": .125 },
-                    { "idx": 8, "ms": 125, "px": .125, "py": .125 },
-                    { "idx": 9, "ms": 250, "px": .25,  "py": .25 },
-                    { "idx": 8, "ms": 125, "px": .125, "py": .125 }
+        0: {
+            0: { "layer": -1, "idx": 1, "ox": 6, "oy": 10 },
+            1: { "layer": 1,  "idx": 0, "ox": 5, "oy": 12 }
+        },
+        1: {
+            0: { "layer": -1, "idx": 1, "ox": 6, "oy": 11 },
+            1: { "layer": 1,  "idx": 0, "ox": 5, "oy": 13 }
+        },
+        2: {
+            0: { "layer": -1, "idx": 1, "ox": 6, "oy": 10 },
+            1: { "layer": 1,  "idx": 0, "ox": 5, "oy": 12 }
+        },
+        3: {
+            0: { "layer": -1, "idx": 1, "ox": 5, "oy": 10 },
+            1: { "layer": 1,  "idx": 0, "ox": 4, "oy": 12 }
+        },
+        4: {
+            0: { "layer": -1, "idx": 1, "ox": 5, "oy": 11 },
+            1: { "layer": 1,  "idx": 0, "ox": 4, "oy": 13 }
+        },
+        5: {
+            0: { "layer": 1,  "idx": 0, "ox": -5, "oy": 13 },
+            1: { "layer": -1, "idx": 1, "ox": -5, "oy": 10 }
+        },
+        6: {
+            0: {"layer": 1,  "idx": 0, "ox": -5, "oy": 14 },
+            1: { "layer": -1, "idx": 1, "ox": -5, "oy": 11 }
+        },
+        7: {
+            0: { "layer": 1,  "idx": 0, "ox": -5, "oy": 13 },
+            1: { "layer": -1, "idx": 1, "ox": -5, "oy": 10 }
+        },
+        8: {
+            0: { "layer": 1,  "idx": 0, "ox": -4, "oy": 13 },
+            1: { "layer": -1, "idx": 1, "ox": -4, "oy": 10 }
+        },
+        9: {
+            0: { "layer": 1,  "idx": 0, "ox": -4, "oy": 14 },
+            1: { "layer": -1, "idx": 1, "ox": -4, "oy": 11 }
+        },
+        10: {
+            0: { "layer": -1, "idx": 1, "ox": 6, "oy": 13 },
+            1: { "layer": 1,  "idx": 0, "ox": 5, "oy": 15 }
+        },
+        11: {
+            0: { "layer": -1, "idx": 1, "ox": 6, "oy": 10 },
+            1: { "layer": 1,  "idx": 0, "ox": 5, "oy": 12 }
+        },
+        12: {
+            0: { "layer": 1,  "idx": 0, "ox": -6, "oy": 16 },
+            1: { "layer": -1, "idx": 1, "ox": -6, "oy": 13 }
+        },
+        13: {
+            0: { "layer": 1,  "idx": 0, "ox": -6, "oy": 13 },
+            1: { "layer": -1, "idx": 1, "ox": -5, "oy": 12 }
+        }
+    }
+};
 
-                ]
-            },
+GAME_DATA.tilesets.equipment['armor'] = {
+    "src": "armor.png",
+    "measurements": {
+        "sprite": {
+            "height": 32,
+            "width": 32
+        }
+    },
+    "config": {
+        0: {
+            0: { "layer": 1,  "idx": 0, "oy": 16 },
+            1: { "layer": 1,  "idx": 0, "oy": 16, "mirrored": true }
         },
-        "walk": {
-            "east": {
-                "mirrored": true,
-                "layer": -1,
-                "ox": 5,
-                "oy": 12,
-                "frames": [
-                    { "idx": 1 },
-                    { "idx": 1, "oy": 1 },
-                    { "idx": 1 }
-                ],
-                "variation": [
-                    { "idx": 1 },
-                    { "idx": 1, "oy": 1 },
-                    { "idx": 1 }
-                ]
-            },
-            "south": {
-                "mirrored": true,
-                "layer": 1,
-                "ox": 5,
-                "oy": 12,
-                "frames": [
-                    { "idx": 0 },
-                    { "idx": 0, "oy": 1 },
-                    { "idx": 0 }
-                ],
-                "variation": [
-                    { "idx": 0 },
-                    { "idx": 0, "oy": 1 },
-                    { "idx": 0 }
-                ]
-            },
-            "west": {
-                "frames": [
-                    { "idx": 7, "ms": 125, "px": .25, "py": .25, "pz": .25 },
-                    { "idx": 6, "ms": 250, "px": .5,  "py": .5,  "pz": .50 },
-                    { "idx": 7, "ms": 125, "px": .25, "py": .25, "pz": .25 }
-                ],
-                "variation": [
-                    { "idx": 8, "ms": 125, "px": .25, "py": .25, "pz": .25 },
-                    { "idx": 9, "ms": 250, "px": .5,  "py": .5,  "pz": .50 },
-                    { "idx": 8, "ms": 125, "px": .25, "py": .25, "pz": .25 }
-                ]
-            },
-            "north": {
-                "mirrored": true,
-                "frames": [
-                    { "idx": 7, "ms": 125, "px": .25, "py": .25, "pz": .25 },
-                    { "idx": 6, "ms": 250, "px": .5,  "py": .5,  "pz": .50 },
-                    { "idx": 7, "ms": 125, "px": .25, "py": .25, "pz": .25 }
-                ],
-                "variation": [
-                    { "idx": 8, "ms": 125, "px": .25, "py": .25, "pz": .25 },
-                    { "idx": 9, "ms": 250, "px": .5,  "py": .5,  "pz": .50 },
-                    { "idx": 8, "ms": 125, "px": .25, "py": .25, "pz": .25 }
-                ]
-            },
+        1: {
+            0: { "layer": 1,  "idx": 1, "oy": 16 },
+            1: { "layer": 1,  "idx": 1, "oy": 16, "mirrored": true }
         },
-        "jump-up": {
-            "east": {
-                "frames": [
-                    { "idx": 10, "ms": 500 },
-                    { "idx": 11, "ms": 100, "px": 0.3, "pz": 1 },
-                    { "idx": 11, "ms": 100, "px": 0.2 },
-                    { "idx": 11, "ms": 50,  "px": 0.1 },
-                    { "idx": 11, "ms": 100, "px": 0.2, "py": 0.25 },
-                    { "idx": 11, "ms": 100, "px": 0.2, "py": 0.75 },
-                    { "idx": 10, "ms": 150 },
-                    { "idx": 3,  "ms": 250 }
-                ]
-            },
-            "south": {
-                "mirrored": true,
-                "frames": [
-                    { "idx": 10, "ms": 500 },
-                    { "idx": 11, "ms": 100, "px": 0.3, "pz": 1, "oy": -1 },
-                    { "idx": 11, "ms": 100, "px": 0.3, "oy": -2 },
-                    { "idx": 11, "ms": 100, "px": 0.2, "py": 0.6, "oy": -4 },
-                    { "idx": 11, "ms": 100, "px": 0.2, "py": 0.4, "oy": -2 },
-                    { "idx": 10, "ms": 150 },
-                    { "idx": 3,  "ms": 250 }
-                ]
-            },
-            "west": {
-                "frames": [
-                    { "idx": 12, "ms": 500 },
-                    { "idx": 13, "ms": 100, "px": 0.3, "py": 0.6, "pz": 1, "oy": -1 },
-                    { "idx": 13, "ms": 100, "px": 0.3, "py": 0.4,          "oy": -2 },
-                    { "idx": 13, "ms": 100, "px": 0.2,                     "oy": -4 },
-                    { "idx": 13, "ms": 100, "px": 0.2,                     "oy": -2 },
-                    { "idx": 12, "ms": 150 },
-                    { "idx": 8,  "ms": 250 }
-                ]
-            },
-            "north": {
-                "mirrored": true,
-                "frames": [
-                    { "idx": 12, "ms": 500 },
-                    { "idx": 13, "ms": 100, "px": 0.3, "py": 0.6, "pz": 1, "oy": -1 },
-                    { "idx": 13, "ms": 100, "px": 0.3, "py": 0.4,          "oy": -2 },
-                    { "idx": 13, "ms": 100, "px": 0.2,                     "oy": -4 },
-                    { "idx": 13, "ms": 100, "px": 0.2,                     "oy": -2 },
-                    { "idx": 12, "ms": 150 },
-                    { "idx": 8,  "ms": 250 }
-                ]
-            }
+        2: {
+            0: { "layer": 1,  "idx": 2, "oy": 16 },
+            1: { "layer": 1,  "idx": 2, "oy": 16, "mirrored": true }
         },
-        "jump-down": {
-            "east": {
-                "frames": [
-                    { "idx": 10, "ms": 500 },
-                    { "idx": 11, "ms": 100, "px": 0.3, "oy": -4 },
-                    { "idx": 11, "ms": 100, "px": 0.3, "oy": -2 },
-                    { "idx": 11, "ms": 100, "px": 0.2, "oy": -1, "py": 0.4 },
-                    { "idx": 11, "ms": 100, "px": 0.2, "py": 0.6, "pz": 1 },
-                    { "idx": 10, "ms": 250 },
-                    { "idx": 3,  "ms": 250 }
-                ]
-            },
-            "south": {
-                "mirrored": true,
-                "frames": [
-                    { "idx": 10, "ms": 500 },
-                    { "idx": 11, "ms": 100, "px": 0.3, "oy": -4 },
-                    { "idx": 11, "ms": 100, "px": 0.3, "oy": -2 },
-                    { "idx": 11, "ms": 100, "px": 0.2, "oy": -1, "py": 0.4 },
-                    { "idx": 11, "ms": 100, "px": 0.2, "py": 0.6, "pz": 1 },
-                    { "idx": 10, "ms": 250 },
-                    { "idx": 3,  "ms": 250 }
-                ]
-            },
-            "west": {
-                "frames": [
-                    { "idx": 12, "ms": 500 },
-                    { "idx": 13, "ms": 50,  "px": 0.2, "oy": -3 },
-                    { "idx": 13, "ms": 50,  "px": 0.2, "oy": -6 },
-                    { "idx": 13, "ms": 100, "px": 0.3, "oy": -7 },
-                    { "idx": 13, "ms": 100, "px": 0.2, "oy": -7,            "pz": 0.1 },
-                    { "idx": 13, "ms": 50,  "px": 0.1, "oy": -4, "py": 0.4, "pz": 0.4 },
-                    { "idx": 13, "ms": 50,             "oy": -2, "py": 0.6, "pz": 0.5 },
-                    { "idx": 12, "ms": 250 },
-                    { "idx": 8,  "ms": 250 }
-                ]
-            },
-            "north": {
-                "mirrored": true,
-                "frames": [
-                    { "idx": 12, "ms": 500 },
-                    { "idx": 13, "ms": 50,  "px": 0.2, "oy": -3 },
-                    { "idx": 13, "ms": 50,  "px": 0.2, "oy": -6 },
-                    { "idx": 13, "ms": 100, "px": 0.3, "oy": -7 },
-                    { "idx": 13, "ms": 100, "px": 0.2, "oy": -7,             "pz": 0.1 },
-                    { "idx": 13, "ms": 50,  "px": 0.1, "oy": -4 ,"py": 0.4,  "pz": 0.4 },
-                    { "idx": 13, "ms": 50,             "oy": -2 ,"py": 0.6,  "pz": 0.5 },
-                    { "idx": 12, "ms": 250 },
-                    { "idx": 8,  "ms": 250 }
-                ]
-            }
+        3: {
+            0: { "layer": 1,  "idx": 3, "oy": 16 },
+            1: { "layer": 1,  "idx": 3, "oy": 16, "mirrored": true }
         },
-        "slash": {
-            "east": {
-                "frames": [
-                    { "idx": 20, "ms": 500, "ox": -2, "oy": -1 },
-                    { "idx": 21, "ms": 100, "ox": -1 },
-                    { "idx": 22, "ms": 500 }
-                ]
-            },
-            "south": {
-                "mirrored": true,
-                "frames": [
-                    { "idx": 20, "ms": 500, "ox": 2, "oy": -1 },
-                    { "idx": 21, "ms": 100, "ox": 1 },
-                    { "idx": 22, "ms": 500 }
-                ]
-            },
-            "west": {
-                "frames": [
+        4: {
+            0: { "layer": 1,  "idx": 4, "oy": 16 },
+            1: { "layer": 1,  "idx": 4, "oy": 16, "mirrored": true }
+        },
+        5: {
+            0: { "layer": 1,  "idx": 5, "oy": 16 },
+            1: { "layer": 1,  "idx": 5, "oy": 16, "mirrored": true }
+        },
+        6: {
+            0: { "layer": 1,  "idx": 6, "oy": 16 },
+            1: { "layer": 1,  "idx": 6, "oy": 16, "mirrored": true }
+        },
+        7: {
+            0: { "layer": 1,  "idx": 7, "oy": 16 },
+            1: { "layer": 1,  "idx": 7, "oy": 16, "mirrored": true }
+        },
+        8: {
+            0: { "layer": 1,  "idx": 8, "oy": 16 },
+            1: { "layer": 1,  "idx": 8, "oy": 16, "mirrored": true }
+        },
+        9: {
+            0: { "layer": 1,  "idx": 9, "oy": 16 },
+            1: { "layer": 1,  "idx": 9, "oy": 16, "mirrored": true }
+        },
+        10: {
+            0: { "layer": 1,  "idx": 10, "oy": 16 },
+            1: { "layer": 1,  "idx": 10, "oy": 16, "mirrored": true }
+        },
+        11: {
+            0: { "layer": 1,  "idx": 11, "oy": 16 },
+            1: { "layer": 1,  "idx": 11, "oy": 16, "mirrored": true }
+        },
+        12: {
+            0: { "layer": 1,  "idx": 12, "oy": 16 },
+            1: { "layer": 1,  "idx": 12, "oy": 16, "mirrored": true }
+        },
+        13: {
+            0: { "layer": 1,  "idx": 13, "oy": 16 },
+            1: { "layer": 1,  "idx": 13, "oy": 16, "mirrored": true }
+        }
+    }
+};
 
-                ]
-            },
-            "north": {
-                "mirrored": true,
-                "frames": [
 
-                ]
-            }
+GAME_DATA.tilesets.equipment['hair-pins'] = {
+    "src": "headgear.png",
+    "measurements": {
+        "sprite": {
+            "height": 32,
+            "width": 32
+        }
+    },
+    "config": {
+        0: {
+            0: { "layer": 1,  "idx": 0, "ox": -3, "oy": -5 },
+            1: { "layer": -1, "idx": 0, "ox": 0,  "oy": -9 }
+        },
+        1: {
+            0: { "layer": 1,  "idx": 0, "ox": -3, "oy": -4 },
+            1: { "layer": -1, "idx": 0, "ox": 0,  "oy": -8 }
+        },
+        2: {
+            0: { "layer": 1,  "idx": 0, "ox": -3, "oy": -5 },
+            1: { "layer": -1, "idx": 0, "ox": 0,  "oy": -9 }
+        },
+        3: {
+            0: { "layer": 1,  "idx": 0, "ox": -3, "oy": -5 },
+            1: { "layer": -1, "idx": 0, "ox": 0,  "oy": -9 }
+        },
+        4: {
+            0: { "layer": 1,  "idx": 0, "ox": -3, "oy": -4 },
+            1: { "layer": -1, "idx": 0, "ox": 0,  "oy": -8 }
+        },
+        5: {
+            0: { "layer": -1, "idx": 0, "ox": 5, "oy": -7 },
+            1: { "layer": 1,  "idx": 0, "ox": 3, "oy": -4 }
+        },
+        6: {
+            0: { "layer": -1, "idx": 0, "ox": 5, "oy": -6 },
+            1: { "layer": 1,  "idx": 0, "ox": 3, "oy": -3 }
+        },
+        7: {
+            0: { "layer": -1, "idx": 0, "ox": 5, "oy": -7 },
+            1: { "layer": 1,  "idx": 0, "ox": 3, "oy": -4 }
+        },
+        8: {
+            0: { "layer": -1, "idx": 0, "ox": 5, "oy": -7 },
+            1: { "layer": 1,  "idx": 0, "ox": 3, "oy": -4 }
+        },
+        9: {
+            0: { "layer": -1, "idx": 0, "ox": 5, "oy": -6 },
+            1: { "layer": 1,  "idx": 0, "ox": 3, "oy": -3 }
+        },
+        10: {
+            0: { "layer": 1,  "idx": 0, "ox": -3, "oy": -2 },
+            1: { "layer": -1, "idx": 0, "ox": 0,  "oy": -6 }
+        },
+        11: {
+            0: { "layer": 1,  "idx": 0, "ox": -3, "oy": -5 },
+            1: { "layer": -1, "idx": 0, "ox": 0,  "oy": -9 }
+        },
+        12: {
+            0: { "layer": -1, "idx": 0, "ox": 0, "oy": 0 },
+            1: { "layer": 1,  "idx": 0, "ox": 0, "oy": 0 }
+        },
+        13: {
+            0: { "layer": -1, "idx": 0, "ox": 0, "oy": 0 },
+            1: { "layer": 1,  "idx": 0, "ox": 0, "oy": 0 }
         }
     }
 };

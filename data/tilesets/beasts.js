@@ -15,7 +15,7 @@ GAME_DATA.tilesets.beasts['player'] = {
                     { "idx": 1, "ms": 250 },
                     { "idx": 2, "ms": 125 }
                 ],
-                "variation": [,
+                "variation": [
                     { "idx": 3, "ms": 125 },
                     { "idx": 4, "ms": 250 },
                     { "idx": 3, "ms": 125 }
@@ -71,7 +71,6 @@ GAME_DATA.tilesets.beasts['player'] = {
                     { "idx": 3, "ms": 125, "px": .25, "py": .25, "pz": .25 },
                     { "idx": 4, "ms": 250, "px": .5,  "py": .5,  "pz": .50 },
                     { "idx": 3, "ms": 125, "px": .25, "py": .25, "pz": .25 }
-
                 ]
             },
             "south": {

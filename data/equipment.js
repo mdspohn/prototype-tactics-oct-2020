@@ -5,43 +5,42 @@
 GAME_DATA.equipment['gladius'] = {
     "id": "gladius",
     "tileset": "one-handed",
-    "stats": {
-        "attack": 5
-    }
+    "idx_multiplier": 1,
+    "attack": 5
 };
 
 // --------------
 // HELMETS
 // -----------------------
 
-// GAME_DATA.equipment['rose'] = {
-//     "id": "rose",
-//     "tileset": "helmets",
-//     "stats": {
-//     }
-// };
+GAME_DATA.equipment['rose'] = {
+    "name": "Red Rose",
+    "id": "rose",
+    "tileset": "hair-pins",
+    "idx_multiplier": 1,
+    "resist": 1
+};
 
 // --------------
 // ARMOR
 // -----------------------
 
-// GAME_DATA.equipment['berserker-wraps'] = {
-//     "id": "berserker-wraps",
-//     "tileset": "armor",
-//     "stats": {
-//         "attack": 2,
-//         "defense": 2
-//     }
-// };
+GAME_DATA.equipment['iron-armor'] = {
+    "name": "Iron Armor",
+    "id": "iron-armor",
+    "tileset": "armor",
+    "idx_multiplier": 1,
+    "defense": 2
+};
 
 // --------------
 // ACCESSORIES
 // -----------------------
 
 GAME_DATA.equipment['buckler'] = {
+    "name": "Buckler",
     "id": "buckler",
     "tileset": "shields",
-    "stats": {
-        "block": 10
-    }
+    "idx_multiplier": 1,
+    "block": 10
 };

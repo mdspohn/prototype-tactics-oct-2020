@@ -40,7 +40,7 @@ class EquipmentManager {
     constructor() {
         this.equipment = {
             weapon: null,
-            helmet: null,
+            headgear: null,
             armor: null,
             accessory_1: null,
             accessory_2: null,
@@ -72,9 +72,10 @@ class EquipmentManager {
         this.immunities = [];
     }
 
-    set(type, data, tileset) {
-        this.equipment[type] = new Equipment(data, tileset);
-        this._addBonuses(this.equipment[type]);
+    set(type, equipment) {
+        this.equipment[type] = equipment;
+        this._addBonuses(equipment);
+        console.log(equipment)
     }
 
     remove(type) {
@@ -116,27 +117,29 @@ class EquipmentManager {
         this.speed -= ~~equipment.speed;
     }
 
-    render(layer, animation, x, y) {
+    render(layer, index, mirrored, x, y) {
         Object.values(this.equipment).forEach(item => {
             if (item === null)
                 return;
             
-            const META = item.meta[animation.id][animation.orientation] || item.meta[animation.id];
+            const META = item.meta[index]?.[~~mirrored];
             if (META === undefined || META.layer !== layer)
                 return;
 
-            const FRAME_META = META[(animation.variation ? 'variation' : 'frames')][animation.frame];
-
             Game.ctx.save();
-            Game.ctx.translate(x + ~~META.ox, y + ~~META.oy);
+            Game.ctx.translate(x + ~~META.ox + (~~META.mirrored * item.tw), y + ~~META.oy);
+    
+            if (META.mirrored)
+                Game.ctx.scale(-1, 1);
+
             Game.ctx.drawImage(
                 item.tileset,
-                (FRAME_META.idx * item.tw) % item.tileset.width,
-                Math.floor((FRAME_META.idx * item.tw) / item.tileset.width) * (item.th),
+                (META.idx * item.tw) % item.tileset.width,
+                Math.floor((META.idx * item.tw) / item.tileset.width) * (item.th),
                 item.tw,
                 item.th,
-                ~~FRAME_META.ox,
-                ~~FRAME_META.oy,
+                0,
+                0,
                 item.tw,
                 item.th 
             );

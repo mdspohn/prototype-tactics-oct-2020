@@ -36,19 +36,13 @@ class DataManager {
         return this.roster;
     }
 
+    getEquipment(id) {
+        return new Equipment(this.equipment[id], this.assets.equipment[this.equipment[id].tileset])
+    }
+
     getBeast(id, opts) {
         const entity = new Beast(Object.assign(this.beasts[id], opts), this.assets.beasts[this.beasts[id].tileset]);
-
-        if (!!opts.weapon)
-            entity.equipment.set('weapon', this.equipment[opts.weapon], this.assets.equipment[this.equipment[opts.weapon].tileset]);
-        if (!!opts.helmet)
-            entity.equipment.set('helmet', this.equipment[opts.helmet], this.assets.equipment[this.equipment[opts.helmet].tileset]);
-        if (!!opts.armor)
-            entity.equipment.set('armor', this.equipment[opts.armor], this.assets.equipment[this.equipment[opts.armor].tileset]);
-        if (!!opts.accessory_1)
-            entity.equipment.set('accessory_1', this.equipment[opts.accessory_1], this.assets.equipment[this.equipment[opts.accessory_1].tileset]);
-        if (!!opts.accessory_2)
-            entity.equipment.set('accessory_2', this.equipment[opts.accessory_2], this.assets.equipment[this.equipment[opts.accessory_2].tileset]);
+        Object.entries(opts.equipment).forEach(([ type, id ]) => entity.equipment.set(type, this.getEquipment(id)));
 
         return entity;
     }
