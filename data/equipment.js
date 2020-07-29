@@ -2,11 +2,11 @@
 // WEAPONS
 // --------------------------
 
-GAME_DATA.equipment['gladius'] = {
-    "id": "gladius",
+GAME_DATA.equipment['knife'] = {
+    "id": "knife",
     "tileset": "one-handed",
     "idx_multiplier": 1,
-    "attack": 5
+    "attack": 3
 };
 
 // --------------

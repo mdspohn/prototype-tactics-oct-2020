@@ -36,17 +36,19 @@ class CombatController {
         });
         
         document.querySelector('.strut-button').addEventListener('click', (event) => {
-            this.entities[0].moveTo(this.layout.getLocation(1,1));
-            this.entities[0].moveTo(this.layout.getLocation(1,2));
-            this.entities[0].moveTo(this.layout.getLocation(1,3));
-            this.entities[0].moveTo(this.layout.getLocation(1,4));
-            this.entities[0].moveTo(this.layout.getLocation(2,4));
-            this.entities[0].moveTo(this.layout.getLocation(2,3));
-            this.entities[0].moveTo(this.layout.getLocation(1,3));
-            this.entities[0].moveTo(this.layout.getLocation(1,2));
-            this.entities[0].moveTo(this.layout.getLocation(1,1));
-            this.entities[0].moveTo(this.layout.getLocation(1,0));
-            this.entities[0].moveTo(this.layout.getLocation(1,0), 'idle', 'east');
+            //this.entities[0].animationQueue.push(this.entities[0]._getAnimationData({ id: 'slash', orientation: 'south' }));
+            this.entities[0].animationQueue.push(this.entities[0]._getAnimationData({ id: 'slash', orientation: 'east', destination: this.layout.getLocation(1,1) }));
+            // this.entities[0].moveTo(this.layout.getLocation(1,1));
+            // this.entities[0].moveTo(this.layout.getLocation(1,2));
+            // this.entities[0].moveTo(this.layout.getLocation(1,3));
+            // this.entities[0].moveTo(this.layout.getLocation(1,4));
+            // this.entities[0].moveTo(this.layout.getLocation(2,4));
+            // this.entities[0].moveTo(this.layout.getLocation(2,3));
+            // this.entities[0].moveTo(this.layout.getLocation(1,3));
+            // this.entities[0].moveTo(this.layout.getLocation(1,2));
+            // this.entities[0].moveTo(this.layout.getLocation(1,1));
+            // this.entities[0].moveTo(this.layout.getLocation(1,0));
+            // this.entities[0].moveTo(this.layout.getLocation(1,0), 'idle', 'east');
         });
     }
 

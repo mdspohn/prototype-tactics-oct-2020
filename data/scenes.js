@@ -17,8 +17,9 @@ GAME_DATA.scenes['arena'] = {
             id: 'player',
             x: 1,
             y: 0,
-            orientation: 'east',
+            orientation: 'west',
             equipment: {
+                weapon: 'knife'
                 //accessory_1: 'buckler',
                 //headgear: 'rose',
                 //armor: 'iron-armor'
