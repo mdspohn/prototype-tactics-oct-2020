@@ -1,6 +1,6 @@
 class GameEngine {
     constructor() {
-        this.step = 1000 / 20; // update 20 times a second
+        this.step = 1000 / 20;
         this.frame = 0;
     }
 

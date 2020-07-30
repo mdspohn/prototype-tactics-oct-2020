@@ -75,7 +75,6 @@ class EquipmentManager {
     set(type, equipment) {
         this.equipment[type] = equipment;
         this._addBonuses(equipment);
-        console.log(equipment)
     }
 
     remove(type) {

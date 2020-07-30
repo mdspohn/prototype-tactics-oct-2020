@@ -1,8 +1,7 @@
 class Tileset {
     constructor(category, data) {
-        // tileset image source
-        this.src = `${ASSET_DIR}${OS_FILE_SEPARATOR}${category}${OS_FILE_SEPARATOR}${data.src}`;
         this.img = new Image();
+        this.src = `${ASSET_DIR}${OS_FILE_SEPARATOR}${category}${OS_FILE_SEPARATOR}${data.src}`;
 
         // individual tile default dimensions
         this.tw = ~~data.measurements.sprite.width;

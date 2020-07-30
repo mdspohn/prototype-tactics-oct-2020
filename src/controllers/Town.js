@@ -1,25 +1,17 @@
 class TownController {
     constructor() {
-        this.scene = null;
+        
+    }
+
+    async _load() {
+
     }
     
     update(step) {
-        this.scene.update(step);
+
     }
 
     render(delta) {
-        this.scene.render(delta);
-    }
 
-    // -----------------------
-    // Game State Transitioning
-    // -----------------------
-
-    async load() {
-        this.scene = Data.getScene('test');
-        await this.scene.load();
-    }
-
-    async initialize() {
     }
 }

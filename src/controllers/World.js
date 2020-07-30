@@ -1,31 +1,17 @@
 class WorldController {
     constructor() {
-        this.next = null;
-        this.scene = null;
+
     }
 
-    async load() {
-        this.loader = Data.getScene('test');
-        await this.next.load();
-    }
+    async _load() {
 
-    async initialize() {
-        this.scene = this.next;
     }
     
     update(step) {
-        this.scene.update(step);
+
     }
 
     render(delta) {
-        this.scene.render(delta);
-    }
 
-    // -----------------------
-    // Helper Functions
-    // -----------------------
-
-    getMap() {
-        return this.scene.map;
     }
 }

@@ -10,6 +10,9 @@ class Camera {
         this.adjustmentErrorX = 0;
         this.adjustmentErrorY = 0;
 
+        window.addEventListener('resize', () => this._resizeCanvas(canvas));
+        window.addEventListener('fullscreenchange', () => this._resizeCanvas(canvas));
+        
         this._resizeCanvas(canvas);
     }
 

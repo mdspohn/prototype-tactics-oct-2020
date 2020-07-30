@@ -9,15 +9,15 @@ GAME_DATA.tilesets.equipment['one-handed'] = {
     "config": {
         20: {
             0: { "layer": -1,  "idx": 0, "ox": -14, "oy": 3 },
-            1: { "layer": 1,  "idx": 0, "ox": -7, "oy": 13, "mirrored": true }
+            1: { "layer": -1,  "idx": 0, "ox": 14, "oy": 3, "mirrored": true }
         },
         21: {
             0: { "layer": -1, "idx": 1, "ox": 11, "oy": 11 },
-            1: { "layer": 1, "idx": 0, "ox": 3, "oy": 11 }
+            1: { "layer": -1, "idx": 1, "ox": -11, "oy": 11, "mirrored": true }
         },
         22: {
             0: { "layer": -1, "idx": 1, "ox": 15, "oy": 13 },
-            1: { "layer": 1, "idx": 0, "ox": 4, "oy": 11 }
+            1: { "layer": -1, "idx": 1, "ox": -15, "oy": 13, "mirrored": true }
         }
     }
 };

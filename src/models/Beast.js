@@ -22,6 +22,12 @@ class Beast {
         this.jump = 2;
         this.speed = 50;
 
+        // ---------------------
+        // COMBAT STATE
+        // ----------------------
+
+        this.energy = 0;
+
         // ----------------------
         // EQUIPMENT
         // ---------------------------
@@ -64,10 +70,6 @@ class Beast {
 
         // current animation
         this.animation = this._getDefaultAnimation();
-    }
-
-    async _prepare() {
-        // reset beast
     }
 
     _getDefaultAnimation() {
@@ -193,7 +195,7 @@ class Beast {
             animation.id = this._setMovementType(animation, START, END);
         
         Object.assign(animation, this._verifyAnimation(animation.id, animation.orientation));
-        animation.variation &= !PREVIOUS?.variation;
+        animation.variation &= !PREVIOUS?.variation && ['walk', 'idle'].includes(PREVIOUS?.id);
 
         if (END !== START)
             this._setMovementData(animation, START, END);

@@ -46,6 +46,9 @@ class Decoration {
     }
 
     update(step, location) {
+        if (!this.tiles[location.x] || !this.tiles[location.x][location.y])
+            return;
+            
         this.tiles[location.x][location.y].forEach(tile => {
             if (this.meta[tile.id].idx !== undefined)
                 return;
