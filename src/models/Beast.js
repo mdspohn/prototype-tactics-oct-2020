@@ -5,14 +5,15 @@ class Beast {
         // STATS
         // ----------------------------
 
+        this.id = config.id;
         this.level = 1;
         this.experience = 0;
 
-        this.health  = 1;
+        this.health  = Math.max(~~config.stats.health, 1);
         this.attack  = 1;
-        this.defense = 0;
+        this.defense = 1;
         this.spirit  = 1;
-        this.resist  = 0;
+        this.resist  = 1;
 
         this.tp = 0;
 
@@ -20,7 +21,7 @@ class Beast {
         this.evasion = 0;
         this.move = 5;
         this.jump = 2;
-        this.speed = 50;
+        this.speed = Math.max(~~config.stats.speed, 1);
 
         // ---------------------
         // COMBAT STATE
@@ -72,11 +73,21 @@ class Beast {
         this.animation = this._getDefaultAnimation();
     }
 
+    reset(location) {
+        this.energy = 0;
+        this.location = location;
+    }
+
+    startTurn() {
+        console.log(this.id, this.energy)
+        console.log('turn begin')
+    }
+
     _getDefaultAnimation() {
        return this._getAnimationData(this._verifyAnimation('idle', this.orientation));
     }
 
-    _verifyAnimation(id, orientation, variation = false) {
+    _verifyAnimation(id, orientation) {
         const animation = new Object();
         animation.id = id;
         animation.orientation = this.meta[id][orientation] !== undefined ? orientation : this.orientation;

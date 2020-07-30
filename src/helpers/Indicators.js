@@ -1,4 +1,4 @@
-class TileMarkers {
+class CombatIndicators {
     constructor() {
         this.img = new Image();
         this.src = `${ASSET_DIR}${OS_FILE_SEPARATOR}miscellaneous${OS_FILE_SEPARATOR}tile-markers.png`;

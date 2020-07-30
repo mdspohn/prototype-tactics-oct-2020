@@ -42,7 +42,8 @@ class DataManager {
 
     getBeast(id, opts) {
         const entity = new Beast(Object.assign(this.beasts[id], opts), this.assets.beasts[this.beasts[id].tileset]);
-        Object.entries(opts.equipment).forEach(([ type, id ]) => entity.equipment.set(type, this.getEquipment(id)));
+        if (opts.equipment !== undefined)
+            Object.entries(opts.equipment).forEach(([ type, id ]) => entity.equipment.set(type, this.getEquipment(id)));
 
         return entity;
     }

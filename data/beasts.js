@@ -2,7 +2,8 @@ GAME_DATA.beasts['slime'] = {
     "id": "slime",
     "tileset": "slime",
     "stats": {
-        "movement": 5
+        "movement": 5,
+        "speed": 52
     },
 };
 
@@ -19,6 +20,7 @@ GAME_DATA.beasts['player'] = {
     "species": "humanoid",
     "tileset": "player",
     "stats": {
-        "movement": 5
+        "movement": 5,
+        "speed": 55
     }
 };

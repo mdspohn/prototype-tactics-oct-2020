@@ -46,7 +46,7 @@ class Decoration {
     }
 
     update(step, location) {
-        if (!this.tiles[location.x] || !this.tiles[location.x][location.y])
+        if (this.tiles[location.x]?.[location.y] === undefined)
             return;
             
         this.tiles[location.x][location.y].forEach(tile => {
@@ -60,7 +60,7 @@ class Decoration {
     }
 
     render(delta, location) {
-        if (!this.tiles[location.x] || !this.tiles[location.x][location.y])
+        if (this.tiles[location.x]?.[location.y] === undefined)
             return;
 
         const x = Game.camera.position.x + location.posX() - ((this.tw - location.tw) / 2),

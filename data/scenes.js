@@ -14,6 +14,12 @@ GAME_DATA.scenes['test'] = {
                 //armor: 'iron-armor'
             }
         },
+        {
+            id: 'slime',
+            x: 2,
+            y: 5,
+            orientation: 'south'
+        }
     ]
 };
 

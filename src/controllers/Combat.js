@@ -10,15 +10,18 @@ class CombatController {
         this.layout = null;
 
         // -------------------
-        // TURN ORDER
+        // COMBAT STATE
         // -----------------------
 
-        this.active = null;
-        this.turns = [];
+        this.turns = new TurnManager();
+        this.indicators = new CombatIndicators();
+
+        Events.listen('turn-order', (data) => console.log(data), true);
+        Events.listen('turn-end', () => this.nextTurn());
     }
 
     async _load() {
-        //await this.markers._load();
+        await this.indicators._load();
     }
 
     async _prepare(scene) {
@@ -27,19 +30,29 @@ class CombatController {
         this.entities = scene.entities;
         this.layout = new Layout(this.map, this.entities);
         this.entities.forEach(entity => {
-            entity.energy = 0;
-            entity.location = this.layout.getLocation(entity.x(), entity.y());
+            entity.reset(this.layout.getLocation(entity.initialX, entity.initialY));
         });
     }
 
     async _initialize() {
-        //this.turns = new TurnManager(this.entities);
+        this.turns.use(this.entities);
+        // set initial settings before game swaps to rendering this controller
     }
 
     start() {
         Game.camera.toCenter(Game.canvas, this.layout);
-        //this.turns.next();
+        this.nextTurn();
     }
+
+    nextTurn() {
+        this.turns.next();
+        console.log(this.turns.active)
+        this.turns.active.startTurn();
+    }
+
+    // -------------------
+    // ENGINE LOOP
+    // --------------------------
     
     update(step) {
         this.layout.forEach(location => {
