@@ -9,19 +9,19 @@ class Beast {
         this.level = 1;
         this.experience = 0;
 
-        this.health  = Math.max(~~config.stats.health, 1);
-        this.attack  = 1;
-        this.defense = 1;
-        this.spirit  = 1;
-        this.resist  = 1;
+        this.health  = Math.max(~~config.stats.health,  1);
+        this.attack  = Math.max(~~config.stats.attack,  1);
+        this.defense = Math.max(~~config.stats.defense, 0);
+        this.spirit  = Math.max(~~config.stats.spirit,  1);
+        this.resist  = Math.max(~~config.stats.resist,  0);
 
         this.tp = 0;
 
-        this.block = 0;
-        this.evasion = 0;
-        this.move = 5;
-        this.jump = 2;
-        this.speed = Math.max(~~config.stats.speed, 1);
+        this.block   = Math.max(~~config.stats.block,   0);
+        this.evasion = Math.max(~~config.stats.evasion, 0);
+        this.move    = Math.max(~~config.stats.move,  1);
+        this.jump    = Math.max(~~config.stats.jump,  1);
+        this.speed   = Math.max(~~config.stats.speed, 1);
 
         // ---------------------
         // COMBAT STATE
@@ -71,16 +71,6 @@ class Beast {
 
         // current animation
         this.animation = this._getDefaultAnimation();
-    }
-
-    reset(location) {
-        this.energy = 0;
-        this.location = location;
-    }
-
-    startTurn() {
-        console.log(this.id, this.energy)
-        console.log('turn begin')
     }
 
     _getDefaultAnimation() {
@@ -353,8 +343,67 @@ class Beast {
 // Entity commands and interactions
 // ------------------------
 
+Beast.prototype.reset = function(location) {
+    this.energy = 0;
+    this.location = location;
+};
+
 Beast.prototype.moveTo = function(destination, animation_id = null, orientation = null) {
     this.animationQueue.push(this._getAnimationData({ id: animation_id, orientation, destination }));
+};
+
+Beast.prototype.walkTo = function(destination, layout) {
+    let x = destination.x,
+        y = destination.y;
+
+    const moves = [];
+
+    while(this.range?.[x]?.[y]?.px) {
+        moves.unshift(layout.getLocation(x, y));
+        let newX = this.range[x][y].px,
+            newY = this.range[x][y].py;
+        
+        x = newX;
+        y = newY;
+    }
+
+    moves.forEach(move => this.moveTo(move));
+    this.range = null;
+};
+
+Beast.prototype.getRange = function(layout, entities) {
+    const range = new Object();
+        
+    const addTile = (x, y, px, py, steps = 0) => {
+        if (layout.getLocation(x, y) === undefined)
+            return;
+        
+        if (!entities.some(entity => entity != this && entity.x() == x && entity.y() == y)) {
+            range[x] = range[x] || new Object();
+
+            if (range[x][y] != undefined && range[x][y].steps <= steps)
+                return;
+    
+            range[x][y] = {
+                px,
+                py,
+                steps,
+                showMarker: x != this.x() || y != this.y()
+            };
+    
+            if (steps >= this.move)
+                return;
+            
+            addTile(Math.max(x - 1, 0), y, x, y, (steps + 1));
+            addTile(x, Math.min(y + 1, layout.structure[x].length - 1), x, y, (steps + 1));
+            addTile(Math.min(x + 1, layout.structure.length - 1), y, x, y, (steps + 1));
+            addTile(x, Math.max(y - 1, 0), x, y, (steps + 1));
+        }
+    };
+    
+    addTile(this.x(), this.y(), void 0, void 0);
+    this.range = range;
+    return range;
 };
 
 

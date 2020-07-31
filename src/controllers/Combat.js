@@ -1,3 +1,13 @@
+class CombatInterface {
+    constructor() {
+
+    }
+
+    updateTurnOrder(order) {
+        console.table(order.new);
+    }
+}
+
 class CombatController {
     constructor() {
         // ----------------
@@ -15,8 +25,9 @@ class CombatController {
 
         this.turns = new TurnManager();
         this.indicators = new CombatIndicators();
+        this.interface = new CombatInterface();
 
-        Events.listen('turn-order', (data) => console.log(data), true);
+        Events.listen('turn-order', data => this.interface.updateTurnOrder(data), true);
         Events.listen('turn-end', () => this.nextTurn());
     }
 
@@ -29,12 +40,10 @@ class CombatController {
         this.decoration = scene.decoration;
         this.entities = scene.entities;
         this.layout = new Layout(this.map, this.entities);
-        this.entities.forEach(entity => {
-            entity.reset(this.layout.getLocation(entity.initialX, entity.initialY));
-        });
     }
 
     async _initialize() {
+        this.entities.forEach(entity =>  entity.reset(this.layout.getLocation(entity.initialX, entity.initialY)));
         this.turns.use(this.entities);
         // set initial settings before game swaps to rendering this controller
     }
@@ -46,8 +55,7 @@ class CombatController {
 
     nextTurn() {
         this.turns.next();
-        console.log(this.turns.active)
-        this.turns.active.startTurn();
+        this.indicators.display('movement', this.turns.active.getRange(this.layout, this.entities));
     }
 
     // -------------------
@@ -60,19 +68,20 @@ class CombatController {
             this.decoration.update(step, location);
         });
         this.entities.forEach(entity => entity.update(step));
+        this.indicators.update(step);
     }
 
     render(delta) {
         this.layout.forEach(location => {
             this.map.render(delta, location);
-            //this.markers.render(delta, location);
+            this.indicators.render(delta, location);
             this.decoration.render(delta, location);
             location.getOccupants().forEach(occupant => occupant.render(delta, location));
         });
     }
 
     onClick(event) {
-
+        this.turns.active.walkTo(Game.camera.windowToTile(event.x, event.y, this.layout), this.layout);
     }
 
     onRightClick(event) {

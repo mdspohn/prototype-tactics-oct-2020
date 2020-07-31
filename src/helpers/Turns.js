@@ -35,7 +35,7 @@ class TurnManager {
                       p_energy = energy - (entity.speed * 1);
                 
                 if (energy >= 100 && Math.floor(energy / 100) > Math.floor(p_energy / 100))
-                    energized.push({ energy: energy % 100, entity });
+                    energized.push({ energy: (energy % 100), entity });
             });
 
             energized.sort((a, b) => (b.energy % 100) - (a.energy % 100));

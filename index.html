@@ -5,10 +5,238 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" href="main.css" />
+    <style type="text/css">
+      #help {
+        width: 100%;
+        padding: 10px 25px;
+        min-height: 20px;
+        background-color: rgba(0,0,0,0.2);
+        position: relative;
+        vertical-align: middle;
+      }
+
+      #help img {
+        height: 30px;
+        width: 30px;
+        vertical-align: top;
+        margin-right: 15px;
+        margin-top: 1px;
+        image-rendering: pixelated;
+        image-rendering: -moz-crisp-edges;
+        image-rendering: crisp-edges;
+      }
+
+      #elevation {
+        position: absolute;
+        right: 20px;
+        top: 75px;
+      }
+
+      #elevation > span:first-child {
+        vertical-align: top;
+        position: relative;
+        top: 5px;
+        text-transform: uppercase;
+      }
+      #elevation > span:last-child{
+        font-size: 100px;
+        position: relative;
+        top: -20px;
+        padding-left: 20px;
+      }
+
+      #menu {
+        margin: 15px 20px;
+        width: 200px;
+      }
+
+      #menu > div {
+        padding: 10px;
+        margin-bottom: 5px;
+      }
+
+      #turns {
+        width: 740px;
+        position: absolute;
+        background: rgb(0,0,0);
+        background: linear-gradient(90deg, rgba(0,0,0,0.3981967787114846) 30%, rgba(0,0,0,0) 99%);
+        height: 30px;
+        bottom: 0;
+        padding: 20px;
+      }
+
+      .dim {
+        opacity: 0.4;
+      }
+
+      
+      .unit {
+        position: absolute;
+        bottom: 100px;
+        left: 20px;
+      }
+      .unit.target {
+        right: 20px;
+        left: initial;
+        text-align: right;
+      }
+      .unit > div {
+        float: left;
+      }
+      .unit > div:last-child {
+        margin-left: 25px;
+      }
+      .unit .tile {
+        position: relative;
+        width: 128px;
+        height: 200px;
+        background-image: url('assets/miscellaneous/combat-ui-tiles.png');
+        background-repeat: no-repeat;
+        background-size: auto 100%;
+        image-rendering: pixelated;
+        image-rendering: -moz-crisp-edges;
+        image-rendering: crisp-edges;
+        overflow: hidden;
+      }
+
+      .unit .tile .unit-sprite {
+        position: absolute;
+        display: block;
+        left: 480px;
+        top: calc(100% + 65px);
+        transform: scale(4);
+        image-rendering: pixelated;
+        image-rendering: -moz-crisp-edges;
+        image-rendering: crisp-edges;
+      }
+
+      .unit.target .tile .unit-sprite {
+        transform: scale(-4, 4);
+        left: initial;
+        right: 480px;
+      }
+
+      .unit .info {
+        position: relative;
+        top: 100px;
+      }
+
+      .unit .info .statistics {
+        font-size: 24px;
+      }
+      .unit .info .statistics .stat {
+        display: inline-block;
+        margin-right: 20px;
+        width: 150px;
+        text-align: right;
+      }
+      .unit .info .statistics .stat .stat-text {
+        width: 100%;
+        position: relative;
+      }
+      .unit .info .statistics .stat .stat-text > span:first-child {
+        position: absolute;
+        left: 0;
+        bottom: 4px;
+      }
+      .unit .info .statistics .stat:last-child {
+        margin-right: 0;
+      }
+      .unit .info .statistics .stat-current {
+        font-size: 30px;
+      }
+      .unit .info .statistics .stat .stat-bar {
+        width: calc(100% - 2px);
+        margin-left: -1px;
+        border: 1px solid rgba(0,0,0,0.7);
+        background-color: rgba(0,0,0,0.2);
+        height: 15px;
+        position: relative;
+      }
+      .unit .info .statistics .stat .stat-bar-current {
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        background-color: rgba(0, 186, 219);
+      }
+    
+    </style>
   </head>
   <body>
     <canvas id="canvas" width="480" height="270"></canvas>
-    <div style="position: absolute; top: 15px; right: 20px; z-index: 100; font-size: 24px; font-family: monospace;"><span id="fps-counter">--</span> FPS</div>
+    <section id="combat-ui">
+      <div id="help">
+        <div><img src="help-icon.png" />Click on a tile to move. Right-click to cancel.</div>
+        <div style="position: absolute; top: 10px; right: 70px;"><span id="fps-counter">60</span> FPS</div>
+      </div>
+      <div id="elevation"><span>Height</span><span>2</span></div>
+      <div id="menu">
+        <div>Move</div>
+        <div>Attack</div>
+        <div>Skills</div>
+        <div>End Turn</div>
+      </div>
+      <div class="unit">
+        <div class="tile grass">
+          <img class="unit-sprite player" src="assets/beasts/player.png"/>
+        </div>
+        <div class="info">
+          <div class="name"><span class="dim">Lv.03</span> Street Lad</div>
+          <div class="statistics">
+            <div class="stat">
+              <div class="stat-text">
+                <span class="stat-name">HP</span>
+                <span class="stat-current"><span class="dim">0</span>79</span>
+                <span class="stat-divider dim">/</span>
+                <span class="stat-maximum dim">154</span>
+              </div>
+              <div class="stat-bar hp"><div class="stat-bar-current" style="width: 49%"></div></div>
+            </div>
+            <div class="stat">
+              <div class="stat-text">
+                <span class="stat-name">TP</span>
+                <span class="stat-current">232</span>
+                <span class="stat-divider dim">/</span>
+                <span class="stat-maximum dim">300</span>
+              </div>
+              <div class="stat-bar hp"><div class="stat-bar-current" style="width: 70%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="unit target">
+        <div class="info">
+          <div class="name"><span class="dim">Lv.03</span> Street Lad</div>
+          <div class="statistics">
+            <div class="stat">
+              <div class="stat-text">
+                <span class="stat-name">HP</span>
+                <span class="stat-current"><span class="dim">0</span>79</span>
+                <span class="stat-divider dim">/</span>
+                <span class="stat-maximum dim">154</span>
+              </div>
+              <div class="stat-bar hp"><div class="stat-bar-current" style="width: 49%"></div></div>
+            </div>
+            <div class="stat">
+              <div class="stat-text">
+                <span class="stat-name">TP</span>
+                <span class="stat-current">232</span>
+                <span class="stat-divider dim">/</span>
+                <span class="stat-maximum dim">300</span>
+              </div>
+              <div class="stat-bar hp"><div class="stat-bar-current" style="width: 70%"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="tile grass">
+          <img class="unit-sprite player" src="assets/beasts/player.png"/>
+        </div>
+      </div>
+      <div id="turns">Upcoming Turns &mdash;</div>
+    </section>
+    
   </body>
 
   <script type="text/javascript">

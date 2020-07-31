@@ -35,12 +35,16 @@ input, textarea ,select {
 ----------------------------------------------- */
 
 @font-face {
-    font-family: Unica;
-    src: url("UnicaOne-Regular.ttf");
+    font-family: Compass;
+    src: url("CompassPro.ttf");
 }
 @font-face {
-    font-family: Font_3;
-    src: url("font_3.ttf");
+    font-family: Equipment;
+    src: url("EquipmentPro.ttf");
+}
+@font-face {
+    font-family: Matchup;
+    src: url("MatchupPro.ttf");
 }
 
 body {
@@ -48,9 +52,9 @@ body {
     width: 100vw;
     overflow: hidden;
     position: relative;
-    font-family: Unica;
-    font-size: 14px;
-    word-spacing: 0.1em;
+    font-family: Equipment;
+    word-spacing: -1px;
+    font-size: 30px;
     background-color: #111111;
     color: #FFFFFF;
     background: url('assets/backgrounds/bg.png') no-repeat;
@@ -62,6 +66,38 @@ body {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    text-shadow: 1px  1px 0 #000,
+                -1px  1px 0 #000,
+                 1px -1px 0 #000,
+                -1px -1px 0 #000,
+                 0px  1px 0 #000,
+                 0px -1px 0 #000,
+                -1px  0px 0 #000,
+                 1px  0px 0 #000;
+    /* text-shadow: 1px  1px 0 #000,
+                -1px  1px 0 #000,
+                 1px -1px 0 #000,
+                -1px -1px 0 #000,
+                 0px  1px 0 #000,
+                 0px -1px 0 #000,
+                -1px  0px 0 #000,
+                 1px  0px 0 #000,
+                 2px  2px 0 #000,
+                -2px  2px 0 #000,
+                 2px -2px 0 #000,
+                -2px -2px 0 #000,
+                 0px  2px 0 #000,
+                 0px -2px 0 #000,
+                -2px  0px 0 #000,
+                 2px  0px 0 #000,
+                 1px  2px 0 #000,
+                -1px  2px 0 #000,
+                 1px -2px 0 #000,
+                -1px -2px 0 #000,
+                 2px  1px 0 #000,
+                -2px  1px 0 #000,
+                 2px -1px 0 #000,
+                -2px -1px 0 #000; */
 }
 
 canvas {
