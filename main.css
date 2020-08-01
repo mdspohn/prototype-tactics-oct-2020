@@ -35,16 +35,8 @@ input, textarea ,select {
 ----------------------------------------------- */
 
 @font-face {
-    font-family: Compass;
-    src: url("CompassPro.ttf");
-}
-@font-face {
     font-family: Equipment;
     src: url("EquipmentPro.ttf");
-}
-@font-face {
-    font-family: Matchup;
-    src: url("MatchupPro.ttf");
 }
 
 body {
@@ -74,38 +66,269 @@ body {
                  0px -1px 0 #000,
                 -1px  0px 0 #000,
                  1px  0px 0 #000;
-    /* text-shadow: 1px  1px 0 #000,
-                -1px  1px 0 #000,
-                 1px -1px 0 #000,
-                -1px -1px 0 #000,
-                 0px  1px 0 #000,
-                 0px -1px 0 #000,
-                -1px  0px 0 #000,
-                 1px  0px 0 #000,
-                 2px  2px 0 #000,
-                -2px  2px 0 #000,
-                 2px -2px 0 #000,
-                -2px -2px 0 #000,
-                 0px  2px 0 #000,
-                 0px -2px 0 #000,
-                -2px  0px 0 #000,
-                 2px  0px 0 #000,
-                 1px  2px 0 #000,
-                -1px  2px 0 #000,
-                 1px -2px 0 #000,
-                -1px -2px 0 #000,
-                 2px  1px 0 #000,
-                -2px  1px 0 #000,
-                 2px -1px 0 #000,
-                -2px -1px 0 #000; */
+ /* -------------
+ // **Add** to text-shadow for 2px thick text border
+ // ------------------------------
+     2px  2px 0 #000,
+    -2px  2px 0 #000,
+     2px -2px 0 #000,
+    -2px -2px 0 #000,
+     0px  2px 0 #000,
+     0px -2px 0 #000,
+    -2px  0px 0 #000,
+     2px  0px 0 #000,
+     1px  2px 0 #000,
+    -1px  2px 0 #000,
+     1px -2px 0 #000,
+    -1px -2px 0 #000,
+     2px  1px 0 #000,
+    -2px  1px 0 #000,
+     2px -1px 0 #000,
+    -2px -1px 0 #000; 
+*/
 }
 
 canvas {
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+.interface {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+}
+
+.dim {
+  opacity: 0.4;
+}
+
+/* ------------------------------------
+// -------- GAMEPLAY CANVAS -----------
+// ----------------------------------*/
+
+#canvas {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
+}
+
+/* ------------------------------------
+// -------- COMBAT INTERFACE ----------
+// ----------------------------------*/
+
+/* ---------- Header Toolbar ----------------- */
+
+#combat__header {
+    width: calc(100% - 170px);
+    height: 50px;
+    position: relative;
+    padding: 0 100px 0 70px;
+    line-height: 50px;
+    background-color: rgba(0,0,0,0.2);
+    overflow: hidden;
+}
+
+#ch__suggestions {
+    display: block;
+    position: relative;
+}
+
+#ch__suggestions.tip:before {
+    content: '';
+    display: block;
+    width: 30px;
+    height: 30px;
+    position: absolute;
+    left: -45px;
+    top: 10px;
+    background-image: url("help-icon.png");
+    background-repeat: none;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+#ch__settings {
+    height: 100%;
+    position: absolute;
+    left: calc(100% - 100px);
+    top: 0;
+    text-align: right;
+}
+
+/* ---------- Actions Menu ------------------- */
+
+#combat__menu {
+    margin: 15px;
+    width: 200px;
+}
+  
+#cm__root > div {
+    padding: 10px;
+    margin-bottom: 5px;
+}
+
+/* ---------- Location Information ----------- */
+
+#combat__location {
+    position: absolute;
+    right: 20px;
+    top: 75px;
+}
+
+#cl__elevation > span:first-child {
+    position: relative;
+    top: 5px;
+    vertical-align: top;
+    text-transform: uppercase;
+}
+
+#cl__elevation > #cle__count {
+    font-size: 100px;
+    position: relative;
+    top: -20px;
+    padding-left: 20px;
+}
+
+/* ---------- Active Unit -------------------- */
+/* ---------- Target Unit -------------------- */
+
+.unit {
+    position: absolute;
+    bottom: 100px;
+}
+
+.unit#combat__active {
+    left: 20px;
+}
+
+.unit#combat__target {
+    right: 20px;
+    text-align: right;
+}
+
+.unit-canvas, .unit-information {
+    display: inline-block;
+    vertical-align: bottom;
+}
+
+.unit#combat__active .unit-canvas, .unit#combat__target .unit-information {
+    margin-right: 25px;
+}
+
+.unit-canvas {
+    width: 128px;
+    height: 192px;
+}
+
+.unit-information {
+    position: relative;
+    /*top: 100px;*/
+    bottom: 0px;
+}
+
+.unit-stats > div {
+    display: inline-block;
+    width: 150px;
+    margin-right: 20px;
+    font-size: 24px;
+    text-align: right;
+}
+.unit-stats > div:last-child {
+    margin-right: 0;
+}
+
+.unit-stats > div > div {
+    position: relative;
+    width: 100%;
+}
+
+/* Stat Name */
+.unit-stats > div > div:first-child > span:first-child {
+    position: absolute;
+    left: 0;
+    bottom: 4px;
+}
+
+/* Stat Current Value */
+.unit-stats > div > div:first-child > span:nth-child(2) {
+    font-size: 30px;
+}
+
+.unit-stats .bar {
+    position: relative;
+    width: calc(100% - 2px);
+    height: 15px;
+    margin-left: -1px;
+    border: 1px solid rgba(0,0,0,0.7);
+    background-color: rgba(0,0,0,0.2);
+}
+
+.unit-stats .bar > div {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background-color: rgba(0, 186, 219);
+}
+
+/* ---------- Turn Order --------------------- */
+
+#combat__order {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 740px;
+    height: 70px;
+    padding: 0 20px;
+    line-height: 70px;
+    background: rgba(0,0,0,0.5);
+    background: linear-gradient(90deg, rgba(0,0,0,0.3981967787114846) 30%, rgba(0,0,0,0) 99%);
+}
+
+#combat__order canvas {
+    position: absolute;
+    left: 250px;
+    bottom: 0;
+    width: 320px;
+    height: 96px;
+}
+
+/* ---------- Battlefield Condtions ---------- */
+
+#combat__conditions {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    height: 70px;
+    padding: 0 20px;
+    line-height: 70px;
+    background: rgba(0,0,0,0.5);
+    background: linear-gradient(90deg, rgba(0,0,0,0) 1%, rgba(0,0,0,0.3981967787114846) 70%);
+}
+
+#cc__moon {
+    padding-left: 42px;
+    position: relative;
+}
+
+#cc__moon:before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 32px;
+    height: 32px;
+    background-image: url('moon.png');
+    background-repeat: no-repeat;
     image-rendering: pixelated;
     image-rendering: -moz-crisp-edges;
     image-rendering: crisp-edges;

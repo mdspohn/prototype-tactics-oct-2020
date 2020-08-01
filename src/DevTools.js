@@ -1,6 +1,6 @@
 class DevTools {
     constructor() {
-        this.FPS_COUNTER = document.getElementById('fps-counter');
+        this.FPS_COUNTER = document.getElementById('chsfps__count');
 
         this.frames = 0;
         this.elapsed = 0;

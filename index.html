@@ -5,265 +5,142 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" href="main.css" />
-    <style type="text/css">
-      #combat-ui {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
-      }
-      #help {
-        width: 100%;
-        padding: 10px 25px;
-        min-height: 20px;
-        background-color: rgba(0,0,0,0.2);
-        position: relative;
-        vertical-align: middle;
-      }
-
-      #help img {
-        height: 30px;
-        width: 30px;
-        vertical-align: top;
-        margin-right: 15px;
-        margin-top: 1px;
-        image-rendering: pixelated;
-        image-rendering: -moz-crisp-edges;
-        image-rendering: crisp-edges;
-      }
-
-      #elevation {
-        position: absolute;
-        right: 20px;
-        top: 75px;
-      }
-
-      #elevation > span:first-child {
-        vertical-align: top;
-        position: relative;
-        top: 5px;
-        text-transform: uppercase;
-      }
-      #elevation > span:last-child{
-        font-size: 100px;
-        position: relative;
-        top: -20px;
-        padding-left: 20px;
-      }
-
-      #menu {
-        margin: 15px 20px;
-        width: 200px;
-      }
-
-      #menu > div {
-        padding: 10px;
-        margin-bottom: 5px;
-      }
-
-      #turns {
-        width: 740px;
-        height: 30px;
-        padding: 20px 20px 25px;
-        position: absolute;
-        bottom: 0;
-        background: rgba(0,0,0,0.5);
-        background: linear-gradient(90deg, rgba(0,0,0,0.3981967787114846) 30%, rgba(0,0,0,0) 99%);
-      }
-
-      .dim {
-        opacity: 0.4;
-      }
-
-      
-      .unit {
-        position: absolute;
-        bottom: 100px;
-        left: 20px;
-      }
-      .unit.target {
-        right: 20px;
-        left: initial;
-        text-align: right;
-      }
-      .unit > div {
-        float: left;
-      }
-      .unit > div:last-child {
-        margin-left: 25px;
-      }
-      .unit .tile {
-        position: relative;
-        width: 128px;
-        height: 200px;
-        background-image: url('assets/miscellaneous/combat-ui-tiles.png');
-        background-repeat: no-repeat;
-        background-size: auto 100%;
-        image-rendering: pixelated;
-        image-rendering: -moz-crisp-edges;
-        image-rendering: crisp-edges;
-        overflow: hidden;
-      }
-
-      .unit .tile .unit-sprite {
-        position: absolute;
-        display: block;
-        left: 480px;
-        top: calc(100% + 65px);
-        transform: scale(4);
-        image-rendering: pixelated;
-        image-rendering: -moz-crisp-edges;
-        image-rendering: crisp-edges;
-      }
-
-      .unit.target .tile .unit-sprite {
-        transform: scale(-4, 4);
-        left: initial;
-        right: 480px;
-      }
-
-      .unit .info {
-        position: relative;
-        top: 100px;
-      }
-
-      .unit .info .statistics {
-        font-size: 24px;
-      }
-      .unit .info .statistics .stat {
-        display: inline-block;
-        margin-right: 20px;
-        width: 150px;
-        text-align: right;
-      }
-      .unit .info .statistics .stat .stat-text {
-        width: 100%;
-        position: relative;
-      }
-      .unit .info .statistics .stat .stat-text > span:first-child {
-        position: absolute;
-        left: 0;
-        bottom: 4px;
-      }
-      .unit .info .statistics .stat:last-child {
-        margin-right: 0;
-      }
-      .unit .info .statistics .stat-current {
-        font-size: 30px;
-      }
-      .unit .info .statistics .stat .stat-bar {
-        width: calc(100% - 2px);
-        margin-left: -1px;
-        border: 1px solid rgba(0,0,0,0.7);
-        background-color: rgba(0,0,0,0.2);
-        height: 15px;
-        position: relative;
-      }
-      .unit .info .statistics .stat .stat-bar-current {
-        display: block;
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 100%;
-        background-color: rgba(0, 186, 219);
-      }
-
-      #objective {
-        position: absolute;
-        bottom: 0;
-        right: 0;
-        background: rgba(0,0,0,0.5);
-        background: linear-gradient(90deg, rgba(0,0,0,0) 1%, rgba(0,0,0,0.3981967787114846) 70%);
-        height: 30px;
-        padding: 20px 20px 25px;
-      }
-
-      #objective img {
-        height: 30px;
-        width: 30px;
-        vertical-align: top;
-        margin-top: 3px;
-        image-rendering: pixelated;
-        image-rendering: -moz-crisp-edges;
-        image-rendering: crisp-edges;
-      }
-    
-    </style>
   </head>
   <body>
+
+    <!-------------------------------->
+    <!------- GAMEPLAY CANVAS -------->
+    <!-------------------------------->
+
     <canvas id="canvas" width="480" height="270"></canvas>
-    <section id="combat-ui">
-      <div id="help">
-        <div><img src="help-icon.png" />Click on a tile to move. Right-click to cancel.</div>
-        <div style="position: absolute; top: 10px; right: 70px;"><span id="fps-counter">60</span> FPS</div>
-      </div>
-      <div id="elevation"><span>Height</span><span>2</span></div>
-      <div id="menu">
-        <div>Move</div>
-        <div>Attack</div>
-        <div>Skills</div>
-        <div>End Turn</div>
-      </div>
-      <div class="unit">
-        <div class="tile grass">
-          <img class="unit-sprite player" src="assets/beasts/player.png"/>
+    
+    <!-------------------------------->
+    <!------- COMBAT INTERFACE ------->
+    <!-------------------------------->
+
+    <section id="combat" class="interface">
+
+      <!---------- Header Toolbar -------------->
+      <section id="combat__header">
+        <div id="ch__suggestions" class="tip">Click on a tile to move. Right-click to cancel.</div>
+        <div id="ch__settings">
+          <div id="chs__fps"><span id="chsfps__count">60</span> FPS</div>
+          <div id="chs__menu"></div>
         </div>
-        <div class="info">
-          <div class="name"><span class="dim">Lv.03</span> Street Lad</div>
-          <div class="statistics">
-            <div class="stat">
-              <div class="stat-text">
-                <span class="stat-name">HP</span>
-                <span class="stat-current"><span class="dim">0</span>79</span>
-                <span class="stat-divider dim">/</span>
-                <span class="stat-maximum dim">154</span>
+      </section>
+
+      <!---------- Actions Menu ---------------->
+      <section id="combat__menu">
+        <section id="cm__root">
+          <div id="cmr__move">Move</div>
+          <div id="cmr__attack">Attack</div>
+          <div id="cmr__skills">Skills</div>
+          <div id="cmr__wait">End Turn</div>
+        </section>
+        <section id="ca__skills">
+        </section>
+      </section>
+
+      <!--------- Location Information --------->
+      <section id="combat__location">
+        <div id="cl__elevation"><span>Height</span><span id="cle__count">2</span></div>
+      </section>
+
+      <!---------- Active Unit ----------------->
+      <section id="combat__active" class="unit">
+        <canvas id="ca__canvas" class="unit-canvas" width="32" height="48"></canvas>
+        <section id="ca__information" class="unit-information">
+          <div id="cai__name" class="unit-name">
+            <span class="dim">Lv.</span><span id="cain__level" class="dim">--</span>
+            <span id="cain__species">Street Lad</span>
+          </div>
+          <div id="cai__statistics" class="unit-stats">
+            <div id="cais__hp" class="hp">
+              <div>
+                <span>HP</span>
+                <span>---</span>
+                <span class="dim">/</span>
+                <span class="dim">---</span>
               </div>
-              <div class="stat-bar hp"><div class="stat-bar-current" style="width: 49%"></div></div>
+              <div class="bar"><div style="width: 50%"></div></div>
             </div>
-            <div class="stat">
-              <div class="stat-text">
-                <span class="stat-name">TP</span>
-                <span class="stat-current">232</span>
-                <span class="stat-divider dim">/</span>
-                <span class="stat-maximum dim">300</span>
+            <div id="cais__tp" class="tp">
+              <div>
+                <span>TP</span>
+                <span>---</span>
+                <span class="dim">/</span>
+                <span class="dim">---</span>
               </div>
-              <div class="stat-bar hp"><div class="stat-bar-current" style="width: 70%"></div></div>
+              <div class="bar"><div style="width: 50%"></div></div>
             </div>
           </div>
-        </div>
-      </div>
-      <div class="unit target">
-        <div class="info">
-          <div class="name"><span class="dim">Lv.03</span> Street Lad</div>
-          <div class="statistics">
-            <div class="stat">
-              <div class="stat-text">
-                <span class="stat-name">HP</span>
-                <span class="stat-current"><span class="dim">0</span>79</span>
-                <span class="stat-divider dim">/</span>
-                <span class="stat-maximum dim">154</span>
+        </section>
+      </section>
+
+      <!---------- Target Unit ----------------->
+      <section id="combat__target" class="unit">
+        <section id="ct__information" class="unit-information">
+          <div id="cti__name" class="unit-name">
+            <span class="dim">Lv.</span><span id="ctin__level" class="dim">--</span>
+            <span id="ctin__species">Street Lad</span>
+          </div>
+          <div id="cti__statistics" class="unit-stats">
+            <div id="ctis__hp" class="hp">
+              <div>
+                <span>HP</span>
+                <span>---</span>
+                <span class="dim">/</span>
+                <span class="dim">---</span>
               </div>
-              <div class="stat-bar hp"><div class="stat-bar-current" style="width: 49%"></div></div>
+              <div class="bar"><div style="width: 50%"></div></div>
             </div>
-            <div class="stat">
-              <div class="stat-text">
-                <span class="stat-name">TP</span>
-                <span class="stat-current">232</span>
-                <span class="stat-divider dim">/</span>
-                <span class="stat-maximum dim">300</span>
+            <div id="ctis__tp" class="tp">
+              <div>
+                <span>TP</span>
+                <span>---</span>
+                <span class="dim">/</span>
+                <span class="dim">---</span>
               </div>
-              <div class="stat-bar hp"><div class="stat-bar-current" style="width: 70%"></div></div>
+              <div class="bar"><div style="width: 50%"></div></div>
             </div>
           </div>
-        </div>
-        <div class="tile grass">
-          <img class="unit-sprite player" src="assets/beasts/player.png"/>
-        </div>
+        </section>
+        <canvas id="ct__canvas" class="unit-canvas" width="32" height="48"></canvas>
+      </section>
+
+      <!---------- Turn Order ------------------>
+      <div id="combat__order">
+        <div>Upcoming Turns &mdash;</div>
+        <canvas id="co__canvas" width="160" height="48"></canvas>
       </div>
-      <div id="turns">Upcoming Turns &mdash;</div>
-      <div id="objective"><span>Overcast &mdash; </span><img src="moon.png" /> <span>Waxing Crescent</span></div>
+
+      <!---------- Battlefield Conditions ------>
+      <div id="combat__conditions">
+        <span id="cc__weather">Overcast</span>
+        <span>&mdash;</span>
+        <span id="cc__moon" class="waxing-crescent">Waxing Crescent</span>
+      </div>
+
     </section>
+
+    <!-------------------------------->
+    <!------ SETTINGS INTERFACE ------>
+    <!-------------------------------->
+
+
+    <!-------------------------------->
+    <!--------- MAP INTERFACE -------->
+    <!-------------------------------->
+
+    
+    <!-------------------------------->
+    <!-------- TOWN INTERFACE -------->
+    <!-------------------------------->
+
+    
+    <!-------------------------------->
+    <!----- MAIN MENU INTERFACE ------>
+    <!-------------------------------->
     
   </body>
 

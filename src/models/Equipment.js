@@ -116,7 +116,7 @@ class EquipmentManager {
         this.speed -= ~~equipment.speed;
     }
 
-    render(layer, index, mirrored, x, y) {
+    render(ctx, layer, index, mirrored, x, y) {
         Object.values(this.equipment).forEach(item => {
             if (item === null)
                 return;
@@ -125,13 +125,13 @@ class EquipmentManager {
             if (META === undefined || META.layer !== layer)
                 return;
 
-            Game.ctx.save();
-            Game.ctx.translate(x + ~~META.ox + (~~META.mirrored * item.tw), y + ~~META.oy);
+            ctx.save();
+            ctx.translate(x + ~~META.ox + (~~META.mirrored * item.tw), y + ~~META.oy);
     
             if (META.mirrored)
-                Game.ctx.scale(-1, 1);
+                ctx.scale(-1, 1);
 
-            Game.ctx.drawImage(
+            ctx.drawImage(
                 item.tileset,
                 (META.idx * item.tw) % item.tileset.width,
                 Math.floor((META.idx * item.tw) / item.tileset.width) * (item.th),
@@ -142,7 +142,7 @@ class EquipmentManager {
                 item.tw,
                 item.th 
             );
-            Game.ctx.restore();
+            ctx.restore();
         });
     }
 }

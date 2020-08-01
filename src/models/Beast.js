@@ -314,7 +314,7 @@ class Beast {
               OFFSET_Y = ~~this.animation.oy + ~~FRAME_META.oy + ~~this.animation.cy + ~~this.animation.cz,
               IS_MIRRORED = this.animation.meta.mirrored;
         
-        this.equipment.render(-1, FRAME_META.idx, IS_MIRRORED, X + OFFSET_X, Y + OFFSET_Y);
+        this.equipment.render(Game.ctx, -1, FRAME_META.idx, IS_MIRRORED, X + OFFSET_X, Y + OFFSET_Y);
 
         Game.ctx.save();
         Game.ctx.translate(X + (~~IS_MIRRORED * this.tw) + OFFSET_X, Y + OFFSET_Y);
@@ -335,7 +335,18 @@ class Beast {
         );
         Game.ctx.restore();
 
-        this.equipment.render(1, FRAME_META.idx, IS_MIRRORED, X + OFFSET_X, Y + OFFSET_Y);
+        this.equipment.render(Game.ctx, 1, FRAME_META.idx, IS_MIRRORED, X + OFFSET_X, Y + OFFSET_Y);
+    }
+
+    renderToUICanvas(ctx, x, y, IS_MIRRORED) {
+        this.equipment.render(ctx, -1, 0, IS_MIRRORED, x, y);
+        ctx.save();
+        ctx.translate(x + (~~IS_MIRRORED * this.tw), y);
+        if (IS_MIRRORED)
+            ctx.scale(-1, 1);
+        ctx.drawImage(this.tileset, 0, 0, this.tw, this.th, 0, 0, this.tw, this.th);
+        ctx.restore();
+        this.equipment.render(ctx, 1, 0, IS_MIRRORED, x, y);
     }
 }
 
