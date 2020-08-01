@@ -170,7 +170,7 @@ canvas {
     width: 200px;
 }
   
-#cm__root > div {
+#cm__actions > div {
     padding: 10px;
     margin-bottom: 5px;
 }
@@ -276,7 +276,13 @@ canvas {
     top: 0;
     left: 0;
     height: 100%;
-    background-color: rgba(0, 186, 219);
+}
+.unit-stats .hp .bar > div {
+    /*background-color: rgba(0, 186, 219);*/
+    background-color: #0095e9;
+}
+.unit-stats .tp .bar > div {
+    background-color: rgb(219, 197, 0);
 }
 
 /* ---------- Turn Order --------------------- */

@@ -5,9 +5,7 @@ class CombatIndicators {
         this.markers = {
             movement: {
                 index: 1,
-                opacity: 0.75,
-                max_opacity: 0.75,
-                min_opacity: 0.25,
+                opacity: 0,
                 duration: 4000,
                 ms: 0
             }
@@ -24,7 +22,8 @@ class CombatIndicators {
     }
 
     display(type, range) {
-        this.markers[type].opacity = (this.markers[type].min_opacity + this.markers[type].max_opacity) / 2;
+        this.markers[type].ms = this.markers[this.type].duration / 2;
+        this.markers[type].opacity = Math.floor(Math.abs(this.markers[this.type].ms - (this.markers[this.type].duration / 2))) / (this.markers[this.type].duration * 2);
         this.type = type;
         this.range = range;
     }

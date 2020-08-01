@@ -21,6 +21,7 @@
     <section id="combat" class="interface">
 
       <!---------- Header Toolbar -------------->
+
       <section id="combat__header">
         <div id="ch__suggestions" class="tip">Click on a tile to move. Right-click to cancel.</div>
         <div id="ch__settings">
@@ -30,23 +31,26 @@
       </section>
 
       <!---------- Actions Menu ---------------->
+
       <section id="combat__menu">
-        <section id="cm__root">
-          <div id="cmr__move">Move</div>
-          <div id="cmr__attack">Attack</div>
-          <div id="cmr__skills">Skills</div>
-          <div id="cmr__wait">End Turn</div>
+        <section id="cm__actions">
+          <div id="cma__move">Move</div>
+          <div id="cma__attack" class="dim">Attack</div>
+          <div id="cma__skills" class="dim">Skills</div>
+          <div id="cma__wait">End Turn</div>
         </section>
-        <section id="ca__skills">
+        <section id="cm__skills">
         </section>
       </section>
 
       <!--------- Location Information --------->
+
       <section id="combat__location">
         <div id="cl__elevation"><span>Height</span><span id="cle__count">2</span></div>
       </section>
 
       <!---------- Active Unit ----------------->
+
       <section id="combat__active" class="unit">
         <canvas id="ca__canvas" class="unit-canvas" width="32" height="48"></canvas>
         <section id="ca__information" class="unit-information">
@@ -58,26 +62,27 @@
             <div id="cais__hp" class="hp">
               <div>
                 <span>HP</span>
-                <span>---</span>
+                <span id="caishp__current">---</span>
                 <span class="dim">/</span>
-                <span class="dim">---</span>
+                <span id="caishp__max" class="dim">---</span>
               </div>
-              <div class="bar"><div style="width: 50%"></div></div>
+              <div class="bar"><div id="caishp__bar" style="width: 50%"></div></div>
             </div>
             <div id="cais__tp" class="tp">
               <div>
                 <span>TP</span>
-                <span>---</span>
+                <span id="caistp__current">---</span>
                 <span class="dim">/</span>
-                <span class="dim">---</span>
+                <span id="caistp__max" class="dim">---</span>
               </div>
-              <div class="bar"><div style="width: 50%"></div></div>
+              <div class="bar"><div  id="caistp__bar" style="width: 50%"></div></div>
             </div>
           </div>
         </section>
       </section>
 
       <!---------- Target Unit ----------------->
+
       <section id="combat__target" class="unit">
         <section id="ct__information" class="unit-information">
           <div id="cti__name" class="unit-name">
@@ -88,20 +93,20 @@
             <div id="ctis__hp" class="hp">
               <div>
                 <span>HP</span>
-                <span>---</span>
+                <span id="ctishp__current">---</span>
                 <span class="dim">/</span>
-                <span class="dim">---</span>
+                <span id="ctishp__max" class="dim">---</span>
               </div>
-              <div class="bar"><div style="width: 50%"></div></div>
+              <div class="bar"><div id="ctishp__bar" style="width: 50%"></div></div>
             </div>
             <div id="ctis__tp" class="tp">
               <div>
                 <span>TP</span>
-                <span>---</span>
+                <span id="ctistp__current">---</span>
                 <span class="dim">/</span>
-                <span class="dim">---</span>
+                <span id="ctistp__max" class="dim">---</span>
               </div>
-              <div class="bar"><div style="width: 50%"></div></div>
+              <div class="bar"><div id="ctistp__bar" style="width: 50%"></div></div>
             </div>
           </div>
         </section>
@@ -109,12 +114,14 @@
       </section>
 
       <!---------- Turn Order ------------------>
+
       <div id="combat__order">
         <div>Upcoming Turns &mdash;</div>
         <canvas id="co__canvas" width="160" height="48"></canvas>
       </div>
 
       <!---------- Battlefield Conditions ------>
+
       <div id="combat__conditions">
         <span id="cc__weather">Overcast</span>
         <span>&mdash;</span>
