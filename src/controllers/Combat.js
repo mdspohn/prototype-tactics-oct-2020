@@ -32,7 +32,10 @@ class CombatInterface {
         this.turns.dom.wrapper = document.getElementById('combat__order');
         this.turns.dom.canvas  = document.getElementById('co__canvas');
         this.turns.ctx = this.turns.dom.canvas.getContext('2d');
+
+        this.turns.isAnimating = false;
         this.turns.offset = 0;
+        this.turns.entities = [];
 
         // Battlefield Conditions
         this.conditions = new Object();
@@ -73,7 +76,8 @@ class CombatInterface {
 
 
         // Click Event Listeners
-        this.menu.dom.actions_wait.addEventListener('click', () => Events.dispatch('turn-end'));
+        this.menu.dom.actions_move.addEventListener('click', () => Events.dispatch('request-move'));
+        this.menu.dom.actions_wait.addEventListener('click', () => Events.dispatch('request-wait'));
     }
 
     async _load() {
@@ -87,52 +91,50 @@ class CombatInterface {
 
     update(step) {
         this.animations.forEach((animation) => {
-            animation.current += (animation.target - animation.current) * Math.min(step / animation.ms, 1);
+            const differenceRemaining = animation.target - animation.current,
+                  percentChange = Math.min(step / animation.ms, 1);
+            
+            animation.current += differenceRemaining * percentChange;
             animation.ms = Math.max(animation.ms - step, 0);
         });
 
-        if (this.turns.pending)
-            this.turns.offset = Math.floor(Math.max(this.turns.offset - ((step / 500) * 32), 0));
+        if (!this.turns.isAnimating)
+            return;
+        
+        this.turns.offset = Math.floor(Math.max(this.turns.offset - ((step / 500) * 32), 0));
     }
 
     render(delta) {
         for (let i = this.animations.length - 1; i >= 0; i--) {
-            if ((this.animations[i].ms - delta) <= 0) {
-                this.animations[i].element.style[this.animations[i].style] = this.animations[i].target + this.animations[i].suffix;
-                if (this.animations[i].event) {
-                    Events.dispatch(this.animations[i].event);
-                }
+            const msRemaining = this.animations[i].ms - delta,
+                  element     = this.animations[i].element,
+                  type        = this.animations[i].style,
+                  event       = this.animations[i].event;
+
+            if (msRemaining <= 0) {
+                element.style[type] = this.animations[i].target + this.animations[i].suffix;
                 this.animations.splice(i, 1);
+                if (event !== null)
+                    Events.dispatch(event);
             } else {
-                const change = (this.animations[i].target - this.animations[i].current) * Math.min(delta / this.animations[i].ms, 1);
-                this.animations[i].element.style[this.animations[i].style] = (this.animations[i].current + change) + this.animations[i].suffix;
+                const value = this.animations[i].current + (this.animations[i].target - this.animations[i].current) * Math.min(delta / this.animations[i].ms, 1);
+                element.style[type] = value + this.animations[i].suffix;
             }
         }
 
-        if (this.turns.pending) {
-            const offset = Math.floor(Math.max(this.turns.offset - ((delta / 500) * 32), 0));
-            if (offset === 0)
-                this.turns.pending = false;
-            
-            this.turns.order.forEach((entity, index) => {
-                const x = (index * 32),
-                      clear = (index === 0),
-                      opacity = (index === 0) ? (Math.max(offset - 16, 0) / 16) : (index === this.turns.order.length - 1) ? 1 - (offset / 32) : 1;
-                this._renderEntity(this.turns.dom.canvas, this.turns.ctx, entity, false, clear, x + offset, true, opacity);
-            });
-        }
-    }
+        if (!this.turns.isAnimating)
+            return;
+        
+        const offset = Math.floor(Math.max(this.turns.offset - ((delta / 500) * 32), 0));
 
-    _animateElement(element, style, target, ms = 500, suffix = '', event = null) {
-        let current = element.style[style];
-        if (current === '')
-            current = window.getComputedStyle(element)[style];
-        current = ~~current.replace(suffix, '');
-        this.animations.push({ element, style, current, target, ms, suffix, event });
-    }
-
-    _setElement(element, style, value, suffix = '') {
-        element.style[style] = value + suffix;
+        this.turns.isAnimating = (offset !== 0);
+        this.turns.entities.forEach((entity, index) => {
+            const x       = (index *  32),
+                  clear   = (index === 0),
+                  opacity = (index === 0) ? (Math.max(offset - 16, 0) / 16) : (index === this.turns.entities.length - 1) ? 1 - (offset / 32) : 1;
+                  
+            this._renderEntity(this.turns.dom.canvas, this.turns.ctx, entity, false, clear, x + offset, true, opacity);
+        });
     }
 
     _renderEntity(canvas, ctx, entity, showTile = true, clearCanvas = true, x = 0, mirrored = false, opacity = 1) {
@@ -146,6 +148,19 @@ class CombatInterface {
             ctx.globalAlpha = opacity;
         entity.renderToUICanvas(ctx, x, (canvas.height - entity.th) - (~~showTile * 8), mirrored);
         ctx.restore();
+    }
+
+    _setElement(element, style, value, suffix = '') {
+        element.style[style] = value + suffix;
+    }
+
+    _animateElement(element, style, target, ms = 500, suffix = '', event = null) {
+        let current = element.style[style];
+        if (current === '')
+            current = window.getComputedStyle(element)[style];
+        current = ~~current.replace(suffix, '');
+
+        this.animations.push({ element, style, current, target, ms, suffix, event });
     }
 
     _updateUnit(element, entity) {
@@ -163,16 +178,30 @@ class CombatInterface {
     }
 
     _updateTurns(order) {
-        this.turns.order = order.new;
-        this.turns.pending = true;
-        if (order.old?.[0]) {
-            this.turns.order.unshift(order.old[0]);
-            this.turns.offset = 32;
-        }
+        const active = order.old?.[0];
+
+        this.turns.entities = order.new;
+        this.turns.isAnimating = true;
+
+        if (active === undefined)
+            return;
+            
+        this.turns.offset = 32;
+        this.turns.entities.unshift(active);
+    }
+
+    _updateSuggestion(text, icon = 'info') {
+        this.header.dom.suggestions.class = icon;
+        this.header.dom.suggestions.innerText = text;
+    }
+
+    _updateHeight(height) {
+        this.location.dom.elevation.innerText = ~~height;
     }
 
     async nextTurn(entity) {
         this._updateUnit(this.active, entity);
+        this._updateHeight(entity.location.z());
         this._setElement(this.active.dom.wrapper, 'left', 10, 'px');
         this._animateElement(this.active.dom.wrapper, 'left',   30, 500, 'px', 'active-show');
         this._animateElement(this.active.dom.wrapper, 'opacity', 1, 500);
@@ -232,8 +261,11 @@ class CombatController {
         this.indicators = new CombatIndicators();
         this.interface = new CombatInterface();
 
+        this.state = null;
+
         Events.listen('turn-order', data => this.interface._updateTurns(data), true);
-        Events.listen('turn-end', () => this.endTurn(), true);
+        Events.listen('request-move', () => 'TODO', true);
+        Events.listen('request-wait', () => this.endTurn(), true);
     }
 
     async _load() {
@@ -269,8 +301,9 @@ class CombatController {
 
     nextTurn() {
         this.turns.next();
+        Game.camera.toLocation(this.turns.active.location);
         this.interface.nextTurn(this.turns.active).then(() => {
-            this.indicators.display('movement', this.turns.active.getRange(this.layout, this.entities));
+            //this.indicators.display('movement', this.turns.active.getRange(this.layout, this.entities));
         });
     }
 

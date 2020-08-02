@@ -5,7 +5,8 @@ GAME_DATA.beasts['slime'] = {
     "stats": {
         "move": 5,
         "jump": 3,
-        "speed": 50
+        "speed": 50,
+        "health": 27
     },
 };
 
@@ -15,18 +16,20 @@ GAME_DATA.beasts['mimic'] = {
     "tileset": "mimic",
     "stats": {
         "move": 5,
-        "speed": 50
+        "speed": 50,
+        "health": 42
     },
 };
 
 GAME_DATA.beasts['player'] = {
     "id": "player",
-    "name": "Street Lad",
+    "name": "Human",
     "species": "humanoid",
     "tileset": "player",
     "stats": {
         "move": 5,
         "jump": 2,
-        "speed": 50
+        "speed": 50,
+        "health": 35
     }
 };

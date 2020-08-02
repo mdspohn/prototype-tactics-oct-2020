@@ -163,19 +163,50 @@ canvas {
     text-align: right;
 }
 
+#chs__fps {
+    display: none;
+}
+
 /* ---------- Actions Menu ------------------- */
 
 #combat__menu {
     position: absolute;
     top: 70px;
     left: 20px;
-    width: 200px;
 }
   
 #cm__actions > div {
     padding: 10px;
     margin-bottom: 5px;
+    cursor: pointer;
+    position: relative;
+    float: left;
+    clear: left;
 }
+
+/* @keyframes pointing {
+    0%   { right: -64px; }
+    50%  { right: -69px; }
+    100% { right: -64px; }
+  }
+
+#cm__actions > div:not(.dim):hover:after {
+    content: '';
+    display: block;
+    position: absolute;
+    right: 64px;
+    top: 0;
+    width: 64px;
+    height: 64px;
+    background-repeat: no-repeat;
+    background-image: url('menu-icon.png');
+    animation-name: pointing;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+} */
 
 /* ---------- Location Information ----------- */
 
@@ -296,7 +327,7 @@ canvas {
     left: 0;
     width: 740px;
     height: 70px;
-    padding: 0 20px;
+    padding: 0 30px;
     line-height: 70px;
     background: rgba(0,0,0,0.5);
     background: linear-gradient(90deg, rgba(0,0,0,0.3981967787114846) 30%, rgba(0,0,0,0) 99%);
@@ -304,7 +335,7 @@ canvas {
 
 #combat__order canvas {
     position: absolute;
-    left: 195px;
+    left: 200px;
     bottom: 0;
     width: 576px;
     height: 96px;

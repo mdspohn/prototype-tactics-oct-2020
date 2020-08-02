@@ -10,13 +10,13 @@ class Beast {
         this.level = 1;
         this.experience = 0;
 
-        this.health  = Math.max(~~config.stats.health,  19);
+        this.health  = Math.max(~~config.stats.health,  1);
         this.attack  = Math.max(~~config.stats.attack,  1);
         this.defense = Math.max(~~config.stats.defense, 0);
         this.spirit  = Math.max(~~config.stats.spirit,  1);
         this.resist  = Math.max(~~config.stats.resist,  0);
 
-        this.tp = 200;
+        this.tp = 0;
 
         this.block   = Math.max(~~config.stats.block,   0);
         this.evasion = Math.max(~~config.stats.evasion, 0);

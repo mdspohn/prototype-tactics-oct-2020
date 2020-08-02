@@ -103,78 +103,85 @@ class Camera {
     }
 
     update(step) {
+        if (!this.isProcessingCameraMovement)
+            return;
+        
+        let percentage = step / this.msRemaining,
+            adjustedPercentage = percentage;
+        
+        switch(this.easing) {
+            case 'ease-in':
+                adjustedPercentage = percentage * (percentage * 10);
+                break;
+            case 'ease-out':
+                adjustedPercentage = percentage * (2 - percentage);
+                break;
+            default: 
+                adjustedPercentage = percentage;
+                break;
+        }
 
+        this.partialX += adjustedPercentage * (this.target.x - this.position.x);
+        this.partialY += adjustedPercentage * (this.target.y - this.position.y);
+
+        let xChange, yChange;
+        this.partialX -= xChange = (Math.sign(this.partialX) > 0) ? Math.floor(this.partialX) : Math.ceil(this.partialX);
+        this.partialY -= yChange = (Math.sign(this.partialY) > 0) ? Math.floor(this.partialY) : Math.ceil(this.partialY);
+
+        this.msRemaining = Math.max(this.msRemaining - step, 0);
+
+        if (this.target.x - this.position.x > 0) {
+            this.position.x = Math.min(this.target.x, this.position.x + xChange);
+        } else if (this.target.x - this.position.x < 0) {
+            this.position.x = Math.max(this.target.x, this.position.x + xChange);
+        }
+
+        if (this.target.y - this.position.y > 0) {
+            this.position.y = Math.min(this.target.y, this.position.y + yChange);
+        } else if (this.target.y - this.position.y < 0) {
+            this.position.y = Math.max(this.target.y, this.position.y + yChange);
+        }
+
+        if (this.position.x == this.target.x && this.position.y == this.target.y)
+            Events.dispatch('camera-movement-complete');
     }
 
-    // update(step) {
-    //     if (!this.isProcessingCameraMovement)
-    //         return;
+    async setTarget({ x, y, ms = 1000, easing = 'linear', pixels = false, isAbsolute = false } = opts) {
+        this.isProcessingCameraMovement = true;
+        this.target.x = (x != undefined && isAbsolute) ? 0 : this.target.x;
+        this.target.y = (y != undefined && isAbsolute) ? 0 : this.target.y;
+
+        x = (x != undefined) ? x : 0;
+        x = (pixels) ? x : Math.floor(x / 100 * Game.canvas.width);
+        y = (y != undefined) ? y : 0;
+        y = (pixels) ? y : Math.floor(y / 100 * Game.canvas.height);
         
-    //     let percentage = (step * 1000) / this.msRemaining,
-    //         adjustedPercentage = percentage;
-        
-    //     switch(this.easing) {
-    //         case 'ease-in':
-    //             adjustedPercentage = percentage * (percentage * 10);
-    //             break;
-    //         case 'ease-out':
-    //             adjustedPercentage = percentage * (2 - percentage);
-    //             break;
-    //         default: 
-    //             adjustedPercentage = percentage;
-    //             break;
-    //     }
+        this.easing = easing;
+        this.msRequested = this.msRemaining = ms;
+        this.partialX = 0;
+        this.partialY = 0;
 
-    //     this.partialX += adjustedPercentage * (this.target.x - this.position.x);
-    //     this.partialY += adjustedPercentage * (this.target.y - this.position.y);
+        this.target.x += x;
+        this.target.y += y;
 
-    //     let xChange, yChange;
-    //     this.partialX -= xChange = (Math.sign(this.partialX) > 0) ? Math.floor(this.partialX) : Math.ceil(this.partialX);
-    //     this.partialY -= yChange = (Math.sign(this.partialY) > 0) ? Math.floor(this.partialY) : Math.ceil(this.partialY);
-
-    //     this.msRemaining = Math.max(this.msRemaining - (step * 1000), 0);
-
-    //     if (this.target.x - this.position.x > 0) {
-    //         this.position.x = Math.min(this.target.x, this.position.x + xChange);
-    //     } else if (this.target.x - this.position.x < 0) {
-    //         this.position.x = Math.max(this.target.x, this.position.x + xChange);
-    //     }
-
-    //     if (this.target.y - this.position.y > 0) {
-    //         this.position.y = Math.min(this.target.y, this.position.y + yChange);
-    //     } else if (this.target.y - this.position.y < 0) {
-    //         this.position.y = Math.max(this.target.y, this.position.y + yChange);
-    //     }
-
-    //     if (this.position.x == this.target.x && this.position.y == this.target.y)
-    //         Events.dispatch('camera-movement-complete');
-    // }
-
-    // setTarget({ x, y, ms = 1000, easing = 'linear', pixels = false, isAbsolute = false } = opts) {
-    //     this.isProcessingCameraMovement = true;
-    //     this.target.x = (x != undefined && isAbsolute) ? 0 : this.target.x;
-    //     this.target.y = (y != undefined && isAbsolute) ? 0 : this.target.y;
-
-    //     x = (x != undefined) ? x : 0;
-    //     x = (pixels) ? x : Math.floor(x / 100 * Game.canvas.width);
-    //     y = (y != undefined) ? y : 0;
-    //     y = (pixels) ? y : Math.floor(y / 100 * Game.canvas.height);
-        
-    //     this.easing = easing;
-    //     this.msRequested = this.msRemaining = ms;
-    //     this.partialX = 0;
-    //     this.partialY = 0;
-
-    //     this.target.x += x;
-    //     this.target.y += y;
-
-    //     return new Promise((resolve, reject) => {
-    //         Events.listen('camera-movement-complete', () => {
-    //             this.isProcessingCameraMovement = false;
-    //             resolve();
-    //         });
-    //     });
-    // }
+        return new Promise((resolve, reject) => {
+            Events.listen('camera-movement-complete', () => {
+                this.isProcessingCameraMovement = false;
+                resolve();
+            });
+        });
+    }
+    
+    async toLocation(location) {
+        return this.setTarget({
+            x: -Math.floor(location.posX() - (Game.canvas.width / 2)),
+            y: -Math.floor(location.posY() - (Game.canvas.height / 2)),
+            ms: 700,
+            easing: 'ease-out',
+            pixels: true,
+            isAbsolute: true
+        });
+    }
 
     // setPosition({ x, y, pixels = false, isAbsolute = false } = opts) {
     //     this.position.x = (isAbsolute && x != undefined) ? 0 : this.position.x;
