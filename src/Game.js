@@ -38,7 +38,7 @@ class GameManager {
 
     async _load() {
         await Data._load();
-        await Promise.all([this.controllers.forEach(controller => controller._load())]);
+        await Promise.all([...this.controllers.map(controller => controller._load())]);
         await this._prepare('test');
         await this._initialize();
     }

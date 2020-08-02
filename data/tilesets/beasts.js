@@ -280,7 +280,6 @@ GAME_DATA.tilesets.beasts['slime'] = {
                 ]
             },
             "south": {
-                "mirrored": true,
                 "frames": [
                     { "idx": 1, "ms": 200 },
                     { "idx": 0, "ms": 200 }, 
@@ -313,7 +312,6 @@ GAME_DATA.tilesets.beasts['slime'] = {
                 ]
             },
             "north": {
-                "mirrored": true,
                 "frames": [
                     { "idx": 1, "ms": 200 },
                     { "idx": 0, "ms": 200 }, 
@@ -338,7 +336,6 @@ GAME_DATA.tilesets.beasts['slime'] = {
                 ]
             },
             "south": {
-                "mirrored": true,
                 "frames": [
                     { "idx": 0, "ms": 250, "px": 1, "py": 1, "pz": 1 },
                     { "idx": 1, "ms": 200 }
@@ -351,7 +348,6 @@ GAME_DATA.tilesets.beasts['slime'] = {
                 ]
             },
             "north": {
-                "mirrored": true,
                 "frames": [
                     { "idx": 0, "ms": 250, "px": 1, "py": 1, "pz": 1 },
                     { "idx": 1, "ms": 200 }
@@ -567,11 +563,34 @@ GAME_DATA.tilesets.beasts['mimic'] = {
     },
     "config": {
         "idle": {
-            "frames": [
-                { "idx": 5, "ms": 1000 },
-                { "idx": 4, "ms": 1000, "next": "idle" }
-            ]
+            "east": {
+                "frames": [
+                    { "idx": 6, "ms": 1000 },
+                    { "idx": 5, "ms": 1000 }
+                ]
+            },
+            "south": {
+                "frames": [
+                    { "idx": 6, "ms": 1000 },
+                    { "idx": 5, "ms": 1000 }
+                ]
+            },
+            "west": {
+                "frames": [
+                    { "idx": 6, "ms": 1000 },
+                    { "idx": 5, "ms": 1000 }
+                ]
+            },
+            "north": {
+                "frames": [
+                    { "idx": 6, "ms": 1000 },
+                    { "idx": 5, "ms": 1000 }
+                ]
+            },
         },
+        /* -------------------------
+        // EVERYTHING BELOW HERE IS PROBABLY 1 INDEX TOO LOW
+        // ----------------------------------------*/
         "move": {
             "movement": true,
             "frames": [
@@ -611,15 +630,6 @@ GAME_DATA.tilesets.beasts['mimic'] = {
                 { "idx": 0, "ms": 400 },
                 { "idx": 1, "ms": 100 },
                 { "idx": 4, "ms": 200 }
-            ]
-        },
-        "impact": {
-            "frames": [
-                { "idx": 0, "ms": 100, "oy": -8 },
-                { "idx": 0, "ms": 50, "oy": -10 },
-                { "idx": 0, "ms": 150, "oy": -12 },
-                { "idx": 0, "ms": 100, "oy": -9 },
-                { "idx": 0, "ms": 50, "oy": -5 }
             ]
         },
         "intro": {

@@ -32,6 +32,7 @@ class CombatInterface {
         this.turns.dom.wrapper = document.getElementById('combat__order');
         this.turns.dom.canvas  = document.getElementById('co__canvas');
         this.turns.ctx = this.turns.dom.canvas.getContext('2d');
+        this.turns.offset = 0;
 
         // Battlefield Conditions
         this.conditions = new Object();
@@ -71,20 +72,27 @@ class CombatInterface {
         this.target.ctx = this.target.dom.canvas.getContext('2d');
 
 
-        this.menu.dom.actions_wait.addEventListener('click', () => {
-            Events.dispatch('turn-end');
-        })
+        // Click Event Listeners
+        this.menu.dom.actions_wait.addEventListener('click', () => Events.dispatch('turn-end'));
     }
 
     async _load() {
-
+        const loader = (resolve) => {
+            this.img = new Image();
+            this.img.onload = resolve;
+            this.img.src = `${ASSET_DIR}${OS_FILE_SEPARATOR}miscellaneous${OS_FILE_SEPARATOR}combat-ui-tiles.png`;
+        };
+        await new Promise(loader);
     }
 
     update(step) {
-        this.animations.forEach(animation => {
-            animation.value += (animation.target - animation.value) * Math.min(step / animation.ms, 1);
+        this.animations.forEach((animation) => {
+            animation.current += (animation.target - animation.current) * Math.min(step / animation.ms, 1);
             animation.ms = Math.max(animation.ms - step, 0);
         });
+
+        if (this.turns.pending)
+            this.turns.offset = Math.floor(Math.max(this.turns.offset - ((step / 500) * 32), 0));
     }
 
     render(delta) {
@@ -93,72 +101,98 @@ class CombatInterface {
                 this.animations[i].element.style[this.animations[i].style] = this.animations[i].target + this.animations[i].suffix;
                 if (this.animations[i].event) {
                     Events.dispatch(this.animations[i].event);
-                    this.animations.splice(i, 1);
                 }
+                this.animations.splice(i, 1);
             } else {
-                const change = (this.animations[i].target - this.animations[i].value) * Math.min(delta / this.animations[i].ms, 1);
-                this.animations[i].element.style[this.animations[i].style] = (this.animations[i].value + change) + this.animations[i].suffix;
+                const change = (this.animations[i].target - this.animations[i].current) * Math.min(delta / this.animations[i].ms, 1);
+                this.animations[i].element.style[this.animations[i].style] = (this.animations[i].current + change) + this.animations[i].suffix;
             }
+        }
+
+        if (this.turns.pending) {
+            const offset = Math.floor(Math.max(this.turns.offset - ((delta / 500) * 32), 0));
+            if (offset === 0)
+                this.turns.pending = false;
+            
+            this.turns.order.forEach((entity, index) => {
+                const x = (index * 32),
+                      clear = (index === 0),
+                      opacity = (index === 0) ? (Math.max(offset - 16, 0) / 16) : (index === this.turns.order.length - 1) ? 1 - (offset / 32) : 1;
+                this._renderEntity(this.turns.dom.canvas, this.turns.ctx, entity, false, clear, x + offset, true, opacity);
+            });
+        }
+    }
+
+    _animateElement(element, style, target, ms = 500, suffix = '', event = null) {
+        let current = element.style[style];
+        if (current === '')
+            current = window.getComputedStyle(element)[style];
+        current = ~~current.replace(suffix, '');
+        this.animations.push({ element, style, current, target, ms, suffix, event });
+    }
+
+    _setElement(element, style, value, suffix = '') {
+        element.style[style] = value + suffix;
+    }
+
+    _renderEntity(canvas, ctx, entity, showTile = true, clearCanvas = true, x = 0, mirrored = false, opacity = 1) {
+        if (clearCanvas === true)
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (showTile === true)
+            this.active.ctx.drawImage(this.img, 0, 0, 32, 48, 0, canvas.height - 48, 32, 48);
+        
+        ctx.save();
+        if (opacity !== 1)
+            ctx.globalAlpha = opacity;
+        entity.renderToUICanvas(ctx, x, (canvas.height - entity.th) - (~~showTile * 8), mirrored);
+        ctx.restore();
+    }
+
+    _updateUnit(element, entity) {
+        const HP_PAD = '000'.substr(0, (Math.max(3 - String(entity.health).length, 0))),
+              TP_PAD = '000'.substr(0, (Math.max(3 - String(entity.tp).length, 0)));
+        
+        element.dom.name.innerText = entity.name;
+        element.dom.level.innerText = ('0' + entity.level).slice(-2);
+        element.dom.hp_cur.innerHTML = `<span class="dim">${HP_PAD}</span>${entity.health}`;
+        element.dom.tp_cur.innerHTML = `<span class="dim">${TP_PAD}</span>${entity.tp}`;
+        element.dom.hp_max.innerText = ('00' + entity.health).slice(-3);
+        element.dom.tp_max.innerText = '300';
+        element.dom.hp_bar.style.width = Math.ceil((entity.health / entity.health) * 100) + '%';
+        element.dom.tp_bar.style.width = Math.ceil((entity.tp / 300) * 100) + '%';
+    }
+
+    _updateTurns(order) {
+        this.turns.order = order.new;
+        this.turns.pending = true;
+        if (order.old?.[0]) {
+            this.turns.order.unshift(order.old[0]);
+            this.turns.offset = 32;
         }
     }
 
     async nextTurn(entity) {
-        const HP_PAD = '000'.substr(0, (Math.max(3 - String(entity.health).length, 0))),
-              TP_PAD = '000'.substr(0, (Math.max(3 - String(entity.tp).length, 0)));
+        this._updateUnit(this.active, entity);
+        this._setElement(this.active.dom.wrapper, 'left', 10, 'px');
+        this._animateElement(this.active.dom.wrapper, 'left',   30, 500, 'px', 'active-show');
+        this._animateElement(this.active.dom.wrapper, 'opacity', 1, 500);
+        this._renderEntity(this.active.dom.canvas, this.active.ctx, entity);
         
-        this.active.dom.name.innerText     = entity.name;
-        this.active.dom.level.innerText    = ('0' + entity.level).slice(-2);
-        this.active.dom.hp_cur.innerHTML   = `<span class="dim">${HP_PAD}</span>${entity.health}`;
-        this.active.dom.tp_cur.innerHTML   = `<span class="dim">${TP_PAD}</span>${entity.tp}`;
-        this.active.dom.hp_max.innerText   = ('00' + entity.health).slice(-3);
-        this.active.dom.tp_max.innerText   = '300';
-        this.active.dom.hp_bar.style.width = Math.ceil((entity.health / entity.health) * 100) + '%';
-        this.active.dom.tp_bar.style.width = Math.ceil((entity.tp / 300) * 100) + '%';
-
-        this.animations.push({
-            element: this.active.dom.wrapper,
-            style: 'left',
-            target: 20,
-            value: -20,
-            ms: 500,
-            suffix: 'px',
-            event: 'active-show'
-        },
-        {
-            element: this.active.dom.wrapper,
-            style: 'opacity',
-            target: 1,
-            value:  0,
-            ms: 500,
-            suffix: ''
-        });
-
-        return new Promise((resolve) => Events.listen('active-show', () => resolve()));
+        return new Promise((resolve) => Events.listen('active-show', resolve));
     }
 
-    async endTurn(entity) {
-        this.animations.push({
-            element: this.active.dom.wrapper,
-            style: 'left',
-            target: -20,
-            value: 20,
-            ms: 500,
-            suffix: 'px',
-            event: 'active-hide'
-        },
-        {
-            element: this.active.dom.wrapper,
-            style: 'opacity',
-            target: 0,
-            value:  1,
-            ms: 500,
-            suffix: ''
-        });
+    async endTurn() {
+        this._animateElement(this.active.dom.wrapper, 'left',  50, 500, 'px', 'active-hide');
+        this._animateElement(this.active.dom.wrapper, 'opacity', 0, 500);
 
-        return new Promise((resolve) => Events.listen('active-hide', () => resolve()));
+        return new Promise((resolve) => Events.listen('active-hide', resolve));
     }
 
     async requestMove() {
+
+    }
+
+    async cancelMove() {
 
     }
 
@@ -166,32 +200,16 @@ class CombatInterface {
 
     }
 
-    async requestAttack() {
-
-    }
-
-    async confirmAttack() {
-
-    }
-
-    async requestSkills() {
-
-    }
-
-    async confirmSkill() {
-
-    }
-
     async requestWait() {
+
+    }
+
+    async cancelWait() {
 
     }
 
     async confirmWait() {
 
-    }
-
-    updateTurns(order) {
-        console.table(order.new);
     }
 }
 
@@ -214,7 +232,7 @@ class CombatController {
         this.indicators = new CombatIndicators();
         this.interface = new CombatInterface();
 
-        Events.listen('turn-order', data => this.interface.updateTurns(data), true);
+        Events.listen('turn-order', data => this.interface._updateTurns(data), true);
         Events.listen('turn-end', () => this.endTurn(), true);
     }
 
@@ -285,7 +303,9 @@ class CombatController {
     // --------------------------
 
     onClick(event) {
-        this.turns.active.walkTo(Game.camera.windowToTile(event.x, event.y, this.layout), this.layout);
+        const location = Game.camera.windowToTile(event.x, event.y, this.layout);
+        if (location !== undefined)
+            this.turns.active.walkTo(Game.camera.windowToTile(event.x, event.y, this.layout), this.layout);
     }
 
     onRightClick(event) {

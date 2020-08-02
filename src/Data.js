@@ -22,14 +22,17 @@ class DataManager {
     }
 
     async _load() {
+        let needsLoading = new Array();
         Object.entries(this.tilesets).forEach(([category, configurations]) => {
             this.assets[category] = new Object();
             Object.entries(configurations).forEach(([type, data]) => {
                 this.assets[category][type] = new Tileset(category, data);
+                needsLoading.push(this.assets[category][type]);
             });
         });
 
-        return Promise.all([Object.values(this.assets).forEach(category => Object.values(category).forEach(tileset => tileset._load()))]);
+        return Promise.all([...needsLoading.map(tileset => tileset._load())]);
+        //return Promise.all([...Object.values(this.assets).map(category => Object.values(category).map(tileset => tileset._load()))]);
     }
 
     getRoster() {

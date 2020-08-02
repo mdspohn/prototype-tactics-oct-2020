@@ -166,7 +166,9 @@ canvas {
 /* ---------- Actions Menu ------------------- */
 
 #combat__menu {
-    margin: 15px;
+    position: absolute;
+    top: 70px;
+    left: 20px;
     width: 200px;
 }
   
@@ -203,14 +205,15 @@ canvas {
 .unit {
     position: absolute;
     bottom: 100px;
+    opacity: 0;
 }
 
 .unit#combat__active {
-    left: 20px;
+    left: 10px;
 }
 
 .unit#combat__target {
-    right: 20px;
+    right: 10px;
     text-align: right;
 }
 
@@ -225,13 +228,13 @@ canvas {
 
 .unit-canvas {
     width: 128px;
-    height: 192px;
+    height: 256px;
 }
 
 .unit-information {
     position: relative;
     /*top: 100px;*/
-    bottom: 0px;
+    bottom: 20px;
 }
 
 .unit-stats > div {
@@ -301,9 +304,9 @@ canvas {
 
 #combat__order canvas {
     position: absolute;
-    left: 250px;
+    left: 195px;
     bottom: 0;
-    width: 320px;
+    width: 576px;
     height: 96px;
 }
 

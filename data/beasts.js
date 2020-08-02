@@ -14,7 +14,8 @@ GAME_DATA.beasts['mimic'] = {
     "name": "Mimic",
     "tileset": "mimic",
     "stats": {
-        "move": 5
+        "move": 5,
+        "speed": 50
     },
 };
 
@@ -26,6 +27,6 @@ GAME_DATA.beasts['player'] = {
     "stats": {
         "move": 5,
         "jump": 2,
-        "speed": 75
+        "speed": 50
     }
 };

@@ -19,6 +19,12 @@ GAME_DATA.scenes['test'] = {
             x: 2,
             y: 5,
             orientation: 'south'
+        },
+        {
+            id: 'mimic',
+            x: 0,
+            y: 4,
+            orientation: 'south'
         }
     ]
 };

@@ -39,7 +39,7 @@ class TurnManager {
         return next;
     }
 
-    forecast(count = 6) {
+    forecast(count = 7) {
         let order = new Array(),
             cycles = 0;
 
@@ -62,8 +62,8 @@ class TurnManager {
             cycles += 1;
         }
 
-        Events.dispatch('turn-order', { old: this.order, new: order });
-        this.order = order;
+        Events.dispatch('turn-order', { old: this.order, new: order.slice(0, count) });
+        this.order = order.slice(0, count);
     }
 
     next() {
