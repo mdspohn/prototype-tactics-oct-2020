@@ -301,7 +301,7 @@ class CombatController {
 
     nextTurn() {
         this.turns.next();
-        Game.camera.toLocation(this.turns.active.location);
+        Game.camera.toLocation(this.turns.active.location, 750, 'ease-out');
         this.interface.nextTurn(this.turns.active).then(() => {
             //this.indicators.display('movement', this.turns.active.getRange(this.layout, this.entities));
         });

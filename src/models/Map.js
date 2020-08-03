@@ -54,8 +54,8 @@ class Map {
     }
 
     render(delta, location) {
-        const x = Game.camera.position.x - ((location.x - location.y) * (this.tw / 2)),
-              y = Game.camera.position.y + ((location.x + location.y) * (this.td / 2));
+        const x = Game.camera.posX() - ((location.x - location.y) * (this.tw / 2)),
+              y = Game.camera.posY() + ((location.x + location.y) * (this.td / 2));
         
         this.tiles[location.x][location.y].forEach((tile, z) => {
             if (this.meta[tile.id].frames !== undefined) {

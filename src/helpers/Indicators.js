@@ -43,7 +43,7 @@ class CombatIndicators {
             return;
 
         Game.ctx.save();
-        Game.ctx.translate(Game.camera.position.x + location.posX(), Game.camera.position.y + location.posY());
+        Game.ctx.translate(Game.camera.posX() + location.posX(), Game.camera.posY() + location.posY());
         Game.ctx.globalAlpha = this.markers[this.type].opacity + 0.1;
         Game.ctx.drawImage(this.img, 1 * 32, 0, 32, 16, 0, 0, 32, 16);
         Game.ctx.restore();

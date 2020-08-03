@@ -55,8 +55,8 @@ class GameManager {
     }
     
     update(step) {
-        this.input.update(step)
         this.camera.update(step);
+        this.input.update(step)
         this.controllers[this.state].update(step);
 
         // --------------
@@ -67,6 +67,7 @@ class GameManager {
     }
 
     render(delta) {
+        this.camera.render(delta);
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.controllers[this.state].render(delta);
 

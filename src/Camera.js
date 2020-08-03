@@ -1,19 +1,86 @@
 class Camera {
     constructor(canvas) {
-        // camera configuration
-        this.window   = { x: window.innerWidth, y: window.innerHeight };
-        this.position = { x: 0, y: 0 };
-        this.target   = { x: 0, y: 0 };
+        this.window = new Object();
+        this.window.x = window.innerWidth;
+        this.window.y = window.innerHeight;
+
         this.zoom = 4;
 
+        this.position = new Object();
+        this.position.x = 0;
+        this.position.y = 0;
+
+        this.target = new Object();
+        this.target.x = 0;
+        this.target.y = 0;
+
+        this.msRemaining = 0;
+
+        this.delta = new Object();
+        this.delta.x = 0;
+        this.delta.y = 0;
+
         // to preserve pixel-perfect assets, canvas adjustments may accumulate small rounding errors
-        this.adjustmentErrorX = 0;
-        this.adjustmentErrorY = 0;
+        this.adjustment = new Object();
+        this.adjustment.x = 0;
+        this.adjustment.y = 0;
+
+        this.posX = () => Math.round(this.position.x + this.delta.x);
+        this.posY = () => Math.round(this.position.y + this.delta.y);
 
         window.addEventListener('resize', () => this._resizeCanvas(canvas));
         window.addEventListener('fullscreenchange', () => this._resizeCanvas(canvas));
         
         this._resizeCanvas(canvas);
+    }
+
+    // ------------------------
+    // Common Camera Movement Methods
+    // ---------------------------------
+
+    async toLocation(location, ms = 0, easing = null) {
+        const x = -Math.floor(location.posX() - (Game.canvas.width / 2)),
+              y = -Math.floor(location.posY() - (Game.canvas.height / 2));
+        
+        return this._toPosition(x, y, ms, easing);
+    }
+
+    async toCenter(canvas, layout, ms = 0, easing = null) {
+        const x = Math.floor((canvas.width  - layout.boundaries.x2 - layout.boundaries.x1) / 2) - (layout.tw / 2),
+              y = Math.floor((canvas.height - layout.boundaries.y2) / 2) - (layout.td / 2);
+
+        return this._toPosition(x, y, ms, easing);
+    }
+
+    // ------------------------
+    // Lower Methods for Canvas/Camera Changes
+    // ---------------------------------
+
+    _toPosition(x, y, ms = 0, easing = 'ease-out') {
+        this.isProcessingCameraMovement = true;
+
+        if (ms === 0) {
+            this.position.x = x;
+            this.position.y = y;
+        }
+
+        this.target.x = x;
+        this.target.y = y;
+
+        this.delta.x = 0;
+        this.delta.y = 0;
+
+        this.msRemaining = ms;
+        this.easing = easing;
+
+        const movementComplete = (resolve) => {
+            Events.listen('camera-movement-complete', () => {
+                this.isProcessingCameraMovement = false;
+                resolve();
+            });
+        };
+
+        return new Promise(movementComplete);
     }
 
     _resizeCanvas(canvas) {
@@ -36,11 +103,11 @@ class Camera {
         canvas.style.height = (canvas.height * this.zoom) + 'px';
 
         // update camera position after canvas size change
-        const wChange = ((canvas.width  - oW) / 2) - this.adjustmentErrorX,
-              hChange = ((canvas.height - oH) / 2) - this.adjustmentErrorY;
+        const wChange = ((canvas.width  - oW) / 2) - this.adjustment.x,
+              hChange = ((canvas.height - oH) / 2) - this.adjustment.y;
 
-        this.adjustmentErrorX = Math.round(wChange) - wChange;
-        this.adjustmentErrorY = Math.round(hChange) - hChange;
+        this.adjustment.x = Math.round(wChange) - wChange;
+        this.adjustment.y = Math.round(hChange) - hChange;
 
         this.position.x = this.target.x = (this.position.x + Math.round(wChange));
         this.position.y = this.target.y = (this.position.y + Math.round(hChange));
@@ -55,15 +122,21 @@ class Camera {
         this._resizeCanvas();
     }
 
-    windowToCanvas(windowX, windowY) {
-        // translate window (x, y) to canvas (x, y)
-        const x = Math.floor(windowX / this.zoom),
-              y = Math.floor(windowY / this.zoom);
+    // ------------------------
+    // Camera Helper Methods / Calculations
+    // ---------------------------------
 
-        return { x, y };
+    // (x, y) -> (x, y)
+    _windowToCanvas(x, y) {
+        const coords = new Object();
+        coords.x = Math.floor(x / this.zoom);
+        coords.y = Math.floor(y / this.zoom);
+
+        return coords;
     }
 
-    canvasToTile(x, y, layout) {
+    // (x, y) -> Location {}
+    _canvasToTile(x, y, layout) {
         x -= this.position.x;
         y -= this.position.y;
 
@@ -79,205 +152,61 @@ class Camera {
         return match;
     }
 
-    windowToTile(windowX, windowY, layout) {
-        const canvasCoords = this.windowToCanvas(windowX, windowY);
-        return this.canvasToTile(canvasCoords.x, canvasCoords.y, layout);
+    // (x, y) -> Location {}
+    _windowToTile(x, y, layout) {
+        const coords = this._windowToCanvas(x, y);
+        return this._canvasToTile(coords.x, coords.y, layout);
     }
 
-    onRightClick(event) {
-        const x = event.x,
-              y = event.y;
-        
-        this.position.x = this.target.x = this.position.x + Math.round((Game.canvas.width / 2) - x / this.zoom);
-        this.position.y = this.target.y = this.position.y + Math.round((Game.canvas.height / 2) - y / this.zoom);
-    }
+    // ------------------------
+    // Camera Panning/Position Updates
+    // ---------------------------------
 
-    toCenter(canvas, layout) {
-        this.position.x = this.target.x = Math.floor((canvas.width  - layout.boundaries.x2 - layout.boundaries.x1) / 2) - (layout.tw / 2);
-        this.position.y = this.target.y = Math.floor((canvas.height - layout.boundaries.y2) / 2) - (layout.td / 2);
-    }
+    _calculateCameraOffsets(ms) {
+        let p = ms / this.msRemaining;
 
-    toTile(canvas, layout, location) {
-        this.position.x = this.target.x = Math.floor((canvas.width  - location.posX) / 2) - (layout.tw / 2);
-        this.position.y = this.target.y = Math.floor((canvas.height / 2) - location.posY - (layout.td / 2));
-    }
+        if (this.easing != 'linear')
+            p *= (this.easing == 'ease-out') ? (2 - p) : (p * 10);
 
-    update(step) {
-        if (!this.isProcessingCameraMovement)
-            return;
-        
-        let percentage = step / this.msRemaining,
-            adjustedPercentage = percentage;
-        
-        switch(this.easing) {
-            case 'ease-in':
-                adjustedPercentage = percentage * (percentage * 10);
-                break;
-            case 'ease-out':
-                adjustedPercentage = percentage * (2 - percentage);
-                break;
-            default: 
-                adjustedPercentage = percentage;
-                break;
-        }
+        const partialX = p * (this.target.x - this.position.x),
+              partialY = p * (this.target.y - this.position.y);
 
-        this.partialX += adjustedPercentage * (this.target.x - this.position.x);
-        this.partialY += adjustedPercentage * (this.target.y - this.position.y);
-
-        let xChange, yChange;
-        this.partialX -= xChange = (Math.sign(this.partialX) > 0) ? Math.floor(this.partialX) : Math.ceil(this.partialX);
-        this.partialY -= yChange = (Math.sign(this.partialY) > 0) ? Math.floor(this.partialY) : Math.ceil(this.partialY);
-
-        this.msRemaining = Math.max(this.msRemaining - step, 0);
-
+        let deltaX = 0,
+            deltaY = 0;
+                
         if (this.target.x - this.position.x > 0) {
-            this.position.x = Math.min(this.target.x, this.position.x + xChange);
+            deltaX = Math.min(this.target.x, this.position.x + partialX) - this.position.x;
         } else if (this.target.x - this.position.x < 0) {
-            this.position.x = Math.max(this.target.x, this.position.x + xChange);
+            deltaX = Math.max(this.target.x, this.position.x + partialX) - this.position.x;
         }
 
         if (this.target.y - this.position.y > 0) {
-            this.position.y = Math.min(this.target.y, this.position.y + yChange);
+            deltaY = Math.min(this.target.y, this.position.y + partialY) - this.position.y;
         } else if (this.target.y - this.position.y < 0) {
-            this.position.y = Math.max(this.target.y, this.position.y + yChange);
+            deltaY = Math.max(this.target.y, this.position.y + partialY) - this.position.y;
         }
 
-        if (this.position.x == this.target.x && this.position.y == this.target.y)
-            Events.dispatch('camera-movement-complete');
+        return {  x: deltaX, y: deltaY };
     }
 
-    async setTarget({ x, y, ms = 1000, easing = 'linear', pixels = false, isAbsolute = false } = opts) {
-        this.isProcessingCameraMovement = true;
-        this.target.x = (x != undefined && isAbsolute) ? 0 : this.target.x;
-        this.target.y = (y != undefined && isAbsolute) ? 0 : this.target.y;
+    update(step) {
+        if (this.isProcessingCameraMovement) {
+            this.msRemaining = Math.max(this.msRemaining - step, 0);
 
-        x = (x != undefined) ? x : 0;
-        x = (pixels) ? x : Math.floor(x / 100 * Game.canvas.width);
-        y = (y != undefined) ? y : 0;
-        y = (pixels) ? y : Math.floor(y / 100 * Game.canvas.height);
-        
-        this.easing = easing;
-        this.msRequested = this.msRemaining = ms;
-        this.partialX = 0;
-        this.partialY = 0;
+            const changes = this._calculateCameraOffsets(step);
+            this.position.x += changes.x;
+            this.position.y += changes.y;
 
-        this.target.x += x;
-        this.target.y += y;
-
-        return new Promise((resolve, reject) => {
-            Events.listen('camera-movement-complete', () => {
-                this.isProcessingCameraMovement = false;
-                resolve();
-            });
-        });
-    }
-    
-    async toLocation(location) {
-        return this.setTarget({
-            x: -Math.floor(location.posX() - (Game.canvas.width / 2)),
-            y: -Math.floor(location.posY() - (Game.canvas.height / 2)),
-            ms: 700,
-            easing: 'ease-out',
-            pixels: true,
-            isAbsolute: true
-        });
+            if (this.position.x == this.target.x && this.position.y == this.target.y)
+                Events.dispatch('camera-movement-complete');
+        }
     }
 
-    // setPosition({ x, y, pixels = false, isAbsolute = false } = opts) {
-    //     this.position.x = (isAbsolute && x != undefined) ? 0 : this.position.x;
-    //     this.position.y = (isAbsolute && y != undefined) ? 0 : this.position.y;
-
-    //     x = (x != undefined) ? x : 0;
-    //     y = (y != undefined) ? y : 0;
-        
-    //     this.target.x = this.position.x += (pixels) ? x : Math.floor((x / 100) * Game.canvas.width);
-    //     this.target.y = this.position.y += (pixels) ? y : Math.floor((y / 100) * Game.canvas.height);
-
-    //     return Promise.resolve();
-    // }
-
-    // // -----------------------------
-    // // utility functions
-    // // ------------------------------------
-
-    // getCenterCoords(map) {
-    //     const lastTile = map.structure[map.structure.length - 1];
-    //     return {
-    //         x: Math.floor((Game.canvas.width / 2)),
-    //         y: Math.floor((Game.canvas.height / 2) - ((lastTile.x + lastTile.y) * this.zoom + 8 /* half of tile depth */))
-    //     }
-    // }
-    
-    // windowToCanvas(windowX, windowY) {
-    //     // translate window (x, y) to canvas (x, y)
-    //     const x = Math.floor(windowX / this.zoom),
-    //           y = Math.floor(windowY / this.zoom);
-
-    //     return { x, y };
-    // }
-
-    // windowToTile(windowX, windowY) {
-    //     const canvasCoords = this.windowToCanvas(windowX, windowY);
-    //     return this.canvasToTile(canvasCoords.x, canvasCoords.y);
-    // }
-
-    // tileToCanvas(row, col) {
-    //     const sConfig = Game.controllers[Game.state].map.tileConfig,
-    //           height  = Game.controllers[Game.state].map.layout[row][col].z;
-    //     const x = this.position.x + ((col - row) * (sConfig.width / 2)),
-    //           y = this.position.y + ((row + col) * (sConfig.depth / 2)) - (height * sConfig.height);
-
-    //     return { x, y };
-    // }
-
-    // canvasToTile(x, y) {
-    //     x -= this.position.x;
-    //     y -= this.position.y;
-    //     let match;
-    //     Game.controllers[Game.state].map.layout.forEach((row, ri) => {
-    //         row.forEach((tile, ci) => {
-    //             if (x >= (tile.posX - 16) && x <= (tile.posX + 16)) {
-    //                 if (y >= tile.posY && y <= (tile.posY + 16)) {
-    //                     let pixelsInX = x - tile.posX + 16;
-    //                     if (Math.ceil((16 - Math.abs(16 - pixelsInX)) / 2) >= Math.abs(8 - (y - tile.posY))) {
-    //                         match = { x: ri, y: ci };
-    //                     }
-    //                 }
-    //             }
-    //         });
-    //     });
-    //     return match;
-    // }
-
-    // distanceToEdgeOfScreen(canvasX, canvasY) {
-    //     const x = Math.min(Game.canvas.width - canvasX, canvasX),
-    //           y = Math.min(Game.canvas.height - canvasY, canvasY);
-        
-    //     return { x, y };
-    // }
-
-    // // ----------------------------
-    // // methods for altering camera behavior and position
-    // // ---------------------------------------
-
-    // toPosition(canvasX, canvasY) {
-    //     this.target.x -= Math.floor(canvasX - (Game.canvas.width / 2));
-    //     this.target.y -= Math.floor(canvasY - (Game.canvas.height / 2));
-    // }
-
-    // // toTile(row, col) {
-    // //     const sConfig = Game.controllers[Game.state].map.tileConfig,
-    // //           height  = Game.controllers[Game.state].map.layout[row][col].z;
-    // //     const x = this.position.x + ((col - row) * (sConfig.width / 2)) + (sConfig.width / 2),
-    // //           y = this.position.y + ((row + col) * (sConfig.depth / 2)) - (height * sConfig.height);
-        
-    // //     return this.setTarget({
-    // //         x: -Math.floor(x - (Game.canvas.width / 2)),
-    // //         y: -Math.floor(y - (Game.canvas.height / 2)),
-    // //         ms: 700,
-    // //         easing: 'ease-out',
-    // //         pixels: true,
-    // //         isAbsolute: false
-    // //     });
-    // // }
+    render(delta) {
+        if (this.isProcessingCameraMovement) {
+            const changes = this._calculateCameraOffsets(delta);
+            this.delta.x = changes.x;
+            this.delta.y = changes.y;
+        }
+    }
 }

@@ -63,8 +63,8 @@ class Decoration {
         if (this.tiles[location.x]?.[location.y] === undefined)
             return;
 
-        const x = Game.camera.position.x + location.posX() - ((this.tw - location.tw) / 2),
-              y = Game.camera.position.y + location.posY() - (this.th - location.td - location.th);
+        const x = Game.camera.posX() + location.posX() - ((this.tw - location.tw) / 2),
+              y = Game.camera.posY() + location.posY() - (this.th - location.td - location.th);
         
         this.tiles[location.x][location.y].forEach((tile, z) => {
             if (this.meta[tile.id].frames !== undefined) {
