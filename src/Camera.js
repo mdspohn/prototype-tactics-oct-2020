@@ -39,8 +39,8 @@ class Camera {
     // ---------------------------------
 
     async toLocation(location, ms = 0, easing = null) {
-        const x = -Math.floor(location.posX() - (Game.canvas.width / 2)),
-              y = -Math.floor(location.posY() - (Game.canvas.height / 2));
+        const x = -Math.floor(location.posX() - (Game.canvas.width / 2) + (location.tw / 2)),
+              y = -Math.floor(location.posY() - (Game.canvas.height / 2) + (location.td / 2));
         
         return this._toPosition(x, y, ms, easing);
     }
@@ -53,8 +53,37 @@ class Camera {
     }
 
     // ------------------------
-    // Lower Methods for Canvas/Camera Changes
+    // Camera Helper Methods / Calculations
     // ---------------------------------
+
+    _windowToCanvas(x, y) {
+        const coords = new Object();
+        coords.x = Math.floor(x / this.zoom);
+        coords.y = Math.floor(y / this.zoom);
+
+        return coords;
+    }
+
+    _canvasToTile(x, y, layout) {
+        x -= this.position.x;
+        y -= this.position.y;
+
+        let match;
+        layout.forEach(tile => {
+            if (x >= tile.posX() && x < (tile.posX() + 32) && y >= tile.posY() && y < (tile.posY() + 16)) {
+                let pixelsInX = x - tile.posX();
+                if (Math.ceil((16 - Math.abs(16 - pixelsInX)) / 2) >= Math.abs(8 - (y - tile.posY()))) {
+                    match = tile;
+                }
+            }
+        });
+        return match;
+    }
+
+    _windowToTile(x, y, layout) {
+        const coords = this._windowToCanvas(x, y);
+        return this._canvasToTile(coords.x, coords.y, layout);
+    }
 
     _toPosition(x, y, ms = 0, easing = 'ease-out') {
         this.isProcessingCameraMovement = true;
@@ -122,46 +151,6 @@ class Camera {
         this._resizeCanvas();
     }
 
-    // ------------------------
-    // Camera Helper Methods / Calculations
-    // ---------------------------------
-
-    // (x, y) -> (x, y)
-    _windowToCanvas(x, y) {
-        const coords = new Object();
-        coords.x = Math.floor(x / this.zoom);
-        coords.y = Math.floor(y / this.zoom);
-
-        return coords;
-    }
-
-    // (x, y) -> Location {}
-    _canvasToTile(x, y, layout) {
-        x -= this.position.x;
-        y -= this.position.y;
-
-        let match;
-        layout.forEach(tile => {
-            if (x >= tile.posX() && x < (tile.posX() + 32) && y >= tile.posY() && y < (tile.posY() + 16)) {
-                let pixelsInX = x - tile.posX();
-                if (Math.ceil((16 - Math.abs(16 - pixelsInX)) / 2) >= Math.abs(8 - (y - tile.posY()))) {
-                    match = tile;
-                }
-            }
-        });
-        return match;
-    }
-
-    // (x, y) -> Location {}
-    _windowToTile(x, y, layout) {
-        const coords = this._windowToCanvas(x, y);
-        return this._canvasToTile(coords.x, coords.y, layout);
-    }
-
-    // ------------------------
-    // Camera Panning/Position Updates
-    // ---------------------------------
-
     _calculateCameraOffsets(ms) {
         let p = ms / this.msRemaining;
 
@@ -188,6 +177,10 @@ class Camera {
 
         return {  x: deltaX, y: deltaY };
     }
+
+    // ------------------------
+    // Engine Hooks
+    // ---------------------------------
 
     update(step) {
         if (this.isProcessingCameraMovement) {

@@ -82,6 +82,10 @@ class GameManager {
     // User Input Mediation
     // ----------------------------
 
+    onMouseMove(event) {
+        this.controllers[this.state].onMouseMove(event);
+    }
+
     onClick(event) {
         this.controllers[this.state].onClick(event);
     }

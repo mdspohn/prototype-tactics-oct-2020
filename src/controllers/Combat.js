@@ -1,6 +1,5 @@
 class CombatInterface {
     constructor() {
-
         this.animations = new Array();
 
         // Header Toolbar
@@ -74,10 +73,11 @@ class CombatInterface {
         this.target.dom.tp_bar  = document.getElementById('ctistp__bar');
         this.target.ctx = this.target.dom.canvas.getContext('2d');
 
-
         // Click Event Listeners
-        this.menu.dom.actions_move.addEventListener('click', () => Events.dispatch('request-move'));
-        this.menu.dom.actions_wait.addEventListener('click', () => Events.dispatch('request-wait'));
+        this.menu.dom.actions_move.addEventListener('click', () => Events.dispatch('MOVE_REQUEST'));
+        this.menu.dom.actions_attack.addEventListener('click', () => Events.dispatch('ATTACK_REQUEST'));
+        this.menu.dom.actions_skills.addEventListener('click', () => Events.dispatch('SKILLS_MENU'));
+        this.menu.dom.actions_wait.addEventListener('click', () => Events.dispatch('WAIT_REQUEST'));
     }
 
     async _load() {
@@ -257,15 +257,36 @@ class CombatController {
         // COMBAT STATE
         // -----------------------
 
-        this.turns = new TurnManager();
+        this.turns      = new TurnManager();
         this.indicators = new CombatIndicators();
-        this.interface = new CombatInterface();
+        this.interface  = new CombatInterface();
 
-        this.state = null;
+        this.states = new Object();
+        this.states.NONE           = 0;
+        this.states.AI_TURN        = 10;
+        this.states.PLAYER_TURN    = 20;
+        this.states.MOVE_REQUEST   = 21;
+        this.states.MOVE_CONFIRM   = 22;
+        this.states.ATTACK_REQUEST = 23;
+        this.states.ATTACK_CONFIRM = 24;
+        this.states.SKILLS         = 25;
+        this.states.SKILL_REQUEST  = 26;
+        this.states.SKILL_CONFIRM  = 27;
+        this.states.WAIT_REQUEST   = 28;
+        this.states.WAIT_CONFIRM   = 29;
+
+        this.state = 0;
+
+        // -------------------
+        // EVENT LISTENERS
+        // -----------------------
 
         Events.listen('turn-order', data => this.interface._updateTurns(data), true);
-        Events.listen('request-move', () => 'TODO', true);
-        Events.listen('request-wait', () => this.endTurn(), true);
+
+        Events.listen('MOVE_REQUEST',   (event) => this.requestMove(event),   true);
+        Events.listen('ATTACK_REQUEST', (event) => this.requestAttack(event), true);
+        Events.listen('SKILLS_MENU',    (event) => this.skillsMenu(event),    true);
+        Events.listen('WAIT_REQUEST',   (event) => this.requestWait(event),   true);
     }
 
     async _load() {
@@ -302,13 +323,20 @@ class CombatController {
     nextTurn() {
         this.turns.next();
         Game.camera.toLocation(this.turns.active.location, 750, 'ease-out');
-        this.interface.nextTurn(this.turns.active).then(() => {
-            //this.indicators.display('movement', this.turns.active.getRange(this.layout, this.entities));
-        });
+
+        // detect if AI or player then set state
+        this.state = this.states.PLAYER_TURN;
+
+        // reset entity state for new turn
+        this.turns.active.hasMoved = false;
+        this.interface.nextTurn(this.turns.active);
+        // this.interface.nextTurn(this.turns.active).then(() => {
+        //     this.indicators.display('movement', this.turns.active.getRange(this.layout, this.entities));
+        // });
     }
 
     // -------------------
-    // ENGINE LOOP
+    // ENGINE HOOKS
     // --------------------------
     
     update(step) {
@@ -331,18 +359,90 @@ class CombatController {
         this.interface.render(delta);
     }
 
+    requestMove(event) {
+        if (this.state !== this.states.PLAYER_TURN || !this.turns.active.canMove())
+            return;
+
+        this.state = this.states.REQUEST_MOVE;
+
+        if (event !== undefined)
+            event.stopPropagation();
+
+        this.indicators.requestMove(this.turns.active.getRange(this.layout, this.entities));
+        this.interface.requestMove();
+    }
+
+    confirmMove(location) {
+        if (this.indicators?.range?.[location.x]?.[location.y] === undefined)
+            return;
+
+        this.state = this.states.CONFIRM_MOVE;
+        this.indicators.confirmMove();
+
+        Events.listen('MOVE_COMPLETE', () => {
+            this.turns.active.hasMoved = true;
+            this.state = this.states.PLAYER_TURN;
+        });
+        this.turns.active.walkTo(location);
+    }
+
+    requestAttack(entity) {}
+
+    confirmAttack(entity) {}
+
+    requestSkillsMenu(entity) {}
+
+    requestSkill(entity) {}
+
+    confirmSkill(entity) {}
+
+    requestWait(entity) {
+        this.interface.endTurn().then(() => this.nextTurn());
+    }
+
+    confirmWait(entity) {}
+
+    // this.states.NONE           = 0;
+    // this.states.AI_TURN        = 10;
+    // this.states.PLAYER_TURN    = 20;
+    // this.states.MOVE_REQUEST   = 21;
+    // this.states.MOVE_CONFIRM   = 22;
+    // this.states.ATTACK_REQUEST = 23;
+    // this.states.ATTACK_CONFIRM = 24;
+    // this.states.SKILLS         = 25;
+    // this.states.SKILL_REQUEST  = 26;
+    // this.states.SKILL_CONFIRM  = 27;
+    // this.states.WAIT_REQUEST   = 28;
+    // this.states.WAIT_CONFIRM   = 29;
+
     // -------------------
-    // INPUT MEDIATION
+    // MOUSE INPUT MEDIATION
     // --------------------------
 
+    onMouseMove(event) {
+        const location = Game.camera._windowToTile(event.x, event.y, this.layout);
+        if (location !== undefined) {
+
+        }
+    }
+
     onClick(event) {
-        const location = Game.camera.windowToTile(event.x, event.y, this.layout);
-        if (location !== undefined)
-            this.turns.active.walkTo(Game.camera.windowToTile(event.x, event.y, this.layout), this.layout);
+        switch(this.state) {
+            case this.states.NONE:
+                break;
+        }
+        const location = Game.camera._windowToTile(event.x, event.y, this.layout);
+        if (location !== undefined) {
+            this.turns.active.walkTo(location, this.layout);
+        }
     }
 
     onRightClick(event) {
+        // TODO
+    }
 
+    onMouseWheel(event) {
+        // TODO
     }
 
     onKeyUp(event) {

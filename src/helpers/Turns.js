@@ -7,9 +7,9 @@ class TurnManager {
         Events.listen('speed-change', (entities) => {
             this.forecast();
         }, true);
-        Events.listen('death', (entity) => {
+        Events.listen('death', (entities) => {
             this.forecast();
-            if (entity === this.active)
+            if (entities.includes(this.active))
                 this.next();
         }, true);
     }

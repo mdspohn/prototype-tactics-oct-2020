@@ -29,6 +29,7 @@ class Beast {
         // ----------------------
 
         this.energy = 0;
+        this.hasMoved = false;
 
         // ----------------------
         // EQUIPMENT
@@ -72,6 +73,11 @@ class Beast {
 
         // current animation
         this.animation = this._getDefaultAnimation();
+    }
+
+    canMove() {
+        // determine whether beast is allowed to move (has moved already, root, etc...)
+        return !this.hasMoved;
     }
 
     _getDefaultAnimation() {
@@ -180,7 +186,7 @@ class Beast {
         animation.pz = 0;
     }
 
-    _getAnimationData({ id, orientation = this.orientation, destination } = opts) {
+    _getAnimationData({ id, orientation = this.orientation, destination, event = null } = opts) {
         // need to derive animation and movement data
         const PREVIOUS = this.animationQueue[this.animationQueue.length - 1] || this.animation,
               START = PREVIOUS?.destination || this.location,
@@ -192,6 +198,7 @@ class Beast {
         animation.frame = 0;
         animation.destination = END;
         animation.orientation = orientation;
+        animation.event = event;
 
         if (id === null)
             animation.id = this._setMovementType(animation, START, END);
@@ -222,6 +229,9 @@ class Beast {
 
         if (META.event !== undefined)
             Events.dispatch(META.event, this);
+
+        if (this.animation.event !== null)
+            Events.dispatch(this.animation.event, this);
 
         // animation finished, so swap to new location if it hasn't been done yet
         if (this.animation.destination !== undefined && this.animation.destination !== this.location)
@@ -360,8 +370,8 @@ Beast.prototype.reset = function(location) {
     this.location = location;
 };
 
-Beast.prototype.moveTo = function(destination, animation_id = null, orientation = null) {
-    this.animationQueue.push(this._getAnimationData({ id: animation_id, orientation, destination }));
+Beast.prototype.moveTo = function(destination, animation_id = null, orientation = null, event = null) {
+    this.animationQueue.push(this._getAnimationData({ id: animation_id, orientation, destination, event }));
 };
 
 Beast.prototype.walkTo = function(destination, layout) {
@@ -370,8 +380,12 @@ Beast.prototype.walkTo = function(destination, layout) {
 
     const moves = [];
 
-    while(this.range?.[x]?.[y]?.px) {
-        moves.unshift(layout.getLocation(x, y));
+    while(this.range?.[x]?.[y]?.px !== undefined) {
+        const move = new Object();
+        move.location = layout.getLocation(x, y);
+        move.event = (x == destination.x && y == destination.y) ? 'move-complete' : null;
+        moves.unshift(move);
+
         let newX = this.range[x][y].px,
             newY = this.range[x][y].py;
         
@@ -379,8 +393,7 @@ Beast.prototype.walkTo = function(destination, layout) {
         y = newY;
     }
 
-    moves.forEach(move => this.moveTo(move));
-    this.range = null;
+    moves.forEach(move => this.moveTo(move.location, null, null, move.event));
 };
 
 Beast.prototype.getRange = function(layout, entities) {

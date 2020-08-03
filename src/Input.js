@@ -28,7 +28,7 @@ class InputManager {
             Game.onClick(event);
             //this.actions.push({ key: 'Click', data: event });
         });
-        document.addEventListener('mousemove', event => this.actions.push({ key: 'MouseMove', data: event }));
+        document.addEventListener('mousemove', event => Game.onMouseMove(event));
         document.addEventListener('keyup', event => {
             Game.onKeyUp(event);
             // if (this.KEYBOARD[event.key])
