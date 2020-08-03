@@ -206,6 +206,7 @@ class CombatInterface {
         this._animateElement(this.active.dom.wrapper, 'left',   30, 500, 'px', 'active-show');
         this._animateElement(this.active.dom.wrapper, 'opacity', 1, 500);
         this._renderEntity(this.active.dom.canvas, this.active.ctx, entity);
+        this.menu.dom.actions_move.classList.toggle('dim', false);
         
         return new Promise((resolve) => Events.listen('active-show', resolve));
     }
@@ -218,15 +219,22 @@ class CombatInterface {
     }
 
     async requestMove() {
-
+        this._animateElement(this.active.dom.wrapper, 'left',  50, 500, 'px', 'active-hide');
+        this._animateElement(this.active.dom.wrapper, 'opacity', 0, 500);
+        this._updateSuggestion('Click on a tile to move. Right-click to cancel.');
     }
 
     async cancelMove() {
-
+        this._animateElement(this.active.dom.wrapper, 'left',   30, 500, 'px', 'active-show');
+        this._animateElement(this.active.dom.wrapper, 'opacity', 1, 500);
+        this._updateSuggestion('Select an action. The mouse wheel can be used to navigate menus.');
     }
 
     async confirmMove() {
-
+        this._animateElement(this.active.dom.wrapper, 'left',   30, 500, 'px', 'active-show');
+        this._animateElement(this.active.dom.wrapper, 'opacity', 1, 500);
+        this.menu.dom.actions_move.classList.toggle('dim', true);
+        this._updateSuggestion('Select an action. The mouse wheel can be used to navigate menus.');
     }
 
     async requestWait() {
@@ -269,7 +277,7 @@ class CombatController {
         this.states.MOVE_CONFIRM   = 22;
         this.states.ATTACK_REQUEST = 23;
         this.states.ATTACK_CONFIRM = 24;
-        this.states.SKILLS         = 25;
+        this.states.SKILLS_MENU    = 25;
         this.states.SKILL_REQUEST  = 26;
         this.states.SKILL_CONFIRM  = 27;
         this.states.WAIT_REQUEST   = 28;
@@ -315,11 +323,6 @@ class CombatController {
         this.nextTurn();
     }
 
-    endTurn() {
-        this.interface.endTurn().then(() => this.nextTurn());
-        this.indicators.range = null;
-    }
-
     nextTurn() {
         this.turns.next();
         Game.camera.toLocation(this.turns.active.location, 750, 'ease-out');
@@ -360,10 +363,13 @@ class CombatController {
     }
 
     requestMove(event) {
+        if (this.state === this.states.MOVE_REQUEST)
+            return this.cancelMove();
+        
         if (this.state !== this.states.PLAYER_TURN || !this.turns.active.canMove())
             return;
 
-        this.state = this.states.REQUEST_MOVE;
+        this.state = this.states.MOVE_REQUEST;
 
         if (event !== undefined)
             event.stopPropagation();
@@ -373,17 +379,24 @@ class CombatController {
     }
 
     confirmMove(location) {
-        if (this.indicators?.range?.[location.x]?.[location.y] === undefined)
+        if (location === undefined || this.indicators?.range?.[location.x]?.[location.y] === undefined)
             return;
 
-        this.state = this.states.CONFIRM_MOVE;
+        this.state = this.states.MOVE_CONFIRM;
         this.indicators.confirmMove();
 
-        Events.listen('MOVE_COMPLETE', () => {
+        Events.listen('move-complete', () => {
             this.turns.active.hasMoved = true;
             this.state = this.states.PLAYER_TURN;
+            this.interface.confirmMove();
         });
-        this.turns.active.walkTo(location);
+        this.turns.active.walkTo(location, this.layout);
+    }
+
+    cancelMove() {
+        this.state = this.states.PLAYER_TURN;
+        this.indicators.cancelMove();
+        this.interface.cancelMove();
     }
 
     requestAttack(entity) {}
@@ -397,6 +410,8 @@ class CombatController {
     confirmSkill(entity) {}
 
     requestWait(entity) {
+        if (this.state !== this.states.PLAYER_TURN)
+            return;
         this.interface.endTurn().then(() => this.nextTurn());
     }
 
@@ -430,14 +445,18 @@ class CombatController {
         switch(this.state) {
             case this.states.NONE:
                 break;
-        }
-        const location = Game.camera._windowToTile(event.x, event.y, this.layout);
-        if (location !== undefined) {
-            this.turns.active.walkTo(location, this.layout);
+            case this.states.MOVE_REQUEST:
+                const location = Game.camera._windowToTile(event.x, event.y, this.layout);
+                this.confirmMove(location);
         }
     }
 
     onRightClick(event) {
+        switch(this.state) {
+            case this.states.MOVE_REQUEST:
+                this.cancelMove();
+                break;
+        }
         // TODO
     }
 

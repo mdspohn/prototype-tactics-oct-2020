@@ -32,6 +32,10 @@ class CombatIndicators {
         this.range = null;
     }
 
+    cancelMove() {
+        this.range = null;
+    }
+
     update(step) {
         if (this.type === null)
             return;
