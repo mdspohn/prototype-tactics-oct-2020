@@ -46,14 +46,21 @@ class CombatIndicators {
     }
 
     render(delta, location) {
-        const showMarker = this.range?.[location.x]?.[location.y]?.showMarker;
+        const showMarker = this.range?.[location.x]?.[location.y]?.showMarker,
+              index = ~~location.slope() * (['north', 'west'].includes(location.orientation()) ? 1 : 2),
+              IS_MIRRORED = location.slope() && ['east', 'west'].includes(location.orientation());
+        
         if (!showMarker || !this.type)
             return;
 
         Game.ctx.save();
-        Game.ctx.translate(Game.camera.posX() + location.posX(), Game.camera.posY() + location.posY());
+        Game.ctx.translate(Game.camera.posX() + location.posX() + (~~IS_MIRRORED * 32), Game.camera.posY() + location.posY());
+
+        if (IS_MIRRORED)
+            Game.ctx.scale(-1, 1);
+
         Game.ctx.globalAlpha = this.markers[this.type].opacity + 0.1;
-        Game.ctx.drawImage(this.img, 1 * 32, 0, 32, 16, 0, 0, 32, 16);
+        Game.ctx.drawImage(this.img, index * 32, 0, 32, 24, 0, 0, 32, 24);
         Game.ctx.restore();
     }
 }

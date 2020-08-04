@@ -385,10 +385,15 @@ class CombatController {
         this.state = this.states.MOVE_CONFIRM;
         this.indicators.confirmMove();
 
+        const stepListenerId = Events.listen('move-step', () => {
+            this.interface._updateHeight(this.turns.active.location.z());
+        }, true);
         Events.listen('move-complete', () => {
             this.turns.active.hasMoved = true;
             this.state = this.states.PLAYER_TURN;
             this.interface.confirmMove();
+            this.interface._updateHeight(this.turns.active.location.z());
+            Events.remove('move-step', stepListenerId);
         });
         this.turns.active.walkTo(location, this.layout);
     }
