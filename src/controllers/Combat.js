@@ -440,7 +440,7 @@ class CombatController {
     // --------------------------
 
     onMouseMove(event) {
-        const location = Game.camera._windowToTile(event.x, event.y, this.layout);
+        //const location = Game.camera._windowToTile(event.x, event.y, this.layout);
         if (location !== undefined) {
 
         }

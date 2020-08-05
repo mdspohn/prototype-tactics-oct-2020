@@ -64,16 +64,77 @@ class Camera {
         return coords;
     }
 
+    _getTriangleArea(p1, p2, p3) {
+        return Math.abs((p1[0] * (p2[1] - p3[1]) + p2[0] * (p3[1] - p1[1]) + p3[0] * (p1[1] - p2[1])) / 2);
+    }
+
     _canvasToTile(x, y, layout) {
         x -= this.position.x;
         y -= this.position.y;
 
         let match;
-        layout.forEach(tile => {
-            if (x >= tile.posX() && x < (tile.posX() + 32) && y >= tile.posY() && y < (tile.posY() + 16)) {
-                let pixelsInX = x - tile.posX();
-                if (Math.ceil((16 - Math.abs(16 - pixelsInX)) / 2) >= Math.abs(8 - (y - tile.posY()))) {
+
+        // quickly filter to smaller group of possible tiles
+        const potentialMatches = layout.filter(function(tile) {
+            const TILE_LEFT = tile.posX(),
+                  TILE_TOP  = tile.posY();
+
+            return x >= TILE_LEFT && x < (TILE_LEFT + tile.tw) && y >= TILE_TOP && y < (TILE_TOP + tile.td + ((tile.z() - 1) * tile.th));
+        });
+        console.log(potentialMatches)
+        potentialMatches.forEach(tile => {
+            const TILE_X = x - tile.posX(),
+                  TILE_Y = y - tile.posY();
+            if (tile.slope()) {
+                const O = tile.orientation();
+                let p1, p2, p3, p4;
+                if (O == 'north') {
+                    p1 = [0, 15], p2 = [15, 0], p3 = [31, 7], p4 = [15, 23];
+                } else if (O == 'west') {
+                    p1 = [31, 15], p2 = [15, 0], p3 = [0, 7], p4 = [15, 23];
+                } else if (O == 'south') {
+                    p1 = [0, 7], p2 = [15, 7], p3 = [31, 15], p4 = [15, 15];
+                } else {
+                    p1 = [0, 15], p2 = [15, 7], p3 = [31, 7], p4 = [15, 15];
+                }
+
+                    // if (area == pointArea)
+                    //     console.log('match');
+                    //     return false;
+
+
+                    // if (TILE_X < 16) {
+                    //     const lowerBound = Math.floor((48 -  Math.abs(16 - TILE_X)) / 2), // gives bottom y of left side (16 ... 24)
+                    //           upperBound = 24 - Math.floor((48 -  (Math.abs(16 - TILE_X) * 2)) / 2);
+                    // }
+
+                    // if (TILE_X >= 16) {
+                    //     const lowerBound = Math.floor((48 -  (Math.abs(16 - TILE_X) * 2)) / 2), // gives bottom y of right side (24 ... 8)
+                    //           upperBound = 24 - Math.floor((48 -  Math.abs(16 - TILE_X)) / 2);
+                    // }
+
+                    // const SURFACE_HIT = Math.floor((24 - Math.abs(16 - TILE_X)) / 2) >= Math.abs(8 - (TILE_Y)),
+                    //       SIDE_HIT = TILE_Y > (Math.floor((16 - Math.abs(16 - TILE_X)) / 2) + 8);
+                
+                const area  = this._getTriangleArea(p1, p2, p3) + this._getTriangleArea(p1, p4, p3),
+                      pArea = this._getTriangleArea([TILE_X, TILE_Y], p1, p2)
+                            + this._getTriangleArea([TILE_X, TILE_Y], p1, p4)
+                            + this._getTriangleArea([TILE_X, TILE_Y], p2, p3)
+                            + this._getTriangleArea([TILE_X, TILE_Y], p3, p4);
+                console.log(TILE_X, TILE_Y, area, pArea)
+                if (area == pArea) {
                     match = tile;
+                } else if (false) {
+                    match = undefined;
+                }
+            } else {
+                const SURFACE_HIT = Math.floor((16 - Math.abs(16 - TILE_X)) / 2) >= Math.abs(8 - (TILE_Y)),
+                      SIDE_HIT = TILE_Y > (Math.floor((16 - Math.abs(16 - TILE_X)) / 2) + 8);
+                
+                if (SURFACE_HIT) {
+                    match = tile;
+                } else if (SIDE_HIT) {
+                    match = undefined;
                 }
             }
         });

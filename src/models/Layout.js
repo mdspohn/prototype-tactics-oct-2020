@@ -57,6 +57,10 @@ class Layout {
         return this.structure[x]?.[y];
     }
 
+    filter(fn) {
+        return this.sorted[this.method].filter(location => fn(location));
+    }
+
     forEach(fn) {
         this.sorted[this.method].forEach(location => fn(location));
     }

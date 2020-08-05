@@ -52,16 +52,16 @@ GAME_DATA.tilesets.equipment['shields'] = {
             1: { "layer": 1,  "idx": 0, "ox": 4, "oy": 13 }
         },
         5: {
-            0: { "layer": 1,  "idx": 0, "ox": -7, "oy": 13, "mirrored": true },
-            1: { "layer": -1, "idx": 1, "ox": -5, "oy": 10 }
-        },
-        6: {
-            0: {"layer": 1,  "idx": 0, "ox": -7, "oy": 14, "mirrored": true },
+            0: { "layer": 1,  "idx": 0, "ox": -7, "oy": 14, "mirrored": true },
             1: { "layer": -1, "idx": 1, "ox": -5, "oy": 11 }
         },
+        6: {
+            0: {"layer": 1,  "idx": 0, "ox": -7, "oy": 15, "mirrored": true },
+            1: { "layer": -1, "idx": 1, "ox": -5, "oy": 12 }
+        },
         7: {
-            0: { "layer": 1,  "idx": 0, "ox": -7, "oy": 13, "mirrored": true },
-            1: { "layer": -1, "idx": 1, "ox": -5, "oy": 10 }
+            0: { "layer": 1,  "idx": 0, "ox": -7, "oy": 14, "mirrored": true },
+            1: { "layer": -1, "idx": 1, "ox": -5, "oy": 11 }
         },
         8: {
             0: { "layer": 1,  "idx": 0, "ox": -6, "oy": 13, "mirrored": true },
