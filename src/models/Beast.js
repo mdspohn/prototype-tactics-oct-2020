@@ -74,11 +74,81 @@ class Beast {
         // current animation
         this.animation = this._getDefaultAnimation();
     }
+    
+    reset(location) {
+        this.energy = 0;
+        this.location = location;
+    }
 
     canMove() {
         // determine whether beast is allowed to move (has moved already, root, etc...)
         return !this.hasMoved;
     }
+    
+    moveTo(destination, animation_id = null, orientation = null, event = null) {
+        this.animationQueue.push(this._getAnimationData({ id: animation_id, orientation, destination, event }));
+    }
+    
+    walkTo(destination, layout) {
+        let x = destination.x,
+            y = destination.y;
+    
+        const moves = [];
+    
+        while(this.range?.[x]?.[y]?.px !== undefined) {
+            const move = new Object();
+            move.location = layout.getLocation(x, y);
+            move.event = (x == destination.x && y == destination.y) ? 'move-complete' : 'move-step';
+            moves.unshift(move);
+    
+            let newX = this.range[x][y].px,
+                newY = this.range[x][y].py;
+            
+            x = newX;
+            y = newY;
+        }
+    
+        moves.forEach(move => this.moveTo(move.location, null, null, move.event));
+    }
+    
+    getRange(layout, entities) {
+        const range = new Object();
+            
+        const addTile = (x, y, px, py, steps = 0) => {
+            if (layout.getLocation(x, y) === undefined)
+                return;
+            
+            if (!entities.some(entity => entity != this && entity.x() == x && entity.y() == y)) {
+                range[x] = range[x] || new Object();
+    
+                if (range[x][y] != undefined && range[x][y].steps <= steps)
+                    return;
+        
+                range[x][y] = {
+                    px,
+                    py,
+                    steps,
+                    showMarker: x != this.x() || y != this.y()
+                };
+        
+                if (steps >= this.move)
+                    return;
+                
+                addTile(Math.max(x - 1, 0), y, x, y, (steps + 1));
+                addTile(x, Math.min(y + 1, layout.structure[x].length - 1), x, y, (steps + 1));
+                addTile(Math.min(x + 1, layout.structure.length - 1), y, x, y, (steps + 1));
+                addTile(x, Math.max(y - 1, 0), x, y, (steps + 1));
+            }
+        };
+        
+        addTile(this.x(), this.y(), void 0, void 0);
+        this.range = range;
+        return range;
+    }
+
+    // ----------------------
+    // ANIMATIONS
+    // ---------------------------
 
     _getDefaultAnimation() {
        return this._getAnimationData(this._verifyAnimation('idle', this.orientation));
@@ -278,6 +348,10 @@ class Beast {
         return animation.meta[(animation.variation ? 'variation' : 'frames')][animation.frame];
     }
 
+    // ----------------------
+    // ENGINE HOOKS
+    // ---------------------------
+
     update(step) {
         let FRAME_META = this._getFrameMeta(this.animation);
 
@@ -360,186 +434,3 @@ class Beast {
         this.equipment.render(ctx, 1, 0, IS_MIRRORED, x, y);
     }
 }
-
-// ---------------------------
-// Entity commands and interactions
-// ------------------------
-
-Beast.prototype.reset = function(location) {
-    this.energy = 0;
-    this.location = location;
-};
-
-Beast.prototype.moveTo = function(destination, animation_id = null, orientation = null, event = null) {
-    this.animationQueue.push(this._getAnimationData({ id: animation_id, orientation, destination, event }));
-};
-
-Beast.prototype.walkTo = function(destination, layout) {
-    let x = destination.x,
-        y = destination.y;
-
-    const moves = [];
-
-    while(this.range?.[x]?.[y]?.px !== undefined) {
-        const move = new Object();
-        move.location = layout.getLocation(x, y);
-        move.event = (x == destination.x && y == destination.y) ? 'move-complete' : 'move-step';
-        moves.unshift(move);
-
-        let newX = this.range[x][y].px,
-            newY = this.range[x][y].py;
-        
-        x = newX;
-        y = newY;
-    }
-
-    moves.forEach(move => this.moveTo(move.location, null, null, move.event));
-};
-
-Beast.prototype.getRange = function(layout, entities) {
-    const range = new Object();
-        
-    const addTile = (x, y, px, py, steps = 0) => {
-        if (layout.getLocation(x, y) === undefined)
-            return;
-        
-        if (!entities.some(entity => entity != this && entity.x() == x && entity.y() == y)) {
-            range[x] = range[x] || new Object();
-
-            if (range[x][y] != undefined && range[x][y].steps <= steps)
-                return;
-    
-            range[x][y] = {
-                px,
-                py,
-                steps,
-                showMarker: x != this.x() || y != this.y()
-            };
-    
-            if (steps >= this.move)
-                return;
-            
-            addTile(Math.max(x - 1, 0), y, x, y, (steps + 1));
-            addTile(x, Math.min(y + 1, layout.structure[x].length - 1), x, y, (steps + 1));
-            addTile(Math.min(x + 1, layout.structure.length - 1), y, x, y, (steps + 1));
-            addTile(x, Math.max(y - 1, 0), x, y, (steps + 1));
-        }
-    };
-    
-    addTile(this.x(), this.y(), void 0, void 0);
-    this.range = range;
-    return range;
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // getMovementRange(layout, entities) {
-    //     this.range = new Object();
-        
-    //     const addTile = (x, y, px, py, steps = 0) => {
-    //         if (!layout[x] || !layout[x][y] || !layout[x][y].tiles)
-    //             return;
-            
-    //         if (!entities.some(entity => entity != this && entity.x == x && entity.y == y)) {
-    //             this.range[x] = this.range[x] || new Object();
-
-    //             if (this.range[x][y] != undefined && this.range[x][y].steps <= steps)
-    //                 return;
-        
-    //             this.range[x][y] = {
-    //                 px,
-    //                 py,
-    //                 steps,
-    //                 showMarker: x != this.x || y != this.y
-    //             };
-        
-    //             if (steps >= this.movement)
-    //                 return;
-                
-    //             addTile(Math.max(x - 1, 0), y, x, y, (steps + 1));
-    //             addTile(x, Math.min(y + 1, layout[x].length - 1), x, y, (steps + 1));
-    //             addTile(Math.min(x + 1, layout.length - 1), y, x, y, (steps + 1));
-    //             addTile(x, Math.max(y - 1, 0), x, y, (steps + 1));
-    //         }
-    //     };
-        
-    //     addTile(this.x, this.y, void 0, void 0);
-    //     return this.range;
-    // }
-    
-    // canMoveTo({ x, y } = target) {
-    //     return !(x == this.x && y == this.y) && this.range != null && this.range[x] != undefined && this.range[x][y] != undefined;
-    // }
-    
-    // moveTo({ x, y } = target) {
-    //     let sequence = this._getAnimationAction('move', true, { movement: true, x, y, z: 0 }),
-    //         previous = this.range[x][y];
-    
-    //     while (previous != undefined && previous.px != undefined) {
-    //         const action = this._getAnimationAction('move', false, {
-    //             movement: true,
-    //             x: previous.px,
-    //             y: previous.py,
-    //             z: 0
-    //         })[0];
-    
-    //         const tile = this.map.layout[previous.px][previous.py],
-    //               nextTile = this.map.layout[sequence[0].x][sequence[0].y],
-    //               zChange = tile.z - nextTile.z,
-    //               xChange = tile.x - nextTile.x,
-    //               animationId = (zChange != 0) ? 'jump' : 'move';
-            
-    //         this.movement -= 1;
-            
-    //         sequence[0].id = animationId;
-    //         sequence[0].z = zChange;
-    //         sequence[0].sorting = (xChange != 0) ? 'y' : 'x';
-    
-    //         previous = this.range[previous.px][previous.py];
-    
-    //         if (previous.px != undefined)
-    //             sequence.unshift(action);
-    //     }
-        
-    //     // TODO race condition ??
-    //     this.actions.push(...sequence);
-    //     return new Promise((resolve, reject) => Events.listen('move-complete', () => resolve()));
-    // }
-
-    // attack(target, skill) {
-    //     this.queueAnimation('attack');
-    //     Events.listen('hit', () => target.defend());
-    //     return new Promise((resolve, reject) => Events.listen('attack-complete', () => resolve()));
-    // }
-
-    // defend() {
-    //     this.forceAnimation('defend');
-    // }
-
-    // _broadcastAnimationSorting(action) {
-    //     Game.controllers[GAME_STATES.COMBAT].map.sortBy(action.sorting);
-    //     action.sorting = false;
-    // }
-
-    // _broadcastAnimationEvent(event) {
-    //     Events.dispatch(event.id, event.data);
-    // }
-
-    // AI(wait = 0) {
-    //     return new Promise((resolve, reject) => setTimeout(() => resolve(), wait));
-    // }

@@ -21,18 +21,14 @@ class CombatIndicators {
         await new Promise(loader);
     }
 
-    requestMove(range) {
+    set(range, type = 'movement') {
         this.range = range;
-        this.type = 'movement';
-        this.markers[this.type].ms = this.markers[this.type].duration / 2;
-        this.markers[this.type].opacity = Math.floor(Math.abs(this.markers[this.type].ms - (this.markers[this.type].duration / 2))) / (this.markers[this.type].duration * 2);
+        this.type = type;
+        this.markers[type].ms = this.markers[type].duration / 2;
+        this.markers[type].opacity = Math.floor(Math.abs(this.markers[type].ms - (this.markers[type].duration / 2))) / (this.markers[type].duration * 2);
     }
 
-    confirmMove() {
-        this.range = null;
-    }
-
-    cancelMove() {
+    clear() {
         this.range = null;
     }
 

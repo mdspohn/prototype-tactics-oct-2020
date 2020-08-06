@@ -30,6 +30,54 @@ class Decoration {
         });
     }
 
+    add(x, y, ...ids) {
+        ids.forEach(id => {
+            const tile = new Object();
+            tile.id = id;
+            tile.frame = 0;
+            tile.ox = ~~this.meta[id].ox + ~~this.meta[id].frames?.[0].ox;
+            tile.oy = ~~this.meta[id].oy + ~~this.meta[id].frames?.[0].oy;
+            tile.ms = ~~this.meta[tile.id].delay;
+            
+            this.tiles[x][y].push(tile);
+        });
+    }
+
+    remove(x, y) {
+        this.tiles[x][y] = [{ id: 0, ox: 0, oy: 0 }];
+    }
+
+    replace(x, y, ...ids) {
+        const newTiles = new Array();
+        ids.forEach(id => {
+            const tile = new Object();
+            tile.id = id;
+            tile.frame = 0;
+            tile.ox = ~~this.meta[id].ox + ~~this.meta[id].frames?.[0].ox;
+            tile.oy = ~~this.meta[id].oy + ~~this.meta[id].frames?.[0].oy;
+            tile.ms = ~~this.meta[tile.id].delay;
+            
+            newTiles.push(tile);
+        });
+        this.tiles[x][y] = newTiles;
+    }
+    
+    replaceTop(x, y, ...ids) {
+        const newTiles = new Array();
+        ids.forEach(id => {
+            const tile = new Object();
+            tile.id = id;
+            tile.frame = 0;
+            tile.ox = ~~this.meta[id].ox + ~~this.meta[id].frames?.[0].ox;
+            tile.oy = ~~this.meta[id].oy + ~~this.meta[id].frames?.[0].oy;
+            tile.ms = ~~this.meta[id].delay;
+            
+            newTiles.push(tile);
+        });
+        this.tiles[x][y].pop();
+        this.tiles[x][y].push(...newTiles);
+    }
+
     _handleFrameComplete(tile) {
         tile.ms -= this.meta[tile.id].frames[tile.frame].ms;
 
@@ -95,53 +143,5 @@ class Decoration {
             );
             Game.ctx.restore();
         });
-    }
-
-    add(x, y, ...ids) {
-        ids.forEach(id => {
-            const tile = new Object();
-            tile.id = id;
-            tile.frame = 0;
-            tile.ox = ~~this.meta[id].ox + ~~this.meta[id].frames?.[0].ox;
-            tile.oy = ~~this.meta[id].oy + ~~this.meta[id].frames?.[0].oy;
-            tile.ms = ~~this.meta[tile.id].delay;
-            
-            this.tiles[x][y].push(tile);
-        });
-    }
-
-    remove(x, y) {
-        this.tiles[x][y] = [{ id: 0, ox: 0, oy: 0 }];
-    }
-
-    replace(x, y, ...ids) {
-        const newTiles = new Array();
-        ids.forEach(id => {
-            const tile = new Object();
-            tile.id = id;
-            tile.frame = 0;
-            tile.ox = ~~this.meta[id].ox + ~~this.meta[id].frames?.[0].ox;
-            tile.oy = ~~this.meta[id].oy + ~~this.meta[id].frames?.[0].oy;
-            tile.ms = ~~this.meta[tile.id].delay;
-            
-            newTiles.push(tile);
-        });
-        this.tiles[x][y] = newTiles;
-    }
-    
-    replaceTop(x, y, ...ids) {
-        const newTiles = new Array();
-        ids.forEach(id => {
-            const tile = new Object();
-            tile.id = id;
-            tile.frame = 0;
-            tile.ox = ~~this.meta[id].ox + ~~this.meta[id].frames?.[0].ox;
-            tile.oy = ~~this.meta[id].oy + ~~this.meta[id].frames?.[0].oy;
-            tile.ms = ~~this.meta[id].delay;
-            
-            newTiles.push(tile);
-        });
-        this.tiles[x][y].pop();
-        this.tiles[x][y].push(...newTiles);
     }
 }

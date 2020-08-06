@@ -24,24 +24,17 @@ class InputManager {
         this.actions = [];
 
         // keyboard and mouse event listeners
-        document.addEventListener('click', event => {
-            Game.onClick(event);
-            //this.actions.push({ key: 'Click', data: event });
-        });
         document.addEventListener('mousemove', event => Game.onMouseMove(event));
-        document.addEventListener('keyup', event => {
-            Game.onKeyUp(event);
-            // if (this.KEYBOARD[event.key])
-            //     this.actions.push({ key: this.KEYBOARD[event.key], data: event.key });
-        });
+        document.addEventListener('wheel',     event => Game.onMouseWheel(event));
+        document.addEventListener('click',     event => Game.onClick(event));
+        document.addEventListener('keyup',     event => Game.onKeyUp(event));
         document.addEventListener('contextmenu', (event) => {
             event.preventDefault();
             Game.onRightClick(event);
-            //this.actions.push({ key: 'RightClick', data: event });
         });
     }
 
     update(step) {
-        return this.actions.splice(0, this.actions.length);
+        //return this.actions.splice(0, this.actions.length);
     }
 }

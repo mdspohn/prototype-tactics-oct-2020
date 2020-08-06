@@ -309,9 +309,8 @@ class CombatController {
     }
 
     async _initialize() {
-        this.entities.forEach(entity =>  entity.reset(this.layout.getLocation(entity.initialX, entity.initialY)));
+        this.entities.forEach(entity => entity.reset(this.layout.getLocation(entity.initialX, entity.initialY)));
         this.turns.use(this.entities);
-        // set initial settings before game swaps to rendering this controller
     }
 
     // -------------------
@@ -320,6 +319,7 @@ class CombatController {
 
     start() {
         Game.camera.toCenter(Game.canvas, this.layout);
+        this.turns.forecast();
         this.nextTurn();
     }
 
@@ -332,10 +332,8 @@ class CombatController {
 
         // reset entity state for new turn
         this.turns.active.hasMoved = false;
+
         this.interface.nextTurn(this.turns.active);
-        // this.interface.nextTurn(this.turns.active).then(() => {
-        //     this.indicators.display('movement', this.turns.active.getRange(this.layout, this.entities));
-        // });
     }
 
     // -------------------
@@ -362,6 +360,10 @@ class CombatController {
         this.interface.render(delta);
     }
 
+    // -------------------
+    // COMBAT ACTIONS
+    // --------------------------
+
     requestMove(event) {
         if (this.state === this.states.MOVE_REQUEST)
             return this.cancelMove();
@@ -374,7 +376,7 @@ class CombatController {
         if (event !== undefined)
             event.stopPropagation();
 
-        this.indicators.requestMove(this.turns.active.getRange(this.layout, this.entities));
+        this.indicators.set(this.turns.active.getRange(this.layout, this.entities), 'movement');
         this.interface.requestMove();
     }
 
@@ -383,10 +385,10 @@ class CombatController {
             return;
 
         this.state = this.states.MOVE_CONFIRM;
-        this.indicators.confirmMove();
+        this.indicators.clear();
 
-        const stepListenerId = Events.listen('move-step', () => {
-            this.interface._updateHeight(this.turns.active.location.z());
+        const stepListenerId = Events.listen('move-step', (beast) => {
+            this.interface._updateHeight(beast.location.z());
         }, true);
         Events.listen('move-complete', () => {
             this.turns.active.hasMoved = true;
@@ -400,7 +402,7 @@ class CombatController {
 
     cancelMove() {
         this.state = this.states.PLAYER_TURN;
-        this.indicators.cancelMove();
+        this.indicators.clear();
         this.interface.cancelMove();
     }
 
@@ -440,10 +442,11 @@ class CombatController {
     // --------------------------
 
     onMouseMove(event) {
-        //const location = Game.camera._windowToTile(event.x, event.y, this.layout);
-        if (location !== undefined) {
+        // TODO
+    }
 
-        }
+    onMouseWheel(event) {
+        console.log(event);
     }
 
     onClick(event) {
@@ -462,14 +465,13 @@ class CombatController {
                 this.cancelMove();
                 break;
         }
-        // TODO
     }
 
-    onMouseWheel(event) {
-        // TODO
-    }
+    // -------------------
+    // KEYBOARD/GAMEPAD BINDINGS INPUT MEDIATION
+    // --------------------------
 
     onKeyUp(event) {
-
+        // TODO
     }
 }

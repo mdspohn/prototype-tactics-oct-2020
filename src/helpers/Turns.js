@@ -3,23 +3,13 @@ class TurnManager {
         this.entities = null;
         this.order = [];
         this.active = null;
-
-        Events.listen('speed-change', (entities) => {
-            this.forecast();
-        }, true);
-        Events.listen('death', (entities) => {
-            this.forecast();
-            if (entities.includes(this.active))
-                this.next();
-        }, true);
     }
 
     use(entities) {
         this.entities = entities;
-        this.forecast();
     }
 
-    getNext() {
+    _getNext() {
         let next = (this.order[0].energy >= 100) ? this.order[0] : undefined;
         while (next === undefined) {
             const energized = [];
@@ -67,7 +57,7 @@ class TurnManager {
     }
 
     next() {
-        this.active = this.getNext();
+        this.active = this._getNext();
         this.active.energy -= 100;
         this.forecast();
     }

@@ -86,6 +86,10 @@ class GameManager {
         this.controllers[this.state].onMouseMove(event);
     }
 
+    onMouseWheel(event) {
+        this.controllers[this.state].onMouseWheel(event);
+    }
+
     onClick(event) {
         this.controllers[this.state].onClick(event);
     }
