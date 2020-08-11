@@ -37,10 +37,6 @@ class Beast {
 
         this.equipment = new EquipmentManager();
 
-        // this.anima_1 = Game.equipment.get('anima', config.anima_1);
-        // this.anima_2 = Game.equipment.get('anima', config.anima_2);
-        // this.anima_3 = Game.equipment.get('anima', config.anima_3);
-
         // ----------------------
         // POSITION
         // ---------------------------
@@ -75,10 +71,15 @@ class Beast {
         this.animation = this._getDefaultAnimation();
     }
     
-    reset(location) {
+    _initialize(location) {
+        // set location and defaults at beginning of combat
         this.energy = 0;
         this.location = location;
     }
+
+    // ----------------------
+    // COMBAT COMMANDS / HELPERS
+    // ---------------------------
 
     canMove() {
         // determine whether beast is allowed to move (has moved already, root, etc...)
@@ -86,7 +87,8 @@ class Beast {
     }
     
     moveTo(destination, animation_id = null, orientation = null, event = null) {
-        this.animationQueue.push(this._getAnimationData({ id: animation_id, orientation, destination, event }));
+        const animation = this._getAnimationData({ id: animation_id, orientation, destination, event });
+        this.animationQueue.push(animation);
     }
     
     walkTo(destination, layout) {

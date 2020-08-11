@@ -309,7 +309,7 @@ class CombatController {
     }
 
     async _initialize() {
-        this.entities.forEach(entity => entity.reset(this.layout.getLocation(entity.initialX, entity.initialY)));
+        this.entities.forEach(entity => entity._initialize(this.layout.getLocation(entity.initialX, entity.initialY)));
         this.turns.use(this.entities);
     }
 

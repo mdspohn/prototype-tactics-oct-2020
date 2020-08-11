@@ -29,6 +29,7 @@ class CombatIndicators {
     }
 
     clear() {
+        this.type = null;
         this.range = null;
     }
 
