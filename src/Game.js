@@ -23,7 +23,13 @@ class GameManager {
         this.states['WORLD'] = 3;
 
         this.state = null; // <0-3>
+
+        // upcoming/active scene
         this.scene = null;
+        this.map = null;
+        this.decoration = null;
+        this.entities = null;
+        this.layout = null;
 
         // --------------
         // XXX - DEVELOPMENT ONLY
@@ -39,24 +45,35 @@ class GameManager {
     async _load() {
         await Data._load();
         await Promise.all([...this.controllers.map(controller => controller._load())]);
+
+        // --------------
+        // XXX - This should be done when transitioning, not on game load
+        // -----------------------
         await this._prepare('test');
         await this._initialize();
     }
 
-    async _prepare(sceneId) {
-        this.scene = Data.getScene(sceneId);
-        await this.controllers[this.states[this.scene.type]]._prepare(this.scene);
+    async _prepare(id) {
+        this.scene = Data.getScene(id);
+
+        this.map = this.scene.map;
+        this.decoration = this.scene.decoration;
+        this.entities = this.scene.entities;
+        if (this.layout !== null)
+            this.layout._destroy();
+        this.layout = new Layout(this.map);
+
+        await this.controllers[this.states[this.scene.type]]._prepare(this.map, this.decoration, this.entities, this.layout);
     }
 
     async _initialize() {
-        await this.controllers[this.states[this.scene.type]]._initialize();
         this.state = this.states[this.scene.type];
-        this.controllers[this.states[this.scene.type]].start();
+        this.controllers[this.states[this.scene.type]]._initialize();
     }
     
     update(step) {
         this.camera.update(step);
-        this.input.update(step)
+        this.input.update(step);
         this.controllers[this.state].update(step);
 
         // --------------

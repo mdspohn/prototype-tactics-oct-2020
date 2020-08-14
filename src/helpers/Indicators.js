@@ -44,8 +44,8 @@ class CombatIndicators {
 
     render(delta, location) {
         const showMarker = this.range?.[location.x]?.[location.y]?.showMarker,
-              index = ~~location.slope() * (['north', 'west'].includes(location.orientation()) ? 1 : 2),
-              IS_MIRRORED = location.slope() && ['east', 'west'].includes(location.orientation());
+              index = ~~location.isSlope() * (['north', 'west'].includes(location.orientation()) ? 1 : 2),
+              IS_MIRRORED = location.isSlope() && ['east', 'west'].includes(location.orientation());
         
         if (!showMarker || !this.type)
             return;

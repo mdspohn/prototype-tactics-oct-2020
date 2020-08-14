@@ -1,56 +1,88 @@
-class Layout {
-    constructor(map, entities) {
-        this.boundaries = new Object();
-        this.boundaries.x1 = 0;
-        this.boundaries.x2 = 0;
-        this.boundaries.y1 = 0;
-        this.boundaries.y2 = 0;
-
+class Location {
+    constructor(x, y, map) {
+        // reference to parent map
+        this.map = map;
         this.tw = map.tw;
         this.th = map.th;
         this.td = map.td;
 
+        // tile coords
+        this.x = x;
+        this.y = y;
+    }
+
+    z() {
+        return this.map.tiles[this.x][this.y].length;
+    }
+
+    tile() {
+        return this.map.tiles[this.x][this.y][this.z() - 1];
+    }
+
+    ox() {
+        return this.tile().ox;
+    }
+
+    oy() {
+        return this.tile().oy;
+    }
+
+    posX() {
+        return this.y * (this.tw / 2) - this.x * (this.tw / 2) + this.ox();
+    }
+
+    posY() {
+        return this.y * (this.td / 2) + this.x * (this.td / 2) - (this.z() - 1) * this.th + this.oy();
+    }
+    
+    isWater() {
+        return !!this.map.meta[this.tile().id].water;
+    }
+
+    isSlope() {
+        return !!this.map.meta[this.tile().id].slope;
+    }
+
+    orientation() {
+        return this.map.meta[this.tile().id].orientation;
+    }
+}
+
+class Layout {
+    constructor(map) {
+        this.tw = map.tw;
+        this.th = map.th;
+        this.td = map.td;
+        this.boundaries = {
+            x1: 0,
+            x2: 0,
+            y1: 0,
+            y2: 0
+        };
+
         this.structure = map.tiles.map((row, ri) => {
-            return row.map((tiles, ci) => {
-                const location = new Object();
-                location.tw = this.tw;
-                location.th = this.th;
-                location.td = this.td;
-                location.x = ri;
-                location.y = ci;
-                location.z =  () => map.tiles[ri][ci].length;
-                location.ox = () => map.tiles[ri][ci][location.z() - 1].ox;
-                location.oy = () => map.tiles[ri][ci][location.z() - 1].oy;
-                location.posX = () => location.y * (location.tw / 2) - location.x * (location.tw / 2) + location.ox();
-                location.posY = () => location.y * (location.td / 2) + location.x * (location.td / 2) - (location.z() - 1) * location.th + location.oy();
-                location.getOccupants = () => entities.filter(entity => entity.location == location);
-                location.water = () => Boolean(map.meta[map.tiles[ri][ci][location.z() - 1].id].water);
-                location.slope = () => Boolean(map.meta[map.tiles[ri][ci][location.z() - 1].id].slope);
-                location.orientation = () => map.meta[map.tiles[ri][ci][location.z() - 1].id].orientation;
+            return row.map((col, ci) => {
+                const tile = new Location(ri, ci, map);
 
-                this.boundaries.x1 = Math.min(this.boundaries.x1, location.posX());
-                this.boundaries.x2 = Math.max(this.boundaries.x2, location.posX());
+                this.boundaries.x1 = Math.min(this.boundaries.x1, tile.posX());
+                this.boundaries.x2 = Math.max(this.boundaries.x2, tile.posX());
                 this.boundaries.y1 = 0;
-                this.boundaries.y2 = Math.max(this.boundaries.y2, location.posY() - location.td);
+                this.boundaries.y2 = Math.max(this.boundaries.y2, tile.posY() - map.td);
 
-                return location;
+                return tile;
             });
         });
         
-        this.sorted = new Object();
-        this.sorted.X = [].concat(...this.structure).sort((a, b) => (a.x - b.x) ? a.x - b.x : a.y - b.y);
-        this.sorted.Y = [].concat(...this.structure).sort((a, b) => (a.y - b.y) ? a.y - b.y : a.x - b.x);
-
+        this.sorted = {
+            X: [].concat(...this.structure).sort((a, b) => (a.x - b.x) ? a.x - b.x : a.y - b.y),
+            Y: [].concat(...this.structure).sort((a, b) => (a.y - b.y) ? a.y - b.y : a.x - b.x)
+        };
         this.method = 'X';
-        this.listenerId = Events.listen('sort', (method) => this.method = method, true);
-    }
-
-    sort(method) {
-        this.method = method;
+        this.event = Events.listen('sort', (method) => this.method = method, true);
     }
 
     _destroy() {
-        Events.remove('sort', this.listenerId);
+        Events.remove('sort', this.event);
     }
 
     getLocation(x, y) {

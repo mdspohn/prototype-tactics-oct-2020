@@ -270,20 +270,20 @@ class CombatController {
         this.interface  = new CombatInterface();
 
         this.states = new Object();
-        this.states.NONE           = 0;
-        this.states.AI_TURN        = 10;
-        this.states.PLAYER_TURN    = 20;
-        this.states.MOVE_REQUEST   = 21;
-        this.states.MOVE_CONFIRM   = 22;
-        this.states.ATTACK_REQUEST = 23;
-        this.states.ATTACK_CONFIRM = 24;
-        this.states.SKILLS_MENU    = 25;
-        this.states.SKILL_REQUEST  = 26;
-        this.states.SKILL_CONFIRM  = 27;
-        this.states.WAIT_REQUEST   = 28;
-        this.states.WAIT_CONFIRM   = 29;
+        this.states["NONE"]           = 0;
+        this.states["AI_TURN"]        = 10;
+        this.states["PLAYER_TURN"]    = 20;
+        this.states["MOVE_REQUEST"]   = 21;
+        this.states["MOVE_CONFIRM"]   = 22;
+        this.states["ATTACK_REQUEST"] = 23;
+        this.states["ATTACK_CONFIRM"] = 24;
+        this.states["SKILLS_MENU"]    = 25;
+        this.states["SKILL_REQUEST"]  = 26;
+        this.states["SKILL_CONFIRM"]  = 27;
+        this.states["WAIT_REQUEST"]   = 28;
+        this.states["WAIT_CONFIRM"]   = 29;
 
-        this.state = 0;
+        this.state = 0; // <0-29>
 
         // -------------------
         // EVENT LISTENERS
@@ -301,27 +301,28 @@ class CombatController {
         await Promise.all([this.indicators._load(), this.interface._load()]);
     }
 
-    async _prepare(scene) {
-        this.map = scene.map;
-        this.decoration = scene.decoration;
-        this.entities = scene.entities;
-        this.layout = new Layout(this.map, this.entities);
+    async _prepare(map, decoration, entities, layout) {
+        this.map = map;
+        this.decoration = decoration;
+        this.entities = entities;
+        this.layout = layout;
+
+        this.entities.forEach(unit => {
+            const location = this.layout.getLocation(unit.initialX, unit.initialY);
+            unit._initialize(location);
+        });
+        this.turns.use(this.entities);
     }
 
     async _initialize() {
-        this.entities.forEach(entity => entity._initialize(this.layout.getLocation(entity.initialX, entity.initialY)));
-        this.turns.use(this.entities);
+        Game.camera.toCenter(Game.canvas, this.layout);
+        this.turns.forecast();
+        this.nextTurn();
     }
 
     // -------------------
     // COMBAT STATE CHANGES
     // --------------------------
-
-    start() {
-        Game.camera.toCenter(Game.canvas, this.layout);
-        this.turns.forecast();
-        this.nextTurn();
-    }
 
     nextTurn() {
         this.turns.next();
@@ -355,7 +356,7 @@ class CombatController {
             this.map.render(delta, location);
             this.indicators.render(delta, location);
             this.decoration.render(delta, location);
-            location.getOccupants().forEach(occupant => occupant.render(delta, location));
+            this.entities.filter(entity => entity.location == location).forEach(occupant => occupant.render(delta, location));
         });
         this.interface.render(delta);
     }

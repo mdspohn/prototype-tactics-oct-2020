@@ -234,7 +234,7 @@ class Beast {
               x    = (end.x - start.x),
               y    = (end.y - start.y),
               z    = (end.z() - start.z()),
-              s    = (~~end.slope()) - (~~start.slope());
+              s    = (~~end.isSlope()) - (~~start.isSlope());
 
         const dist = Math.abs((end.x - start.x)) + Math.abs((end.y - start.y)),
               swap = (end.x > start.x || end.y > start.y) && ((z === 0 && dist <= 1 && s >= 0) || animation.sloped);
@@ -396,7 +396,7 @@ class Beast {
             return;
 
         const X = Game.camera.posX() + this.location.posX() - ((this.tw - this.location.tw) / 2),
-              Y = Game.camera.posY() + this.location.posY() - ((this.th - this.location.th) - (this.location.td / 2)) + (~~this.location.slope() * (this.location.th / 2)),
+              Y = Game.camera.posY() + this.location.posY() - ((this.th - this.location.th) - (this.location.td / 2)) + (~~this.location.isSlope() * (this.location.th / 2)),
               OFFSET_X = ~~this.animation.ox + ~~FRAME_META.ox + ~~this.animation.cx,
               OFFSET_Y = ~~this.animation.oy + ~~FRAME_META.oy + ~~this.animation.cy + ~~this.animation.cz,
               IS_MIRRORED = this.animation.meta.mirrored;
