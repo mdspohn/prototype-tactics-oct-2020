@@ -84,8 +84,8 @@ class GameManager {
     }
 
     render(delta) {
-        this.camera.render(delta);
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.camera.render(delta);
         this.controllers[this.state].render(delta);
 
         // --------------

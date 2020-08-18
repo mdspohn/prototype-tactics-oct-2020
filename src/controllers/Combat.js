@@ -308,9 +308,9 @@ class CombatController {
         this.layout = layout;
 
         this.entities.forEach(unit => {
-            const location = this.layout.getLocation(unit.initialX, unit.initialY);
-            unit._initialize(location);
+            unit._initialize(this.layout.getLocation(unit.initialX, unit.initialY));
         });
+        
         this.turns.use(this.entities);
     }
 
