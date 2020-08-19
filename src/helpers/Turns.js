@@ -1,65 +1,56 @@
-class TurnManager {
+class CombatTurns {
     constructor() {
-        this.entities = null;
-        this.order = [];
-        this.active = null;
     }
 
-    use(entities) {
-        this.entities = entities;
+    _entityCanTakeTurn(entity) {
+        return entity.health > 0;
     }
 
-    _getNext() {
-        let next = (this.order[0].energy >= 100) ? this.order[0] : undefined;
+    _entityIsReady(entity, cycles) {
+        const energy = entity.energy + (entity.speed * cycles),
+              energized = energy >= 100,
+              isNewlyEnergized = Math.floor(energy / 100) > Math.floor((energy - (entity.speed * 1)) / 100);
+
+        return energized && isNewlyEnergized;
+    }
+
+    getNext(entities) {
+        let next = entities.find(entity => entity.energy >= 100);
         while (next === undefined) {
-            const energized = [];
-            this.entities.forEach(entity => {
-                if (entity.health <= 0)
-                    return;
-
-                entity.energy += entity.speed;
-                
-                if (entity.energy >= 100)
-                    energized.push(entity);
+            const ready = [];
+            entities.forEach(entity => {
+                if (this._entityCanTakeTurn(entity)) {
+                    entity.energy += entity.speed;
+                    
+                    if (entity.energy >= 100)
+                        ready.push(entity);
+                }
             });
 
-            energized.sort((a, b) => b.energy - a.energy);
-            next = energized[0];
+            ready.sort((a, b) => b.energy - a.energy);
+            next = ready[0];
         }
+        next.energy -= 100;
         return next;
     }
 
-    forecast(count = 7) {
-        let order = new Array(),
-            cycles = 0;
+    getForecast(entities, count = 7) {
+        const forecast = [];
+        let cycles = 0;
 
-        while (order.length < count) {
-            const energized = [];
+        while (forecast.length < count) {
+            const ready = [];
 
-            this.entities.forEach(entity => {
-                if (entity.health <= 0)
-                    return;
-
-                const energy   = entity.energy + (entity.speed * cycles),
-                      p_energy = energy - (entity.speed * 1);
-                
-                if (energy >= 100 && Math.floor(energy / 100) > Math.floor(p_energy / 100))
-                    energized.push({ energy: (energy % 100), entity });
+            entities.forEach(entity => {
+                if (this._entityCanTakeTurn(entity) && this._entityIsReady(entity, cycles))
+                    ready.push({ entity, energy: (entity.energy + (entity.speed * cycles)) % 100 });
             });
 
-            energized.sort((a, b) => (b.energy % 100) - (a.energy % 100));
-            energized.forEach(item => order.push(item.entity));
+            ready.sort((a, b) => (b.energy % 100) - (a.energy % 100));
+            ready.forEach(energized => forecast.push(energized.entity));
             cycles += 1;
         }
 
-        Events.dispatch('turn-order', { old: this.order, new: order.slice(0, count) });
-        this.order = order.slice(0, count);
+        return forecast.slice(0, count);
     }
-
-    next() {
-        this.active = this._getNext();
-        this.active.energy -= 100;
-        this.forecast();
-    }
-
 }

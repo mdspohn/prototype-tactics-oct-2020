@@ -32,9 +32,9 @@ class CombatInterface {
         this.turns.dom.canvas  = document.getElementById('co__canvas');
         this.turns.ctx = this.turns.dom.canvas.getContext('2d');
 
+        this.turns.forecast = [];
         this.turns.isAnimating = false;
         this.turns.offset = 0;
-        this.turns.entities = [];
 
         // Battlefield Conditions
         this.conditions = new Object();
@@ -128,10 +128,10 @@ class CombatInterface {
         const offset = Math.floor(Math.max(this.turns.offset - ((delta / 500) * 32), 0));
 
         this.turns.isAnimating = (offset !== 0);
-        this.turns.entities.forEach((entity, index) => {
+        this.turns.forecast.forEach((entity, index) => {
             const x       = (index *  32),
                   clear   = (index === 0),
-                  opacity = (index === 0) ? (Math.max(offset - 16, 0) / 16) : (index === this.turns.entities.length - 1) ? 1 - (offset / 32) : 1;
+                  opacity = (index === 0) ? (Math.max(offset - 16, 0) / 16) : (index === this.turns.forecast.length - 1) ? 1 - (offset / 32) : 1;
                   
             this._renderEntity(this.turns.dom.canvas, this.turns.ctx, entity, false, clear, x + offset, true, opacity);
         });
@@ -177,17 +177,13 @@ class CombatInterface {
         element.dom.tp_bar.style.width = Math.ceil((entity.tp / 300) * 100) + '%';
     }
 
-    _updateTurns(order) {
-        const active = order.old?.[0];
-
-        this.turns.entities = order.new;
+    updateTurns(forecast, active) {
+        this.turns.forecast = forecast;
         this.turns.isAnimating = true;
-
-        if (active === undefined)
-            return;
-            
-        this.turns.offset = 32;
-        this.turns.entities.unshift(active);
+        if (active !== undefined && (active != forecast[0])) {
+            this.turns.offset = 32;
+            this.turns.forecast.unshift(active);
+        }
     }
 
     _updateSuggestion(text, icon = 'info') {
@@ -265,7 +261,7 @@ class CombatController {
         // COMBAT STATE
         // -----------------------
 
-        this.turns      = new TurnManager();
+        this.turns      = new CombatTurns();
         this.indicators = new CombatIndicators();
         this.interface  = new CombatInterface();
 
@@ -285,11 +281,11 @@ class CombatController {
 
         this.state = 0; // <0-29>
 
+        this.active = null;
+
         // -------------------
         // EVENT LISTENERS
         // -----------------------
-
-        Events.listen('turn-order', data => this.interface._updateTurns(data), true);
 
         Events.listen('MOVE_REQUEST',   (event) => this.requestMove(event),   true);
         Events.listen('ATTACK_REQUEST', (event) => this.requestAttack(event), true);
@@ -310,13 +306,10 @@ class CombatController {
         this.entities.forEach(unit => {
             unit._initialize(this.layout.getLocation(unit.initialX, unit.initialY));
         });
-        
-        this.turns.use(this.entities);
     }
 
     async _initialize() {
         Game.camera.toCenter(Game.canvas, this.layout);
-        this.turns.forecast();
         this.nextTurn();
     }
 
@@ -324,17 +317,18 @@ class CombatController {
     // COMBAT STATE CHANGES
     // --------------------------
 
-    nextTurn() {
-        this.turns.next();
-        Game.camera.toLocation(this.turns.active.location, 750, 'ease-out');
+    async nextTurn() {
+        // set new active entity
+        this.active = this.turns.getNext(this.entities);
+        this.active.hasMoved = false;
+        this.interface.updateTurns(this.turns.getForecast(this.entities), this.active);
 
-        // detect if AI or player then set state
+        // pan camera to entity
+        Game.camera.toLocation(this.active.location, 750, 'ease-out');
+
+        // enable interface and new state
+        await this.interface.nextTurn(this.active);
         this.state = this.states.PLAYER_TURN;
-
-        // reset entity state for new turn
-        this.turns.active.hasMoved = false;
-
-        this.interface.nextTurn(this.turns.active);
     }
 
     // -------------------
@@ -369,7 +363,7 @@ class CombatController {
         if (this.state === this.states.MOVE_REQUEST)
             return this.cancelMove();
         
-        if (this.state !== this.states.PLAYER_TURN || !this.turns.active.canMove())
+        if (this.state !== this.states.PLAYER_TURN || !this.active.canMove())
             return;
 
         this.state = this.states.MOVE_REQUEST;
@@ -377,7 +371,7 @@ class CombatController {
         if (event !== undefined)
             event.stopPropagation();
 
-        this.indicators.set(this.turns.active.getRange(this.layout, this.entities), 'movement');
+        this.indicators.set(this.active.getRange(this.layout, this.entities), 'movement');
         this.interface.requestMove();
     }
 
@@ -392,13 +386,13 @@ class CombatController {
             this.interface._updateHeight(beast.location.z());
         }, true);
         Events.listen('move-complete', () => {
-            this.turns.active.hasMoved = true;
+            this.active.hasMoved = true;
             this.state = this.states.PLAYER_TURN;
             this.interface.confirmMove();
-            this.interface._updateHeight(this.turns.active.location.z());
+            this.interface._updateHeight(this.active.location.z());
             Events.remove('move-step', stepListenerId);
         });
-        this.turns.active.walkTo(location, this.layout);
+        this.active.walkTo(location, this.layout);
     }
 
     cancelMove() {
@@ -420,10 +414,16 @@ class CombatController {
     requestWait(entity) {
         if (this.state !== this.states.PLAYER_TURN)
             return;
-        this.interface.endTurn().then(() => this.nextTurn());
+        this.state = this.states.WAIT_REQUEST;
+        this.interface.endTurn().then(() => {
+            this.confirmWait(entity);
+        });
     }
 
-    confirmWait(entity) {}
+    confirmWait(entity) {
+        this.state = this.states.WAIT_CONFIRM;
+        this.nextTurn();
+    }
 
     // this.states.NONE           = 0;
     // this.states.AI_TURN        = 10;

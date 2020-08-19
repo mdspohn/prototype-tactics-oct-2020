@@ -39,7 +39,6 @@ class CombatIndicators {
 
         this.markers[this.type].ms = (this.markers[this.type].ms + (step)) % this.markers[this.type].duration;
         this.markers[this.type].opacity = Math.floor(Math.abs(this.markers[this.type].ms - (this.markers[this.type].duration / 2))) / (this.markers[this.type].duration * 2);
-
     }
 
     render(delta, location) {
