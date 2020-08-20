@@ -261,9 +261,9 @@ class CombatController {
         // COMBAT STATE
         // -----------------------
 
-        this.turns      = new CombatTurns();
-        this.indicators = new CombatIndicators();
-        this.interface  = new CombatInterface();
+        this.turns     = new CombatTurns();
+        this.markers   = new CombatMarkers();
+        this.interface = new CombatInterface();
 
         this.states = new Object();
         this.states["NONE"]           = 0;
@@ -294,18 +294,15 @@ class CombatController {
     }
 
     async _load() {
-        await Promise.all([this.indicators._load(), this.interface._load()]);
+        await Promise.all([this.markers._load(), this.interface._load()]);
     }
 
     async _prepare(map, decoration, entities, layout) {
         this.map = map;
         this.decoration = decoration;
-        this.entities = entities;
         this.layout = layout;
-
-        this.entities.forEach(unit => {
-            unit._initialize(this.layout.getLocation(unit.initialX, unit.initialY));
-        });
+        this.entities = entities;
+        this.entities.forEach(unit => unit._initialize(this.layout.getLocation(unit.initialX, unit.initialY)));
     }
 
     async _initialize() {
@@ -341,14 +338,14 @@ class CombatController {
             this.decoration.update(step, location);
         });
         this.entities.forEach(entity => entity.update(step));
-        this.indicators.update(step);
+        this.markers.update(step);
         this.interface.update(step);
     }
 
     render(delta) {
         this.layout.forEach(location => {
             this.map.render(delta, location);
-            this.indicators.render(delta, location);
+            this.markers.render(delta, location);
             this.decoration.render(delta, location);
             this.entities.filter(entity => entity.location == location).forEach(occupant => occupant.render(delta, location));
         });
@@ -371,16 +368,16 @@ class CombatController {
         if (event !== undefined)
             event.stopPropagation();
 
-        this.indicators.set(this.active.getRange(this.layout, this.entities), 'movement');
+        this.markers.set(this.active.getRange(this.layout, this.entities), 'movement');
         this.interface.requestMove();
     }
 
     confirmMove(location) {
-        if (location === undefined || this.indicators?.range?.[location.x]?.[location.y] === undefined)
+        if (location === undefined || this.markers?.range?.[location.x]?.[location.y] === undefined)
             return;
 
         this.state = this.states.MOVE_CONFIRM;
-        this.indicators.clear();
+        this.markers.clear();
 
         const stepListenerId = Events.listen('move-step', (beast) => {
             this.interface._updateHeight(beast.location.z());
@@ -397,7 +394,7 @@ class CombatController {
 
     cancelMove() {
         this.state = this.states.PLAYER_TURN;
-        this.indicators.clear();
+        this.markers.clear();
         this.interface.cancelMove();
     }
 

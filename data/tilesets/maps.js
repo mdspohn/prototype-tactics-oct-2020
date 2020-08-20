@@ -82,7 +82,8 @@ GAME_DATA.tilesets.maps['woodlands'] = {
         21: {
             "name": "Water",
             "idx": 20,
-            "water": true
+            "water": true,
+            "oy": 1
         },
         "impact": {
             "frames": [

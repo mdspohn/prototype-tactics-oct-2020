@@ -153,14 +153,17 @@
 
   <script type="text/javascript">
     GAME_DATA = new Object();
-    GAME_DATA.beasts = new Object();
-    GAME_DATA.equipment = new Object();
-    GAME_DATA.areas = new Object();
     GAME_DATA.scenes = new Object();
+    GAME_DATA.areas = new Object();
+    GAME_DATA.beasts = new Object();
+    GAME_DATA.skills = new Object();
+    GAME_DATA.equipment = new Object();
+
     GAME_DATA.tilesets = new Object();
-    GAME_DATA.tilesets.beasts = new Object();
-    GAME_DATA.tilesets.decorations = new Object();
     GAME_DATA.tilesets.maps = new Object();
+    GAME_DATA.tilesets.decorations = new Object();
+    GAME_DATA.tilesets.beasts = new Object();
+    GAME_DATA.tilesets.skills = new Object();
     GAME_DATA.tilesets.equipment = new Object();
     
     ASSET_DIR = 'assets';
@@ -171,25 +174,27 @@
   <script type="text/javascript" src="data/scenes.js"></script>
   <script type="text/javascript" src="data/areas.js"></script>
   <script type="text/javascript" src="data/beasts.js"></script>
+  <script type="text/javascript" src="data/skills.js"></script>
   <script type="text/javascript" src="data/equipment.js"></script>
   <script type="text/javascript" src="data/tilesets/maps.js"></script>
   <script type="text/javascript" src="data/tilesets/decorations.js"></script>
   <script type="text/javascript" src="data/tilesets/beasts.js"></script>
+  <script type="text/javascript" src="data/tilesets/skills.js"></script>
   <script type="text/javascript" src="data/tilesets/equipment.js"></script>
 
 
   <!-- GAME OBJECTS -->
+  <script type="text/javascript" src="src/models/Location.js"></script>
+  <script type="text/javascript" src="src/models/Layout.js"></script>
   <script type="text/javascript" src="src/models/Map.js"></script>
   <script type="text/javascript" src="src/models/Decoration.js"></script>
   <script type="text/javascript" src="src/models/Tileset.js"></script>
   <script type="text/javascript" src="src/models/Beast.js"></script>
-  <script type="text/javascript" src="src/models/Location.js"></script>
-  <script type="text/javascript" src="src/models/Layout.js"></script>
   <script type="text/javascript" src="src/models/Equipment.js"></script>
 
   <!-- UTILITY FUNCTION / HELPERS -->
   <script type="text/javascript" src="src/helpers/Turns.js"></script>
-  <script type="text/javascript" src="src/helpers/Indicators.js"></script>
+  <script type="text/javascript" src="src/helpers/Markers.js"></script>
 
   <!-- GAME STATE CONTROLLERS -->
   <script type="text/javascript" src="src/controllers/Menu.js"></script>

@@ -1,6 +1,11 @@
 class CombatTurns {
     constructor() {
+        // XXX: not sure if this will ever need an instance
     }
+
+    // ----------------------
+    // HELPER METHODS
+    // ---------------------------
 
     _entityCanTakeTurn(entity) {
         return entity.health > 0;
@@ -13,6 +18,10 @@ class CombatTurns {
 
         return energized && isNewlyEnergized;
     }
+
+    // -----------------------
+    // TURN INFORMATION
+    // ----------------------------
 
     getNext(entities) {
         let next = entities.find(entity => entity.energy >= 100);
