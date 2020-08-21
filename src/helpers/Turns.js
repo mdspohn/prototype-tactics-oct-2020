@@ -1,4 +1,4 @@
-class CombatTurns {
+class Turns {
     constructor() {
         // XXX: not sure if this will ever need an instance
     }

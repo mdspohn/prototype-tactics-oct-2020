@@ -261,8 +261,9 @@ class CombatController {
         // COMBAT STATE
         // -----------------------
 
-        this.turns     = new CombatTurns();
-        this.markers   = new CombatMarkers();
+        this.turns     = new Turns();
+        this.markers   = new Markers();
+        this.pathing   = new Pathing();
         this.interface = new CombatInterface();
 
         this.states = new Object();
@@ -307,6 +308,7 @@ class CombatController {
 
     async _initialize() {
         Game.camera.toCenter(Game.canvas, this.layout);
+        console.log(this.pathing.getRange(this.layout, this.entities[0].location, this.entities[0].move));
         this.nextTurn();
     }
 
