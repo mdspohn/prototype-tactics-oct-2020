@@ -224,12 +224,15 @@ class CombatInterface {
         this._animateElement(this.active.dom.wrapper, 'left',   30, 500, 'px', 'active-show');
         this._animateElement(this.active.dom.wrapper, 'opacity', 1, 500);
         this._updateSuggestion('Select an action. The mouse wheel can be used to navigate menus.');
+        this.menu.dom.actions_move.classList.toggle('dim', false);
     }
 
-    async confirmMove() {
+    async confirmMove(stepsRemaining) {
         this._animateElement(this.active.dom.wrapper, 'left',   30, 500, 'px', 'active-show');
         this._animateElement(this.active.dom.wrapper, 'opacity', 1, 500);
-        this.menu.dom.actions_move.classList.toggle('dim', true);
+        if (stepsRemaining <= 0) {
+            this.menu.dom.actions_move.classList.toggle('dim', true);
+        }
         this._updateSuggestion('Select an action. The mouse wheel can be used to navigate menus.');
     }
 
@@ -308,7 +311,7 @@ class CombatController {
 
     async _initialize() {
         Game.camera.toCenter(Game.canvas, this.layout);
-        console.log(this.pathing.getRange(this.layout, this.entities[0].location, this.entities[0].move));
+        console.log(this.pathing.getRange(this.layout, this.entities, this.entities[0].location, this.entities[0].move, {}));
         this.nextTurn();
     }
 
@@ -319,7 +322,7 @@ class CombatController {
     async nextTurn() {
         // set new active entity
         this.active = this.turns.getNext(this.entities);
-        this.active.hasMoved = false;
+        this.active.resetTurn();
         this.interface.updateTurns(this.turns.getForecast(this.entities), this.active);
 
         // pan camera to entity
@@ -387,7 +390,7 @@ class CombatController {
         Events.listen('move-complete', () => {
             this.active.hasMoved = true;
             this.state = this.states.PLAYER_TURN;
-            this.interface.confirmMove();
+            this.interface.confirmMove(this.active.getMovement());
             this.interface._updateHeight(this.active.location.z());
             Events.remove('move-step', stepListenerId);
         });
@@ -397,6 +400,11 @@ class CombatController {
     cancelMove() {
         this.state = this.states.PLAYER_TURN;
         this.markers.clear();
+        this.interface.cancelMove();
+    }
+
+    revertMove() {
+        this.active.resetMove();
         this.interface.cancelMove();
     }
 
@@ -463,6 +471,9 @@ class CombatController {
         switch(this.state) {
             case this.states.MOVE_REQUEST:
                 this.cancelMove();
+                break;
+            case this.states.PLAYER_TURN:
+                this.revertMove();
                 break;
         }
     }

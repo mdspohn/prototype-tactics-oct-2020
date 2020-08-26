@@ -45,7 +45,7 @@ class Pathing {
 
     }
 
-    _addToRange(range, layout, location, previous, distance, steps, opts) {
+    _addToRange(range, layout, entities, location, previous, distance, steps, opts) {
         const z = ~~opts.z,
               waterObstructs = Boolean(opts.waterObstructs),
               includeObstructions = Boolean(opts.includeObstructions),
@@ -65,7 +65,7 @@ class Pathing {
                 if (Math.abs(zChange) > z) {
                     if (Math.abs(zChange) > (z + 1)) {
                         valid = false;
-                    } else if (location.isSloped() || previous.isSloped()) {
+                    } else if (location.isSlope() || previous.isSlope()) {
                         // TODO check if z movement is allowed because of slope
                     }
                 }
@@ -98,15 +98,36 @@ class Pathing {
 
             [n, s, e, w].forEach(nextLocation => {
                 if (nextLocation !== undefined)
-                    this._addToRange(range, layout, nextLocation, nextPrevious, distance, (steps + 1), opts);
+                    this._addToRange(range, layout, entities, nextLocation, nextPrevious, distance, (steps + 1), opts);
             });
         }
 
         return range;
     }
 
-    getRange(layout, location, distance, opts = {}) {
-        return this._addToRange(new WeakMap(), layout, location, null, distance, 0, opts);
+    getRange(layout, entities, location, distance, opts = {}) {
+        return this._addToRange(new WeakMap(), layout, entities, location, null, distance, 0, opts);
+    }
+
+    getMovementRange(layout, entities, beast) {
+        return this.getRange(
+            layout,
+            entities,
+            beast.location,
+            beast.move,
+            {
+                zUp: beast.jump,                                 // max z difference when going up
+                zDown: (beast.jump + 1),                         // max z difference when going down
+                targets: [],                                     // will not count these target types as obstructions and include them in range (empty array for moving)
+                blockers: ['neutral', 'foe'],                    // pathing cannot continue through these entity types
+                includeWater: beast.canSwim() || beast.canFly(), // whether water is a selectable tile
+                hazardDistance: Math.floor(beast.jump / 2)       // max hazard tiles that can be jumped over
+            }
+        );
+    }
+
+    getSkillRange(layout, entities, location, skill) {
+
     }
 
     isInRange(location, range) {

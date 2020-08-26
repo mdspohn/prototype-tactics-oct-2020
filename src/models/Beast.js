@@ -29,7 +29,11 @@ class Beast {
         // ----------------------
 
         this.energy = 0;
-        this.hasMoved = false;
+
+        this.lastLocation;
+        this.lastOrientation;
+        this.totalMoved = 0;
+        this.lastMoved = 0;
 
         // ----------------------
         // EQUIPMENT
@@ -81,9 +85,46 @@ class Beast {
     // COMBAT COMMANDS / HELPERS
     // ---------------------------
 
+    resetTurn() {
+        this.lastLocation = null;
+        this.lastOrientation = null;
+        this.totalMoved = 0;
+        this.lastMoved = 0;
+    }
+
+    resetMove() {
+        if (this.lastLocation === null)
+            return;
+        
+        this.animation.destination = this.lastLocation;
+        this.orientation = this.lastOrientation;
+        this._handleAnimationComplete(this.animation.meta);
+
+        this.lastLocation = null;
+        this.lastOrientation = null;
+        this.totalMoved -= this.lastMoved;
+        this.lastMoved = 0;
+    }
+
+    getMovement() {
+        return this.move - this.totalMoved;
+    }
+
     canMove() {
         // determine whether beast is allowed to move (has moved already, root, etc...)
-        return !this.hasMoved;
+        return this.getMovement() > 0;
+    }
+
+    canSwim() {
+        return false;
+    }
+
+    canFloat() {
+        return false;
+    }
+
+    canFly() {
+        return false;
     }
     
     moveTo(destination, animation_id = null, orientation = null, event = null) {
@@ -110,6 +151,14 @@ class Beast {
             y = newY;
         }
     
+        // set variables for being able to reset movement choice
+        this.lastLocation = this.lastLocation || this.location;
+        this.lastOrientation = this.lastOrientation || this.orientation;
+        const distanceTraveled = Math.abs(destination.x - this.location.x) + Math.abs(destination.y - this.location.y);
+        this.lastMoved += distanceTraveled;
+        this.totalMoved += distanceTraveled;
+
+        // execute movement
         moves.forEach(move => this.moveTo(move.location, null, null, move.event));
     }
     
@@ -133,7 +182,7 @@ class Beast {
                     showMarker: x != this.x() || y != this.y()
                 };
         
-                if (steps >= this.move)
+                if (steps >= this.getMovement())
                     return;
                 
                 addTile(Math.max(x - 1, 0), y, x, y, (steps + 1));
