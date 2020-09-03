@@ -92,6 +92,23 @@ class Beast {
         this.lastMoved = 0;
     }
 
+    getAllegiance() {
+        return 'foe';
+    }
+
+    getAllegianceTo(beast) {
+        const allegianceDiff = Math.abs(beast.allegiance - this.allegiance);
+        
+        switch(allegianceDiff) {
+            case 0:
+                return 'ally';
+            case 1:
+                return 'neutral';
+            case 2:
+                return 'foe'
+        }
+    }
+
     resetMove() {
         if (this.lastLocation === null)
             return;
@@ -248,6 +265,7 @@ class Beast {
               EO  = end.orientation(),
               OSO = this._getOppositeOrientation(SO),
               OEO = this._getOppositeOrientation(EO),
+              DIFF = Math.abs(end.x - start.x) + Math.abs(end.y - start.y),
               DIFF_Z = end.z() - start.z();
           
         if (Math.abs(DIFF_Z) <= 1 && (SO !== undefined || EO !== undefined)) {
@@ -261,7 +279,7 @@ class Beast {
         if (animation.sloped)
             return 'walk';
 
-        if (Math.abs(DIFF_Z) > 0)
+        if (Math.abs(DIFF_Z) > 0 || DIFF > 1)
             return (DIFF_Z > 0) ? 'jump-up' : 'jump-down';
 
         // at least one tile is a slope, but there is no z change if we're here

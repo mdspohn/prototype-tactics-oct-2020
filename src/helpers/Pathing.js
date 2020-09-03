@@ -45,46 +45,39 @@ class Pathing {
 
     }
 
-    _addToRange(range, layout, entities, location, previous, distance, steps, opts) {
-        const z = ~~opts.z,
-              waterObstructs = Boolean(opts.waterObstructs),
-              includeObstructions = Boolean(opts.includeObstructions),
-              entityObstructionLevel = ~~opts.entityObstructionLevel,
-              stopOnObstructions = Boolean(opts.stopOnObstructions);
-
+    _addToRange(range, layout, entities, location, previous, distance, steps, restrictions) {
+        const zUp = restrictions.zUp,
+              zDown = restrictions.zDown,
+              targets = restrictions.targets,
+              blockers = restrictions.blockers,
+              includeWater = restrictions.includeWater,
+              hazardDistance = restrictions.hazardDistance;
+        
         // only add location to map if it doesn't exist already or exists with more steps
         if (!range.has(location) || range.get(location).steps > steps) {
-            // make sure location abides by restrictions
-            let valid = true,
-                obstruction = false;
-            
+
+            let selectable = true,
+                obstruction = false,
+                hazard = false;
+                
             if (previous !== null) {
 
-                // check height restrictions
-                const zChange = location.z() - previous.z();
-                if (Math.abs(zChange) > z) {
-                    if (Math.abs(zChange) > (z + 1)) {
-                        valid = false;
-                    } else if (location.isSlope() || previous.isSlope()) {
-                        // TODO check if z movement is allowed because of slope
-                    }
+                // abides by z-axis restrictions?
+
+                // abides by hazard restrictions?
+
+                // abides by entity targetting/blocking restrictions?
+                const blocker = entities.find(entity => entity.location === location);
+                if (blocker !== undefined) {
+                    selectable = !targets.includes(blocker.getAllegiance());
+                    obstruction = blockers.includes(blocker.getAllegiance());
                 }
 
-                // check water restrictions
-                if (waterObstructs) {
-                    obstruction &= location.isWater();
-                }
-
-                // check entity restrictions
-                if (entityObstructionLevel !== -1) {
-
-                }
+                if (obstruction)
+                    return;
             }
 
-            if (!valid || (obstruction && stopOnObstructions))
-                return;
-
-            range.set(location, { previous, steps, obstruction });
+            range.set(location, { previous, steps, selectable, obstruction, hazard });
 
             if (steps >= distance)
                 return;
@@ -98,23 +91,58 @@ class Pathing {
 
             [n, s, e, w].forEach(nextLocation => {
                 if (nextLocation !== undefined)
-                    this._addToRange(range, layout, entities, nextLocation, nextPrevious, distance, (steps + 1), opts);
+                    this._addToRange(range, layout, entities, nextLocation, nextPrevious, distance, (steps + 1), restrictions);
             });
         }
 
         return range;
     }
 
-    getRange(layout, entities, location, distance, opts = {}) {
-        return this._addToRange(new WeakMap(), layout, entities, location, null, distance, 0, opts);
+    _addLocationToPattern(range, location, opts) {
+
+    }
+
+    _addLocationToRange(range, location, opts) {
+        // opts <Object>
+        //      .previous <Location>
+        //      .distance <Int>
+        //      .steps <Int>
+        //      .targets <Array> ['EMPTY', 'SELF', 'ALLY', 'NEUTRAL', 'FOE']
+        //      .obstructions <Array> ['HAZARD', 'ALLY', 'NEUTRAL', 'FOE']
+        //      .waterIsHazard <Boolean>
+        //      .hasTrajectory <Boolean>
+        //      .trajectory <String> ...PARABOLA, LINEAR, ORBITAL
+        //      .jumpUp <Int>
+        //      .jumpDown <Int>
+        //      .jumpHazard <Int>
+
+        if (!range.has(location) || range.get(location).steps > opts.steps) {
+            const config = new Object();
+            config.previous = opts.previous;
+            config.steps = opts.steps;
+            config.selectable = true;
+            config.hazard = false;
+            config.obstruction = false;
+
+            range.set(location, config);
+        }
+    }
+
+    getRange(opts) {
+        const range = new WeakMap();
+        this._addLocationToRange(range, opts.location, opts);
+        return range;
     }
 
     getMovementRange(layout, entities, beast) {
-        return this.getRange(
+        return this._addToRange(
+            new WeakMap(),
             layout,
             entities,
             beast.location,
+            null,
             beast.move,
+            0,
             {
                 zUp: beast.jump,                                 // max z difference when going up
                 zDown: (beast.jump + 1),                         // max z difference when going down
@@ -127,7 +155,27 @@ class Pathing {
     }
 
     getSkillRange(layout, entities, location, skill) {
+        return this._addToRange(
+            new WeakMap(),
+            layout,
+            entities,
+            location,
+            null,
+            skill.range,
+            0,
+            {
+                zUp: skill.z,                        // max z difference when going up
+                zDown: skill.z,                      // max z difference when going down
+                targets: ['ally', 'neutral', 'foe'], // will not count these target types as obstructions and include them in range (empty array for moving)
+                blockers: ['neutral', 'foe'],        // pathing cannot continue through these entity types
+                includeWater: true,                  // whether water is a selectable tile
+                hazardDistance: skill.range          // max hazard tiles that can be jumped over
+            }
+        );
+    }
 
+    isValidLocation(location, range) {
+        return range.has(location) && range.get(location).valid;
     }
 
     isInRange(location, range) {

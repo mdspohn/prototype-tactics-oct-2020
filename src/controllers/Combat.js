@@ -236,6 +236,10 @@ class CombatInterface {
         this._updateSuggestion('Select an action. The mouse wheel can be used to navigate menus.');
     }
 
+    async resetMove() {
+        this.menu.dom.actions_move.classList.toggle('dim', false);
+    }
+
     async requestWait() {
 
     }
@@ -311,7 +315,7 @@ class CombatController {
 
     async _initialize() {
         Game.camera.toCenter(Game.canvas, this.layout);
-        console.log(this.pathing.getRange(this.layout, this.entities, this.entities[0].location, this.entities[0].move, {}));
+        console.log(this.pathing.getMovementRange(this.layout, this.entities, this.entities[0]));
         this.nextTurn();
     }
 
@@ -403,9 +407,12 @@ class CombatController {
         this.interface.cancelMove();
     }
 
-    revertMove() {
-        this.active.resetMove();
-        this.interface.cancelMove();
+    resetMove() {
+        if (this.active.lastMoved !== 0) {
+            this.active.resetMove();
+            this.interface.resetMove();
+            this.requestMove();
+        }
     }
 
     requestAttack(entity) {}
@@ -473,7 +480,7 @@ class CombatController {
                 this.cancelMove();
                 break;
             case this.states.PLAYER_TURN:
-                this.revertMove();
+                this.resetMove();
                 break;
         }
     }
