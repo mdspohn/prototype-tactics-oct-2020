@@ -315,7 +315,6 @@ class CombatController {
 
     async _initialize() {
         Game.camera.toCenter(Game.canvas, this.layout);
-        console.log(this.pathing.getMovementRange(this.layout, this.entities, this.entities[0]));
         this.nextTurn();
     }
 
@@ -377,16 +376,15 @@ class CombatController {
         if (event !== undefined)
             event.stopPropagation();
 
-        this.markers.set(this.active.getRange(this.layout, this.entities), 'movement');
+        this.markers.set(this.pathing.getMovementRange(this.active, this.entities, this.layout), 'movement');
         this.interface.requestMove();
     }
 
     confirmMove(location) {
-        if (location === undefined || this.markers?.range?.[location.x]?.[location.y] === undefined)
+        if (location === undefined || !this.pathing.isValidSelection(location, this.markers.range))
             return;
 
         this.state = this.states.MOVE_CONFIRM;
-        this.markers.clear();
 
         const stepListenerId = Events.listen('move-step', (beast) => {
             this.interface._updateHeight(beast.location.z());
@@ -398,7 +396,9 @@ class CombatController {
             this.interface._updateHeight(this.active.location.z());
             Events.remove('move-step', stepListenerId);
         });
-        this.active.walkTo(location, this.layout);
+        console.log(location, this.markers.range)
+        this.active.walkTo(location, this.markers.range);
+        this.markers.clear();
     }
 
     cancelMove() {

@@ -16,6 +16,7 @@ GAME_DATA.beasts['mimic'] = {
     "tileset": "mimic",
     "stats": {
         "move": 5,
+        "jump": 1,
         "speed": 50,
         "health": 42
     },

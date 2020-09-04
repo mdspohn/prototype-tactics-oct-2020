@@ -52,4 +52,16 @@ class Location {
         // cardinal orientation of the tile, if it exists, e.g. slopes
         return this.map.meta[this.tile().id].orientation;
     }
+
+    getOrientationTo(target) {
+        const DX = (target.x - this.x),
+                DY = (target.y - this.y);
+        
+        return [
+            ['NORTH', -DX],
+            ['SOUTH', +DX],
+            ['EAST',  +DY],
+            ['WEST',  -DY]
+        ].sort((a, b) => b[1] - a[1])[0][0];
+    }
 }

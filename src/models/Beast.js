@@ -6,6 +6,7 @@ class Beast {
         // ----------------------------
 
         this.id = config.id;
+        this.allegiance = 0;
         this.name = config.name;
         this.level = 1;
         this.experience = 0;
@@ -92,20 +93,19 @@ class Beast {
         this.lastMoved = 0;
     }
 
-    getAllegiance() {
-        return 'foe';
-    }
-
     getAllegianceTo(beast) {
-        const allegianceDiff = Math.abs(beast.allegiance - this.allegiance);
+        if (beast === undefined || this === beast)
+            return 'SELF';
         
-        switch(allegianceDiff) {
+        const difference = Math.abs(beast.allegiance - this.allegiance);
+        
+        switch(difference) {
             case 0:
-                return 'ally';
+                return 'ALLY';
             case 1:
-                return 'neutral';
+                return 'NEUTRAL';
             case 2:
-                return 'foe'
+                return 'FOE';
         }
     }
 
@@ -149,23 +149,21 @@ class Beast {
         this.animationQueue.push(animation);
     }
     
-    walkTo(destination, layout) {
-        let x = destination.x,
-            y = destination.y;
+    walkTo(destination, range) {
+        let next = destination;
     
         const moves = [];
+        
     
-        while(this.range?.[x]?.[y]?.px !== undefined) {
-            const move = new Object();
-            move.location = layout.getLocation(x, y);
-            move.event = (x == destination.x && y == destination.y) ? 'move-complete' : 'move-step';
-            moves.unshift(move);
+        while(range.get(next)?.previous !== undefined) {
+            if (!range.get(next).isHazard) {
+                const move = new Object();
+                move.location = next;
+                move.event = (next === destination) ? 'move-complete' : 'move-step';
+                moves.unshift(move);
+            }
     
-            let newX = this.range[x][y].px,
-                newY = this.range[x][y].py;
-            
-            x = newX;
-            y = newY;
+            next = range.get(next)?.previous;
         }
     
         // set variables for being able to reset movement choice
@@ -276,11 +274,11 @@ class Beast {
 
         animation.orientation = O;
 
-        if (animation.sloped)
+        if (animation.sloped && DIFF <= 1)
             return 'walk';
 
         if (Math.abs(DIFF_Z) > 0 || DIFF > 1)
-            return (DIFF_Z > 0) ? 'jump-up' : 'jump-down';
+            return (DIFF_Z > 0) ? 'jump-up' : (DIFF > 1 && Math.abs(DIFF_Z) <= 1) ? 'jump-up' : 'jump-down';
 
         // at least one tile is a slope, but there is no z change if we're here
         if (SO !== undefined && EO !== undefined) {

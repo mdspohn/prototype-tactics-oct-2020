@@ -27,155 +27,75 @@ class Pathing {
             selection.push(location);
             return selection;
         };
-
-        // const test = {
-        //     from: Location(),
-        //     direction: 'ANY', // ['CARDINAL', 'DIAGONAL']
-        //     select_obstructions: true,
-        //     pass_obstructions: true,
-        //     restrictions: {
-        //         z_up: 2,
-        //         z_down: 3,
-        //         obstructions: [-1, 0, 1] // ALLY, NEUTRAL, FOE
-        //     }
-        // };
     }
 
-    getPattern(fromLocation, distance, z_up, z_down, includeWater, includeEntities, stopOnObstructions, pattern) {
-
-    }
-
-    _addToRange(range, layout, entities, location, previous, distance, steps, restrictions) {
-        const zUp = restrictions.zUp,
-              zDown = restrictions.zDown,
-              targets = restrictions.targets,
-              blockers = restrictions.blockers,
-              includeWater = restrictions.includeWater,
-              hazardDistance = restrictions.hazardDistance;
-        
-        // only add location to map if it doesn't exist already or exists with more steps
-        if (!range.has(location) || range.get(location).steps > steps) {
-
-            let selectable = true,
-                obstruction = false,
-                hazard = false;
-                
-            if (previous !== null) {
-
-                // abides by z-axis restrictions?
-
-                // abides by hazard restrictions?
-
-                // abides by entity targetting/blocking restrictions?
-                const blocker = entities.find(entity => entity.location === location);
-                if (blocker !== undefined) {
-                    selectable = !targets.includes(blocker.getAllegiance());
-                    obstruction = blockers.includes(blocker.getAllegiance());
-                }
-
-                if (obstruction)
-                    return;
-            }
-
-            range.set(location, { previous, steps, selectable, obstruction, hazard });
-
-            if (steps >= distance)
-                return;
-
-            const n = layout.getLocation(location.x, location.y - 1),
-                  s = layout.getLocation(location.x, location.y + 1),
-                  e = layout.getLocation(location.x + 1, location.y),
-                  w = layout.getLocation(location.x - 1, location.y);
-
-            let nextPrevious = (obstruction) ? previous : location;
-
-            [n, s, e, w].forEach(nextLocation => {
-                if (nextLocation !== undefined)
-                    this._addToRange(range, layout, entities, nextLocation, nextPrevious, distance, (steps + 1), restrictions);
-            });
-        }
-
-        return range;
-    }
-
-    _addLocationToPattern(range, location, opts) {
-
-    }
-
-    _addLocationToRange(range, location, opts) {
-        // opts <Object>
-        //      .previous <Location>
-        //      .distance <Int>
-        //      .steps <Int>
-        //      .targets <Array> ['EMPTY', 'SELF', 'ALLY', 'NEUTRAL', 'FOE']
-        //      .obstructions <Array> ['HAZARD', 'ALLY', 'NEUTRAL', 'FOE']
-        //      .waterIsHazard <Boolean>
-        //      .hasTrajectory <Boolean>
-        //      .trajectory <String> ...PARABOLA, LINEAR, ORBITAL
-        //      .jumpUp <Int>
-        //      .jumpDown <Int>
-        //      .jumpHazard <Int>
-
+    _addToMovementRange(range, location, layout, entity, entities, opts) {
         if (!range.has(location) || range.get(location).steps > opts.steps) {
+            const occupant = entities.find(entity => entity.location === location),
+                  allegiance = entity.getAllegianceTo(occupant);
+            
+            // check if tile should be considered a hazard to possibly jump over
+            let isHazard = false;
+            isHazard |= location.z() === 0 && !entity.canFly();
+            isHazard |= location.isWater() && !entity.canSwim() && !entity.canFly();
+
+            // check if tile can be moved to
+            let isSelectable = !isHazard;
+            isSelectable &= occupant === undefined;
+
             const config = new Object();
             config.previous = opts.previous;
             config.steps = opts.steps;
-            config.selectable = true;
-            config.hazard = false;
-            config.obstruction = false;
+            config.isHazard = Boolean(isHazard);
+            config.canLeap = opts.hazardLeap >= 1;
+            config.isSelectable = Boolean(isSelectable);
+            config.occupant = occupant;
+            config.canPass = ['SELF', 'ALLY', 'NEUTRAL'].includes(allegiance) || entity.canFly() || entity.canPhase();
 
             range.set(location, config);
+
+            if (opts.steps >= opts.distance)
+                return;
+
+            Array.of(
+                layout.getLocation(location.x, location.y - 1),
+                layout.getLocation(location.x, location.y + 1),
+                layout.getLocation(location.x + 1, location.y),
+                layout.getLocation(location.x - 1, location.y)
+            ).forEach(next => {
+                if (next === undefined)
+                    return;
+
+                if (config.isHazard && ((location.getOrientationTo(next) != opts.previous.getOrientationTo(location)) || !config.canLeap))
+                    return;
+
+                const zDiff = next.z() - location.z();
+                if (zDiff < (-entity.jump - 1) || zDiff > entity.jump)
+                    return;
+                
+                this._addToMovementRange(range, next, layout, entity, entities, {
+                    previous: location,
+                    distance: opts.distance,
+                    steps: opts.steps + 1,
+                    hazardLeap: (isHazard) ? (opts.hazardLeap - (1 * isHazard)) : Math.floor(entity.jump / 2)
+                });
+            });
         }
     }
 
-    getRange(opts) {
+    getMovementRange(beast, entities, layout) {
         const range = new WeakMap();
-        this._addLocationToRange(range, opts.location, opts);
+        this._addToMovementRange(range, beast.location, layout, beast, entities, {
+            previous: undefined,
+            distance: beast.getMovement(),
+            steps: 0,
+            hazardLeap: Math.floor(beast.jump / 2)
+        });
         return range;
     }
 
-    getMovementRange(layout, entities, beast) {
-        return this._addToRange(
-            new WeakMap(),
-            layout,
-            entities,
-            beast.location,
-            null,
-            beast.move,
-            0,
-            {
-                zUp: beast.jump,                                 // max z difference when going up
-                zDown: (beast.jump + 1),                         // max z difference when going down
-                targets: [],                                     // will not count these target types as obstructions and include them in range (empty array for moving)
-                blockers: ['neutral', 'foe'],                    // pathing cannot continue through these entity types
-                includeWater: beast.canSwim() || beast.canFly(), // whether water is a selectable tile
-                hazardDistance: Math.floor(beast.jump / 2)       // max hazard tiles that can be jumped over
-            }
-        );
-    }
-
-    getSkillRange(layout, entities, location, skill) {
-        return this._addToRange(
-            new WeakMap(),
-            layout,
-            entities,
-            location,
-            null,
-            skill.range,
-            0,
-            {
-                zUp: skill.z,                        // max z difference when going up
-                zDown: skill.z,                      // max z difference when going down
-                targets: ['ally', 'neutral', 'foe'], // will not count these target types as obstructions and include them in range (empty array for moving)
-                blockers: ['neutral', 'foe'],        // pathing cannot continue through these entity types
-                includeWater: true,                  // whether water is a selectable tile
-                hazardDistance: skill.range          // max hazard tiles that can be jumped over
-            }
-        );
-    }
-
-    isValidLocation(location, range) {
-        return range.has(location) && range.get(location).valid;
+    isValidSelection(location, range) {
+        return !!range && range.has(location) && range.get(location).isSelectable;
     }
 
     isInRange(location, range) {
