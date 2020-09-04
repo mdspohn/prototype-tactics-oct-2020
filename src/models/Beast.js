@@ -230,39 +230,12 @@ class Beast {
         return animation;
     }
 
-    _getOrientationToTarget(target, location = this.location) {
-        const DX = (target.x - location.x),
-              DY = (target.y - location.y);
-        
-        return [
-            ['north', -DX],
-            ['south', +DX],
-            ['east',  +DY],
-            ['west',  -DY]
-        ].sort((a, b) => b[1] - a[1])[0][0];
-    }
-
-    _getOppositeOrientation(orientation) {
-        switch(orientation) {
-            case 'north':
-                return 'south';
-            case 'east':
-                return 'west';
-            case 'south':
-                return 'north';
-            case 'west':
-                return 'east';
-            default:
-                break;
-        }
-    }
-
     _setMovementType(animation, start, end) {
-        const O   = this._getOrientationToTarget(end, start),
-              SO  = start.orientation(),
-              EO  = end.orientation(),
-              OSO = this._getOppositeOrientation(SO),
-              OEO = this._getOppositeOrientation(EO),
+        const O   = Util.getOrientationTo(end, start),
+              SO  = start.getOrientation(),
+              EO  = end.getOrientation(),
+              OSO = SO ? Util.getOppositeOrientation(SO) : undefined,
+              OEO = EO ? Util.getOppositeOrientation(EO) : undefined,
               DIFF = Math.abs(end.x - start.x) + Math.abs(end.y - start.y),
               DIFF_Z = end.z() - start.z();
           
@@ -274,11 +247,14 @@ class Beast {
 
         animation.orientation = O;
 
+        if (DIFF > 1 && Math.abs(DIFF_Z) <= 1)
+            return 'leap';
+
         if (animation.sloped && DIFF <= 1)
             return 'walk';
 
-        if (Math.abs(DIFF_Z) > 0 || DIFF > 1)
-            return (DIFF_Z > 0) ? 'jump-up' : (DIFF > 1 && Math.abs(DIFF_Z) <= 1) ? 'jump-up' : 'jump-down';
+        if (Math.abs(DIFF_Z) > 0)
+            return (DIFF_Z > 0) ? 'jump-up' : 'jump-down';
 
         // at least one tile is a slope, but there is no z change if we're here
         if (SO !== undefined && EO !== undefined) {
@@ -302,7 +278,7 @@ class Beast {
               s    = (~~end.isSlope()) - (~~start.isSlope());
 
         const dist = Math.abs((end.x - start.x)) + Math.abs((end.y - start.y)),
-              swap = (end.x > start.x || end.y > start.y) && ((z === 0 && dist <= 1 && s >= 0) || animation.sloped);
+              swap = (end.x > start.x || end.y > start.y) && ((z === 0 && s >= 0) || animation.sloped);
 
         // swap rendering location immediately on animation start
         animation.swap = swap;

@@ -66,7 +66,7 @@ class Pathing {
                 if (next === undefined)
                     return;
 
-                if (config.isHazard && ((location.getOrientationTo(next) != opts.previous.getOrientationTo(location)) || !config.canLeap))
+                if (config.isHazard && ((Util.getOrientationTo(next, location) != Util.getOrientationTo(location, opts.previous)) || !config.canLeap))
                     return;
 
                 const zDiff = next.z() - location.z();

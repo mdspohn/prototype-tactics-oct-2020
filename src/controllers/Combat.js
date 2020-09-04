@@ -396,7 +396,6 @@ class CombatController {
             this.interface._updateHeight(this.active.location.z());
             Events.remove('move-step', stepListenerId);
         });
-        console.log(location, this.markers.range)
         this.active.walkTo(location, this.markers.range);
         this.markers.clear();
     }

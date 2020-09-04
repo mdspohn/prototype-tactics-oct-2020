@@ -106,7 +106,7 @@ class Camera {
             let p1, p2, p3, p4;
 
             if (tile.isSlope()) {
-                switch(tile.orientation()) {
+                switch(tile.getOrientation()) {
                     case 'north':
                         p1 = [0,  15], p2 = [15, 0], p3 = [31,  7], p4 = [15, 23];
                         break;
