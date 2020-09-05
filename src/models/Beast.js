@@ -53,7 +53,7 @@ class Beast {
         this.y = () => (this.location != null) ? this.location.y : this.initialY;
 
         // current directional facing
-        this.orientation = config.orientation || 'south';
+        this.orientation = config.orientation || Util.ORIENTATIONS.SOUTH;
 
         // ----------------------
         // ANIMATIONS
@@ -175,41 +175,6 @@ class Beast {
 
         // execute movement
         moves.forEach(move => this.moveTo(move.location, null, null, move.event));
-    }
-    
-    getRange(layout, entities) {
-        const range = new Object();
-            
-        const addTile = (x, y, px, py, steps = 0) => {
-            if (layout.getLocation(x, y) === undefined)
-                return;
-            
-            if (!entities.some(entity => entity != this && entity.x() == x && entity.y() == y)) {
-                range[x] = range[x] || new Object();
-    
-                if (range[x][y] != undefined && range[x][y].steps <= steps)
-                    return;
-        
-                range[x][y] = {
-                    px,
-                    py,
-                    steps,
-                    showMarker: x != this.x() || y != this.y()
-                };
-        
-                if (steps >= this.getMovement())
-                    return;
-                
-                addTile(Math.max(x - 1, 0), y, x, y, (steps + 1));
-                addTile(x, Math.min(y + 1, layout.structure[x].length - 1), x, y, (steps + 1));
-                addTile(Math.min(x + 1, layout.structure.length - 1), y, x, y, (steps + 1));
-                addTile(x, Math.max(y - 1, 0), x, y, (steps + 1));
-            }
-        };
-        
-        addTile(this.x(), this.y(), void 0, void 0);
-        this.range = range;
-        return range;
     }
 
     // ----------------------

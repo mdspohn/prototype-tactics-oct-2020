@@ -77,8 +77,8 @@ class Markers {
 
     render(delta, location) {
         const showMarker = this.range?.get(location)?.isSelectable,
-              index = ~~location.isSlope() * (['north', 'west'].includes(location.getOrientation()) ? 1 : 2),
-              IS_MIRRORED = location.isSlope() && ['east', 'west'].includes(location.getOrientation());
+              index = ~~location.isSlope() * ([Util.ORIENTATIONS.NORTH, Util.ORIENTATIONS.WEST].includes(location.getOrientation()) ? 1 : 2),
+              IS_MIRRORED = location.isSlope() && [Util.ORIENTATIONS.EAST, Util.ORIENTATIONS.WEST].includes(location.getOrientation());
         
         if (!showMarker || !this.type)
             return;

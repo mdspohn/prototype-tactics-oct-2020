@@ -2,23 +2,23 @@ GAME_DATA.scenes['test'] = {
     type: 'COMBAT',
     area: 'woodlands',
     entities: [
-        // {
-        //     id: 'slime',
-        //     x: 5,
-        //     y: 4,
-        //     orientation: 'south'
-        // },
         {
             id: 'player',
             x: 5,
             y: 3,
-            orientation: 'south',
+            orientation: 'east',
             equipment: {
                 weapon: 'knife',
                 //accessory_1: 'buckler',
                 //headgear: 'rose'
                 //armor: 'iron-armor'
             }
+        },
+        {
+            id: 'slime',
+            x: 2,
+            y: 5,
+            orientation: 'south'
         },
         // {
         //     id: 'mimic',

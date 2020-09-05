@@ -1,10 +1,5 @@
 class Pathing {
     constructor() {
-        this.obstructions = new Object(); // obstruction level of -1 passes through everything
-        this.obstructions['ENEMY_ONLY'] = 0;
-        this.obstructions['NEUTRAL'] = 1;
-        this.obstructions['ALLY'] = 2;
-
         this.patterns = new Object();
         this.patterns['POINT'] = function(location, layout, opts) {
             return [location];
@@ -50,7 +45,7 @@ class Pathing {
             config.canLeap = opts.hazardLeap >= 1;
             config.isSelectable = Boolean(isSelectable);
             config.occupant = occupant;
-            config.canPass = ['SELF', 'ALLY', 'NEUTRAL'].includes(allegiance) || entity.canFly() || entity.canPhase();
+            config.canPass = ['SELF', 'ALLY'].includes(allegiance) || entity.canFly() || entity.canPhase();
 
             range.set(location, config);
 
