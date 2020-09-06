@@ -8,9 +8,25 @@ class Markers {
         this.type = 'movement';
         this.markers = {
             movement: {
+                index: 0,
+                opacity: 0,
+                duration: 4000,
+                ms: 0
+            },
+            skill: {
                 index: 1,
                 opacity: 0,
                 duration: 4000,
+                ms: 0
+            },
+            selection: {
+                index: 2,
+                opacity: 0,
+                duration: 4000,
+                ms: 0
+            },
+            focus: {
+                duration: 750,
                 ms: 0
             }
         }
@@ -34,6 +50,7 @@ class Markers {
     }
 
     setFocus(location) {
+        //this.markers.focus.ms = 0;
         this.focus = location;
     }
 
@@ -68,29 +85,43 @@ class Markers {
     }
 
     update(step) {
-        if (this.type === null)
-            return;
-
-        this.markers[this.type].ms = (this.markers[this.type].ms + (step)) % this.markers[this.type].duration;
-        this.markers[this.type].opacity = Math.floor(Math.abs(this.markers[this.type].ms - (this.markers[this.type].duration / 2))) / (this.markers[this.type].duration * 2);
+        Object.entries(this.markers).forEach(([type, config]) => {
+            config.ms = (config.ms + step) % config.duration;
+            if (config.hasOwnProperty('opacity'))
+                config.opacity = Math.floor(Math.abs(config.ms - (config.duration / 2))) / (config.duration * 2);
+        });
     }
 
     render(delta, location) {
-        const showMarker = this.range?.get(location)?.isSelectable,
-              index = ~~location.isSlope() * ([Util.ORIENTATIONS.NORTH, Util.ORIENTATIONS.WEST].includes(location.getOrientation()) ? 1 : 2),
-              IS_MIRRORED = location.isSlope() && [Util.ORIENTATIONS.EAST, Util.ORIENTATIONS.WEST].includes(location.getOrientation());
-        
-        if (!showMarker || !this.type)
+        // TODO: needs to use delta
+        const needsDraw = this.range?.get(location)?.isSelectable;
+        if (this.focus === null && !needsDraw)
             return;
 
-        Game.ctx.save();
-        Game.ctx.translate(Game.camera.posX() + location.posX() + (~~IS_MIRRORED * 32), Game.camera.posY() + location.posY());
+        const isSlope = location.isSlope(),
+              isMirrored = isSlope && [Util.ORIENTATIONS.EAST, Util.ORIENTATIONS.WEST].includes(location.getOrientation()),
+              xIndex = ~~isSlope * ([Util.ORIENTATIONS.NORTH, Util.ORIENTATIONS.WEST].includes(location.getOrientation()) ? 1 : 2);
 
-        if (IS_MIRRORED)
+        Game.ctx.save();
+        Game.ctx.translate(Game.camera.posX() + location.posX() + (~~isMirrored * 32), Game.camera.posY() + location.posY());
+
+        if (isMirrored)
             Game.ctx.scale(-1, 1);
 
-        Game.ctx.globalAlpha = this.markers[this.type].opacity + 0.1;
-        Game.ctx.drawImage(this.img, index * 32, 0, 32, 24, 0, 0, 32, 24);
+        if (needsDraw) {
+            const yIndex = this.markers[this.range.get(location).markerType].index;
+            Game.ctx.globalAlpha = this.markers[this.type].opacity + 0.1;
+            Game.ctx.drawImage(this.img, xIndex * 32, yIndex * 32, 32, 24, 0, 0, 32, 24);
+            Game.ctx.globalAlpha = 1;
+        }
+
+        if (this.focus === location) {
+            const overflow = Math.floor((this.markers.focus.ms % (this.markers.focus.duration * .75)) / (this.markers.focus.duration * .25));
+            let focusIndex = overflow + (~~!overflow * Math.floor(this.markers.focus.ms / (this.markers.focus.duration * .5)));
+            //let focusIndex = Math.floor(this.markers.focus.ms / (this.markers.focus.duration / 2));
+            Game.ctx.drawImage(this.img, focusIndex * 32, 96, 32, 24, 0, 0, 32, 24);
+        }
+
         Game.ctx.restore();
     }
 }

@@ -1,27 +1,57 @@
 class Pathing {
     constructor() {
         this.patterns = new Object();
-        this.patterns['POINT'] = function(location, layout, opts) {
-            return [location];
+        this.patterns['POINT'] = function(range, location, layout, opts) {
+            range.set(location, new Object());
         };
-        this.patterns['CROSS_EXCLUSIVE'] = function(location, layout, opts) {
-            const selection = [],
-                  s1 = layout.getLocation(location.x + 1, location.y),
-                  s2 = layout.getLocation(location.x - 1, location.y),
-                  s3 = layout.getLocation(location.x, location.y + 1),
-                  s4 = layout.getLocation(location.x, location.y - 1);
-            
-            [s1, s2, s3, s4].forEach(tile => {
-                if (tile !== undefined)
-                    selection.push(tile);
-            });
-            return selection;
+        this.patterns['CROSS_EXCLUSIVE'] = function(range, location, layout, opts) {
+            // expects opts.z, opts.distance
+            for(let i = 1; i <= opts.distance; i++) {
+                const n = layout.getLocation(location.x + 1, location.y),
+                      e = layout.getLocation(location.x, location.y + 1),
+                      s = layout.getLocation(location.x - 1, location.y),
+                      w = layout.getLocation(location.x, location.y - 1);
+
+                [n, e, s, w].forEach(tile => {
+                    if (tile === undefined)
+                        return;
+                    
+                    const zo = Math.abs(location.z() - tile.z());
+                    if (zo > ~~opts.z)
+                        return;
+
+                    range.set(tile, new Object());
+                });
+            }
         };
-        this.patterns['CROSS_INCLUSIVE'] = function(location, layout, opts) {
-            const selection = this.patterns['CROSS_EXCLUSIVE'](location, layout, opts);
-            selection.push(location);
-            return selection;
+        this.patterns['CROSS_INCLUSIVE'] = function(range, location, layout, opts) {
+            range.set(location, new Object());
+            this.patterns['CROSS_EXCLUSIVE'](range, location, layout, opts);
         };
+    }
+
+    getSelectionRange(location, layout, opts) {
+        return this.getSkillRange(location, layout, opts);
+    }
+
+    getSkillRange(location, layout, opts) {
+        if (!this.patterns.hasOwnProperty(opts.pattern))
+            return console.warn('Skill pattern not found: ', opts.pattern);
+
+        const range = new WeakMap();
+        this.patterns[opts.pattern](range, location, layout, opts);
+        return range;
+    }
+
+    getMovementRange(beast, entities, layout) {
+        const range = new WeakMap();
+        this._addToMovementRange(range, beast.location, layout, beast, entities, {
+            previous: undefined,
+            distance: beast.getMovement(),
+            steps: 0,
+            hazardLeap: Math.floor(beast.jump / 2)
+        });
+        return range;
     }
 
     _addToMovementRange(range, location, layout, entity, entities, opts) {
@@ -46,6 +76,7 @@ class Pathing {
             config.isSelectable = Boolean(isSelectable);
             config.occupant = occupant;
             config.canPass = ['SELF', 'ALLY'].includes(allegiance) || entity.canFly() || entity.canPhase();
+            config.markerType = 'movement';
 
             range.set(location, config);
 
@@ -76,17 +107,6 @@ class Pathing {
                 });
             });
         }
-    }
-
-    getMovementRange(beast, entities, layout) {
-        const range = new WeakMap();
-        this._addToMovementRange(range, beast.location, layout, beast, entities, {
-            previous: undefined,
-            distance: beast.getMovement(),
-            steps: 0,
-            hazardLeap: Math.floor(beast.jump / 2)
-        });
-        return range;
     }
 
     isValidSelection(location, range) {

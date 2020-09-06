@@ -397,7 +397,7 @@ class CombatController {
             Events.remove('move-step', stepListenerId);
         });
         this.active.walkTo(location, this.markers.range);
-        this.markers.clear();
+        this.markers.clearRange();
     }
 
     cancelMove() {
@@ -456,7 +456,12 @@ class CombatController {
     // --------------------------
 
     onMouseMove(event) {
-        // TODO
+        if (this.state !== this.states.MOVE_CONFIRM) {
+            const location = Game.camera._windowToTile(event.x, event.y, this.layout);
+            if (this.markers.focus === location)
+                return;
+            this.markers.setFocus(location);
+        }
     }
 
     onMouseWheel(event) {
