@@ -240,6 +240,20 @@ class CombatInterface {
         this.menu.dom.actions_move.classList.toggle('dim', false);
     }
 
+    async requestAttack() {
+        this._updateSuggestion('Select a tile to attack. Right-click to cancel.');
+    }
+
+    async confirmAttack() {
+        this.menu.dom.actions_attack.classList.toggle('dim', true);
+        this._updateSuggestion('Select an action. The mouse wheel can be used to navigate menus.');
+    }
+
+    async cancelAttack() {
+        this._updateSuggestion('Select an action. The mouse wheel can be used to navigate menus.');
+        this.menu.dom.actions_attack.classList.toggle('dim', false);
+    }
+
     async requestWait() {
 
     }
@@ -376,7 +390,7 @@ class CombatController {
         if (event !== undefined)
             event.stopPropagation();
 
-        this.markers.set(this.pathing.getMovementRange(this.active, this.entities, this.layout), 'movement');
+        this.markers.setRange(this.pathing.getMovementRange(this.active, this.entities, this.layout));
         this.interface.requestMove();
     }
 
@@ -394,6 +408,8 @@ class CombatController {
             this.state = this.states.PLAYER_TURN;
             this.interface.confirmMove(this.active.getMovement());
             this.interface._updateHeight(this.active.location.z());
+            this.markers.clearFocus();
+            this.markers.clearPath();
             Events.remove('move-step', stepListenerId);
         });
         this.active.walkTo(location, this.markers.range);
@@ -402,7 +418,7 @@ class CombatController {
 
     cancelMove() {
         this.state = this.states.PLAYER_TURN;
-        this.markers.clear();
+        this.markers.clearRange();
         this.interface.cancelMove();
     }
 
@@ -414,9 +430,35 @@ class CombatController {
         }
     }
 
-    requestAttack(entity) {}
+    requestAttack(event) {
+        if (this.state === this.states.ATTACK_REQUEST)
+            return this.cancelAttack();
+        
+        if (this.state !== this.states.PLAYER_TURN || !this.active.canAttack())
+            return;
 
-    confirmAttack(entity) {}
+        this.state = this.states.ATTACK_REQUEST;
+
+        if (event !== undefined)
+            event.stopPropagation();
+
+        const atkData = this.active.getAttackData(),
+              atkRange = this.pathing.getSkillRange(this.active.location, this.layout, Object.assign(atkData.range, { markerType: 'white' }));
+
+        this.markers.setRange(atkRange);
+        this.interface.requestAttack();
+    }
+
+    confirmAttack(location) {
+
+    }
+
+    cancelAttack() {
+        this.state = this.states.PLAYER_TURN;
+        this.markers.clearRange();
+        this.markers.clearSelection();
+        this.interface.cancelAttack();
+    }
 
     requestSkillsMenu(entity) {}
 
@@ -438,6 +480,34 @@ class CombatController {
         this.nextTurn();
     }
 
+    _updateFocus(location) {
+        if (this.markers.focus === location)
+            return;
+        
+        switch(this.state) {
+            case this.states.MOVE_REQUEST:
+                if (this.markers.range.has(location) && this.markers.range.get(location).isSelectable) {
+                    this.markers.focus = location;
+                    this.markers.setPath(this.pathing.getPathing(location, this.markers.range));
+                } else {
+                    this.markers.clearFocus();
+                    this.markers.clearPath();
+                }
+                break;
+            case this.states.MOVE_CONFIRM:
+                break;
+            case this.states.ATTACK_REQUEST:
+                if (this.markers.range.has(location)) {
+                    this.markers.focus = location;
+                } else {
+                    this.markers.clearFocus();
+                }
+                break;
+            default:
+                this.markers.clearFocus();
+        }
+    }
+
     // this.states.NONE           = 0;
     // this.states.AI_TURN        = 10;
     // this.states.PLAYER_TURN    = 20;
@@ -456,12 +526,29 @@ class CombatController {
     // --------------------------
 
     onMouseMove(event) {
-        if (this.state !== this.states.MOVE_CONFIRM) {
-            const location = Game.camera._windowToTile(event.x, event.y, this.layout);
-            if (this.markers.focus === location)
+        const location = Game.camera._windowToTile(event.x, event.y, this.layout);
+        switch(this.state) {
+            case this.states.MOVE_CONFIRM:
                 return;
-            this.markers.setFocus(location);
+            case this.states.ATTACK_REQUEST:
+                if (this.markers.range.has(location)) {
+                    const data = this.active.getAttackData();
+                    const highlight = this.pathing.getSelectionRange(location, this.layout, {
+                        distance: data.selection.distance,
+                        pattern: data.selection.pattern,
+                        z: data.selection.z,
+                        markerType: 'red'
+                    });
+                    this.markers.setSelection(highlight);
+                } else {
+                    this.markers.clearSelection();
+                }
+                break;
+            default:
+                break;
         }
+
+        this._updateFocus(location);
     }
 
     onMouseWheel(event) {
@@ -469,12 +556,16 @@ class CombatController {
     }
 
     onClick(event) {
+        const location = Game.camera._windowToTile(event.x, event.y, this.layout);
         switch(this.state) {
             case this.states.NONE:
                 break;
             case this.states.MOVE_REQUEST:
-                const location = Game.camera._windowToTile(event.x, event.y, this.layout);
                 this.confirmMove(location);
+                break;
+            case this.states.ATTACK_REQUEST:
+                this.confirmAttack(location);
+                break;
         }
     }
 
@@ -482,6 +573,9 @@ class CombatController {
         switch(this.state) {
             case this.states.MOVE_REQUEST:
                 this.cancelMove();
+                break;
+            case this.states.ATTACK_REQUEST:
+                this.cancelAttack();
                 break;
             case this.states.PLAYER_TURN:
                 this.resetMove();

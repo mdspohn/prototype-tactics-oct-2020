@@ -36,6 +36,8 @@ class Beast {
         this.totalMoved = 0;
         this.lastMoved = 0;
 
+        this.hasAttacked = false;
+
         // ----------------------
         // EQUIPMENT
         // ---------------------------
@@ -91,6 +93,7 @@ class Beast {
         this.lastOrientation = null;
         this.totalMoved = 0;
         this.lastMoved = 0;
+        this.hasAttacked = false;
     }
 
     getAllegianceTo(beast) {
@@ -132,6 +135,24 @@ class Beast {
         return this.getMovement() > 0;
     }
 
+    getAttackData() {
+        const data = new Object();
+        data.range = new Object();
+        data.range.distance = 1;
+        data.range.pattern = 'CROSS_EXCLUSIVE';
+        data.range.z = 1;
+        data.selection = new Object();
+        data.selection.pattern = 'POINT';
+        data.selection.distance = 1;
+        data.selection.z = 1;
+
+        return data;
+    }
+
+    canAttack() {
+        return !this.hasAttacked;
+    }
+
     canSwim() {
         return false;
     }
@@ -141,6 +162,10 @@ class Beast {
     }
 
     canFly() {
+        return false;
+    }
+
+    canPhase() {
         return false;
     }
     

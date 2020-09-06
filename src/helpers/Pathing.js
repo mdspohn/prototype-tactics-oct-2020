@@ -1,16 +1,16 @@
 class Pathing {
     constructor() {
         this.patterns = new Object();
-        this.patterns['POINT'] = function(range, location, layout, opts) {
-            range.set(location, new Object());
+        this.patterns.POINT = (range, location, layout, opts) => {
+            range.set(location, { markerType: opts.markerType });
         };
-        this.patterns['CROSS_EXCLUSIVE'] = function(range, location, layout, opts) {
+        this.patterns.CROSS_EXCLUSIVE = (range, location, layout, opts) => {
             // expects opts.z, opts.distance
             for(let i = 1; i <= opts.distance; i++) {
-                const n = layout.getLocation(location.x + 1, location.y),
-                      e = layout.getLocation(location.x, location.y + 1),
-                      s = layout.getLocation(location.x - 1, location.y),
-                      w = layout.getLocation(location.x, location.y - 1);
+                const n = layout.getLocation(location.x + i, location.y),
+                      e = layout.getLocation(location.x, location.y + i),
+                      s = layout.getLocation(location.x - i, location.y),
+                      w = layout.getLocation(location.x, location.y - i);
 
                 [n, e, s, w].forEach(tile => {
                     if (tile === undefined)
@@ -20,18 +20,20 @@ class Pathing {
                     if (zo > ~~opts.z)
                         return;
 
-                    range.set(tile, new Object());
+                    range.set(tile, { markerType: opts.markerType });
                 });
             }
         };
-        this.patterns['CROSS_INCLUSIVE'] = function(range, location, layout, opts) {
-            range.set(location, new Object());
-            this.patterns['CROSS_EXCLUSIVE'](range, location, layout, opts);
+        this.patterns.CROSS_INCLUSIVE = (range, location, layout, opts) => {
+            range.set(location, { markerType: opts.markerType });
+            this.patterns.CROSS_EXCLUSIVE(range, location, layout, opts);
         };
     }
 
     getSelectionRange(location, layout, opts) {
-        return this.getSkillRange(location, layout, opts);
+        const range = new WeakMap();
+        this.patterns[opts.pattern](range, location, layout, Object.assign({ markerType: 'red' }, opts));
+        return range;
     }
 
     getSkillRange(location, layout, opts) {
@@ -39,7 +41,7 @@ class Pathing {
             return console.warn('Skill pattern not found: ', opts.pattern);
 
         const range = new WeakMap();
-        this.patterns[opts.pattern](range, location, layout, opts);
+        this.patterns[opts.pattern](range, location, layout, Object.assign({ markerType: 'yellow' }, opts));
         return range;
     }
 
@@ -61,7 +63,7 @@ class Pathing {
             
             // check if tile should be considered a hazard to possibly jump over
             let isHazard = false;
-            isHazard |= location.z() === 0 && !entity.canFly();
+            isHazard |= location.z() === 0 && !entity.canFloat() && !entity.canFly();
             isHazard |= location.isWater() && !entity.canSwim() && !entity.canFly();
 
             // check if tile can be moved to
@@ -76,7 +78,7 @@ class Pathing {
             config.isSelectable = Boolean(isSelectable);
             config.occupant = occupant;
             config.canPass = ['SELF', 'ALLY'].includes(allegiance) || entity.canFly() || entity.canPhase();
-            config.markerType = 'movement';
+            config.markerType = 'white';
 
             range.set(location, config);
 
@@ -118,13 +120,12 @@ class Pathing {
     }
 
     getPathing(location, range) {
-        const path = [];
+        const path = new Array();
 
-        if (range.has(location) && !!range.get(location).previous) {
-            while (range.get(location).previous) {
-                path.unshift(location);
-                location = range.get(location).previous;
-            }
+        let next = location;
+        while (range.has(next)) {
+            path.push(next);
+            next = range.get(next).previous;
         }
 
         return path;
