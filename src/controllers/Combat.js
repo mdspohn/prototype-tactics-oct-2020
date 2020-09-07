@@ -419,6 +419,7 @@ class CombatController {
     cancelMove() {
         this.state = this.states.PLAYER_TURN;
         this.markers.clearRange();
+        this.markers.clearPath();
         this.interface.cancelMove();
     }
 

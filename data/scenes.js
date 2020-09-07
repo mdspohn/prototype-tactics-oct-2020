@@ -5,7 +5,7 @@ GAME_DATA.scenes['test'] = {
         {
             id: 'player',
             x: 5,
-            y: 3,
+            y: 2,
             orientation: 'east',
             equipment: {
                 weapon: 'knife',
