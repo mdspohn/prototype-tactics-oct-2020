@@ -2,7 +2,7 @@ class Pathing {
     constructor() {
         this.patterns = new Object();
         this.patterns.POINT = (range, location, layout, opts) => {
-            range.set(location, { markerType: opts.markerType });
+            range.set(location, { color: opts.color });
         };
         this.patterns.CROSS_EXCLUSIVE = (range, location, layout, opts) => {
             // expects opts.z, opts.distance
@@ -20,19 +20,19 @@ class Pathing {
                     if (zo > ~~opts.z)
                         return;
 
-                    range.set(tile, { markerType: opts.markerType });
+                    range.set(tile, { color: opts.color });
                 });
             }
         };
         this.patterns.CROSS_INCLUSIVE = (range, location, layout, opts) => {
-            range.set(location, { markerType: opts.markerType });
+            range.set(location, { color: opts.color });
             this.patterns.CROSS_EXCLUSIVE(range, location, layout, opts);
         };
     }
 
     getSelectionRange(location, layout, opts) {
         const range = new WeakMap();
-        this.patterns[opts.pattern](range, location, layout, Object.assign({ markerType: 'red' }, opts));
+        this.patterns[opts.pattern](range, location, layout, Object.assign({ color: 'red' }, opts));
         return range;
     }
 
@@ -41,7 +41,7 @@ class Pathing {
             return console.warn('Skill pattern not found: ', opts.pattern);
 
         const range = new WeakMap();
-        this.patterns[opts.pattern](range, location, layout, Object.assign({ markerType: 'yellow' }, opts));
+        this.patterns[opts.pattern](range, location, layout, Object.assign({ color: 'yellow' }, opts));
         return range;
     }
 
@@ -59,7 +59,7 @@ class Pathing {
     _addToMovementRange(range, location, layout, entity, entities, opts) {
         if (!range.has(location) || range.get(location).steps > opts.steps) {
             const occupant = entities.find(entity => entity.location === location),
-                  allegiance = entity.getAllegianceTo(occupant);
+                  allegiance = Util.getAllegiance(entity, occupant);
             
             // check if tile should be considered a hazard to possibly jump over
             let isHazard = false;
@@ -78,7 +78,7 @@ class Pathing {
             config.isSelectable = Boolean(isSelectable);
             config.occupant = occupant;
             config.canPass = ['SELF', 'ALLY'].includes(allegiance) || entity.canFly() || entity.canPhase();
-            config.markerType = 'white';
+            config.color = 'white';
 
             range.set(location, config);
 

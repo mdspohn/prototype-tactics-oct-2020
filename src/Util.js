@@ -8,7 +8,8 @@ class GameUtil {
     }
 
     // ------------------------
-    // ORIENTATION BETWEEN TWO TARGETS
+    // GET ORIENTATION BETWEEN TWO TARGETS
+    // >> <String> ['north', 'south', 'east', 'west']
     // @target <Location>
     // @from <Location>
     // ---------------------------------------
@@ -26,7 +27,8 @@ class GameUtil {
     }
 
     // ----------------------
-    // OPPOSITE ORIENTATION
+    // GET OPPOSITE ORIENTATION
+    // >> <String> ['north', 'south', 'east', 'west']
     // @orientation <String>
     // --------------------------------
 
@@ -42,6 +44,32 @@ class GameUtil {
                 return this.ORIENTATIONS.EAST;
             default:
                 console.warn('Util.getOppositeOrientation() did not receive valid orientation:', orientation);
+        }
+    }
+
+    
+    // ----------------------
+    // GET ALLEGIANCE
+    // >> <String> ['SELF', 'ALLY', 'NEUTRAL', 'FOE']
+    // @beast1 <Beast>
+    // @beast2 <Beast>
+    // --------------------------------
+
+    getAllegiance(beast1, beast2) {
+        if (beast1 === beast2)
+            return 'SELF';
+        
+        const beast1_a = ~~beast1?.allegiance,
+              beast2_a = ~~beast2?.allegiance,
+              difference = Math.abs(beast1_a - beast2_a);
+
+        switch(difference) {
+            case 0:
+                return 'ALLY';
+            case 1:
+                return 'NEUTRAL';
+            case 2:
+                return 'FOE';
         }
     }
 }

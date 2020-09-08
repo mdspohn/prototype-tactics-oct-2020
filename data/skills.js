@@ -1,22 +1,74 @@
-GAME_DATA.skills['template'] = {
-    name: 'Test',
-    description: 'A test skill that uses TP to do something.',
-    distance: 3,
-    basic: [true, false], // is just meant to be a basic attack that generates TP
-    movement: ['NONE', 'TELEPORT', 'CHARGE'],
-    unit_animation: ['charge', 'slash', 'punch', 'meteor'],
-    skill_animation: ['template', 'blunt-attack', 'mandelic-stab'],
-    pattern: ['POINT', 'CROSS_EXCLUSIVE', 'CROSS_INCLUSIVE'],
-    tp: 15
+// -----------------------
+// BASIC ATTACKS
+// ---------------------------
+
+GAME_DATA.skills['sword'] = {
+    name: 'Melee Attack',
+    description: '...',
+    range: {
+        min: 1,
+        max: 1,
+        pattern: 'POINT',
+        z: 2
+    },
+    target: {
+        min: 0,
+        max: 0,
+        pattern: 'POINT',
+        z: 2
+    }
 };
 
-GAME_DATA.skills['slash'] = {
-    name: 'Melee Attack',
-    description: 'A simple melee attack using a weapon, claw, or body weight.',
-    distance: 1,
-    basic: true,
-    movement: 'NONE',
-    unit_animation: 'slash',
-    skill_animation: 'slash',
-    pattern: 'POINT'
+GAME_DATA.skills['spear'] = {
+    name: 'Spear Attack',
+    description: '...',
+    range: {
+        min: 1,
+        max: 2,
+        pattern: 'CARDINAL',
+        z: 2
+    },
+    target: {
+        min: 1,
+        max: 2,
+        pattern: 'FILL',
+        z: 2
+    }
+};
+
+GAME_DATA.skills['bow'] = {
+    name: 'Bow Attack',
+    description: '...',
+    range: {
+        min: 3,
+        max: 6,
+        pattern: 'POINT',
+        z: 3
+    },
+    target: {
+        min: 0,
+        max: 0,
+        pattern: 'POINT'
+    }
+};
+
+// -----------------------
+// TP-COST SKILLS
+// ---------------------------
+
+GAME_DATA.skills['magic'] = {
+    name: 'Magic AoE Attack',
+    description: '...',
+    range: {
+        min: 0,
+        max: 5,
+        pattern: 'POINT',
+        z: null
+    },
+    target: {
+        min: 0,
+        max: 1,
+        pattern: 'POINT',
+        z: 2
+    }
 };

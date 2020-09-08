@@ -287,6 +287,8 @@ class CombatController {
         this.pathing   = new Pathing();
         this.interface = new CombatInterface();
 
+        this.skills = new SkillManager();
+
         this.states = new Object();
         this.states["NONE"]           = 0;
         this.states["AI_TURN"]        = 10;
@@ -316,7 +318,7 @@ class CombatController {
     }
 
     async _load() {
-        await Promise.all([this.markers._load(), this.interface._load()]);
+        await Promise.all([this.markers._load(), this.interface._load(), this.skills._load()]);
     }
 
     async _prepare(map, decoration, entities, layout) {
@@ -324,7 +326,11 @@ class CombatController {
         this.decoration = decoration;
         this.layout = layout;
         this.entities = entities;
-        this.entities.forEach(unit => unit._initialize(this.layout.getLocation(unit.initialX, unit.initialY)));
+        this.entities.forEach(unit => {
+            unit._initialize(this.layout.getLocation(unit.initialX, unit.initialY))
+            this.skills.setSkills(unit, unit.skills);
+            this.skills.setAttack(unit, unit.getWeaponSkillId() || unit.basic);
+        });
     }
 
     async _initialize() {
@@ -443,10 +449,14 @@ class CombatController {
         if (event !== undefined)
             event.stopPropagation();
 
-        const atkData = this.active.getAttackData(),
-              atkRange = this.pathing.getSkillRange(this.active.location, this.layout, Object.assign(atkData.range, { markerType: 'white' }));
+    
+        const attackRange = this.active.actions.basic.getRange(this.active, this.entities, this.layout);
+        this.markers.setRange(attackRange);
 
-        this.markers.setRange(atkRange);
+        // const atkData = this.active.getAttackData(),
+        //       atkRange = this.pathing.getSkillRange(this.active.location, this.layout, Object.assign(atkData.range, { markerType: 'white' }));
+
+        // this.markers.setRange(atkRange);
         this.interface.requestAttack();
     }
 
@@ -527,22 +537,16 @@ class CombatController {
     // --------------------------
 
     onMouseMove(event) {
-        const location = Game.camera._windowToTile(event.x, event.y, this.layout);
+        let location = Game.camera._windowToTile(event.x, event.y, this.layout);
         switch(this.state) {
             case this.states.MOVE_CONFIRM:
                 return;
             case this.states.ATTACK_REQUEST:
-                if (this.markers.range.has(location)) {
-                    const data = this.active.getAttackData();
-                    const highlight = this.pathing.getSelectionRange(location, this.layout, {
-                        distance: data.selection.distance,
-                        pattern: data.selection.pattern,
-                        z: data.selection.z,
-                        markerType: 'red'
-                    });
-                    this.markers.setSelection(highlight);
+                if (this.markers.range.has(location) && this.markers.range.get(location).isSelectable) {
+                    this.markers.setSelection(this.active.actions.basic.getTarget(location, this.entities, this.layout, this.markers.range));
                 } else {
                     this.markers.clearSelection();
+                    location = null;
                 }
                 break;
             default:

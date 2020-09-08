@@ -110,17 +110,17 @@ class Markers {
 
         if (drawSelection) {
             const config = this.selection.get(location),
-                  y = this.markers[config.markerType].index;
+                  y = this.markers[config.color].index;
             
-            Game.ctx.globalAlpha = this.markers[config.markerType].opacity + this.markers[config.markerType].baseOpacity;
+            Game.ctx.globalAlpha = this.markers[config.color].opacity + this.markers[config.color].baseOpacity;
             Game.ctx.drawImage(this.img, x * 32, y * 32, 32, 24, 0, 0, 32, 24);
             Game.ctx.globalAlpha = 1;
         } else if (drawRange) {
-            if (this.range?.get(location).isSelectable !== false) {
+            if (this.range?.get(location).isSelectable) {
                 const config = this.range.get(location),
-                    y = this.markers[config.markerType].index;
+                    y = this.markers[config.color].index;
                 
-                Game.ctx.globalAlpha = this.markers[config.markerType].opacity + this.markers[config.markerType].baseOpacity + (~~this.path.includes(location) * 0.4);
+                Game.ctx.globalAlpha = this.markers[config.color].opacity + this.markers[config.color].baseOpacity + (~~this.path.includes(location) * 0.4);
                 Game.ctx.drawImage(this.img, x * 32, y * 32, 32, 24, 0, 0, 32, 24);
                 Game.ctx.globalAlpha = 1;
             }

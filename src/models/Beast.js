@@ -25,6 +25,17 @@ class Beast {
         this.jump    = Math.max(~~config.stats.jump,  1);
         this.speed   = Math.max(~~config.stats.speed, 1);
 
+        this.basic = config.basic;
+        this.skills = config.skills || new Array();
+
+        // --------------------
+        // ACTIONS
+        // -------------------------------
+
+        this.actions = new Object();
+        this.actions.basic = null;
+        this.actions.skills = null;
+
         // ---------------------
         // COMBAT STATE
         // ----------------------
@@ -84,6 +95,10 @@ class Beast {
         this.location = location;
     }
 
+    getWeaponSkillId() {
+        return this.equipment.getWeaponSkillId();
+    }
+
     // ----------------------
     // COMBAT COMMANDS / HELPERS
     // ---------------------------
@@ -94,22 +109,6 @@ class Beast {
         this.totalMoved = 0;
         this.lastMoved = 0;
         this.hasAttacked = false;
-    }
-
-    getAllegianceTo(beast) {
-        if (beast === undefined || this === beast)
-            return 'SELF';
-        
-        const difference = Math.abs(beast.allegiance - this.allegiance);
-        
-        switch(difference) {
-            case 0:
-                return 'ALLY';
-            case 1:
-                return 'NEUTRAL';
-            case 2:
-                return 'FOE';
-        }
     }
 
     resetMove() {

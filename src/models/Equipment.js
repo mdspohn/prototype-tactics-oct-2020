@@ -1,6 +1,8 @@
 class Equipment {
     constructor(data, tileset) {
 
+        this.skillId = data.skill_id;
+
         // ----------------------
         // STATS
         // ----------------------------
@@ -34,6 +36,10 @@ class Equipment {
         // tile animation data
         this.meta = tileset.config;
     }
+
+    getSkillId() {
+        return this.skillId;
+    }
 }
 
 class EquipmentManager {
@@ -43,10 +49,7 @@ class EquipmentManager {
             headgear: null,
             armor: null,
             accessory_1: null,
-            accessory_2: null,
-            anima_1: null,
-            anima_2: null,
-            anima_3: null
+            accessory_2: null
         };
 
         // ---------------
@@ -80,6 +83,11 @@ class EquipmentManager {
     remove(type) {
         this._removeBonuses(this.equipment[type]);
         this.equipment[type] = null;
+    }
+
+    getWeaponSkillId() {
+        if (this.equipment.weapon !== null)
+            return this.equipment.weapon.getSkillId();
     }
 
     _addBonuses(equipment) {

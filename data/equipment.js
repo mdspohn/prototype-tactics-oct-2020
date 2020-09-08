@@ -6,7 +6,8 @@ GAME_DATA.equipment['knife'] = {
     "id": "knife",
     "tileset": "one-handed",
     "idx_multiplier": 1,
-    "attack": 3
+    "attack": 3,
+    "skill_id": "sword"
 };
 
 // --------------
