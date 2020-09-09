@@ -53,7 +53,6 @@ class Markers {
     }
 
     setFocus(location) {
-        //this.markers.focus.ms = 0;
         this.focus = location;
     }
 
@@ -77,12 +76,6 @@ class Markers {
         this.path = new Array();
     }
 
-    clearAll() {
-        this.clearRange();
-        this.clearFocus();
-        this.clearSelection();
-    }
-
     update(step) {
         Object.entries(this.markers).forEach(([type, config]) => {
             config.ms = (config.ms + step) % config.duration;
@@ -92,45 +85,45 @@ class Markers {
     }
 
     render(delta, location) {
-        // TODO: needs to use delta
-        const drawSelection = this.selection?.get(location),
-              drawRange = this.range?.get(location);
-        if (this.focus === null && !drawSelection && !drawRange)
+        const selection = this.selection?.get(location),
+              range = this.range?.get(location);
+
+        if (selection === undefined && range === undefined && this.focus === null)
             return;
 
-        const isSlope = location.isSlope(),
-              isMirrored = isSlope && [Util.ORIENTATIONS.EAST, Util.ORIENTATIONS.WEST].includes(location.getOrientation()),
-              x = ~~isSlope * ([Util.ORIENTATIONS.NORTH, Util.ORIENTATIONS.WEST].includes(location.getOrientation()) ? 1 : 2);
+        const M_O = [Util.ORIENTATIONS.WEST, Util.ORIENTATIONS.EAST],
+              S_O = [Util.ORIENTATIONS.WEST, Util.ORIENTATIONS.NORTH],
+              isSlope = location.isSlope(),
+              isMirrored = isSlope && M_O.includes(location.getOrientation());
+
+        const index = ~~isSlope * (S_O.includes(location.getOrientation()) ? 1 : 2);
 
         Game.ctx.save();
         Game.ctx.translate(Game.camera.posX() + location.posX() + (~~isMirrored * 32), Game.camera.posY() + location.posY());
 
-        if (isMirrored)
-            Game.ctx.scale(-1, 1);
+        let markerIndex;
 
-        if (drawSelection) {
-            const config = this.selection.get(location),
-                  y = this.markers[config.color].index;
-            
-            Game.ctx.globalAlpha = this.markers[config.color].opacity + this.markers[config.color].baseOpacity;
-            Game.ctx.drawImage(this.img, x * 32, y * 32, 32, 24, 0, 0, 32, 24);
+        if (selection !== undefined && selection.isSelectable) {
+            markerIndex = this.markers[selection.color].index;
+            Game.ctx.globalAlpha = this.markers[selection.color].opacity + this.markers[selection.color].baseOpacity;
+        } else if (range !== undefined && range.isSelectable) {
+            markerIndex = this.markers[range.color].index;
+            Game.ctx.globalAlpha = this.markers[range.color].opacity + this.markers[range.color].baseOpacity + (~~this.path.includes(location) * 0.4);
+        }
+
+        if (isMirrored) {
+            Game.ctx.scale(-1, 1);
+        }
+
+        if (markerIndex !== undefined) {
+            Game.ctx.drawImage(this.img, index * 32, markerIndex * 32, 32, 24, 0, 0, 32, 24);
             Game.ctx.globalAlpha = 1;
-        } else if (drawRange) {
-            if (this.range?.get(location).isSelectable) {
-                const config = this.range.get(location),
-                    y = this.markers[config.color].index;
-                
-                Game.ctx.globalAlpha = this.markers[config.color].opacity + this.markers[config.color].baseOpacity + (~~this.path.includes(location) * 0.4);
-                Game.ctx.drawImage(this.img, x * 32, y * 32, 32, 24, 0, 0, 32, 24);
-                Game.ctx.globalAlpha = 1;
-            }
         }
 
         if (this.focus === location) {
             const overflow = Math.floor((this.markers.focus.ms % (this.markers.focus.duration * .75)) / (this.markers.focus.duration * .25));
             let focusIndex = overflow + (~~!overflow * Math.floor(this.markers.focus.ms / (this.markers.focus.duration * .5)));
-            //let focusIndex = Math.floor(this.markers.focus.ms / (this.markers.focus.duration / 2));
-            Game.ctx.drawImage(this.img, focusIndex * 32, (x * 32) + 96, 32, 24, 0, 0, 32, 24);
+            Game.ctx.drawImage(this.img, focusIndex * 32, (index * 32) + 96, 32, 24, 0, 0, 32, 24);
         }
 
         Game.ctx.restore();

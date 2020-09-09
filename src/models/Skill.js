@@ -9,7 +9,7 @@ class Skill {
         // @range.min <Integer>
         this.range.min = ~~config.range?.min;
         // @range.max <Integer>
-        this.range.max = ~~config.range?.max;
+        this.range.max = config.range?.max;
         // @range.z <Integer>
         this.range.z = ~~config.range?.z;
         // @range.pattern <String> >> 'POINT', 'ALL', 'ALLY', 'ENEMY'
@@ -23,7 +23,7 @@ class Skill {
         // @target.min <Integer>
         this.target.min = ~~config.target?.min;
         // @target.max <Integer>
-        this.target.max = ~~config.target?.max;
+        this.target.max = config.target?.max;
         // @target.z <Integer>
         this.target.z = ~~config.target?.z;
         // @target.pattern <String> >> 'POINT', 'ALL', 'CONCURRENT'
@@ -70,7 +70,7 @@ class Skill {
         if (!range.has(opts.location) || range.get(opts.location).step > opts.step) {
 
             // location restrictions
-            if (opts.restrictions != null && !opts.restrictions.has(opts.location))
+            if (opts.restrictions != null && (!opts.restrictions.has(opts.location) || !opts.restrictions.get(opts.location).isSelectable))
                 return;
             
             // z-axis restrictions
@@ -83,11 +83,11 @@ class Skill {
             details.previous = opts.previous;
             details.step = opts.step;
             details.isSelectable = opts.step >= opts.min;
-            details.color = opts.color;
+            details.color = (opts.secondary && opts.step > 0) ? opts.secondary : opts.color;
 
             range.set(opts.location, details);
 
-            if (opts.max != null && opts.step >= opts.max)
+            if (opts.max !== null && opts.step >= opts.max)
                 return;
 
             const X = opts.location.x,
@@ -176,19 +176,34 @@ class Skill {
     }
 
     _addFillPattern(range, opts) {
-        if (!range.has(opts.location)) {
+        opts.layout.forEach(location => {
+            if (!opts.restrictions.has(location))
+                return;
+            const config = Object.create(opts.restrictions.get(location));
+            config.color = opts.color;
+
+            range.set(location, config);
+        });
+    }
+
+    _addConcurrentPattern(range, opts) {
+        if (!range.has(opts.location) || range.get(opts.location).step > opts.step) {
 
             // location restrictions
-            if (opts.restrictions != null && !opts.restrictions.has(opts.location))
+            if (!opts.restrictions.has(opts.location) || !opts.restrictions.get(opts.location).isSelectable)
+                return;
+            
+            // z-axis restrictions
+            if (opts.previous != null && opts.z != null && Math.abs(opts.location.z() - opts.previous.z()) > opts.z)
                 return;
             
             // add location and details to range
             const details = new Object();
-            details.orientation = null;
+            details.orientation = opts.orientation;
             details.previous = opts.previous;
             details.step = opts.step;
             details.isSelectable = opts.step >= opts.min;
-            details.color = opts.color;
+            details.color = (opts.secondary && opts.step > 0) ? opts.secondary : opts.color;
 
             range.set(opts.location, details);
 
@@ -211,9 +226,9 @@ class Skill {
                 NEXT_OPTS.location = next;
                 NEXT_OPTS.previous = opts.location;
                 NEXT_OPTS.step = opts.step + 1;
-                NEXT_OPTS.orientation = null
+                NEXT_OPTS.orientation = Util.getOrientationTo(opts.location, next);
 
-                this._addFillPattern(range, NEXT_OPTS);
+                this._addPointPattern(range, NEXT_OPTS);
             });
         }
     }
@@ -239,7 +254,10 @@ class Skill {
             case 'FILL':
                 this._addFillPattern(range, opts);
                 break;
-            case 'ENTITY':
+            case 'CONCURRENT':
+                this._addConcurrentPattern(range, opts);
+                break;
+            case 'ENTITIES':
                 this._addEntityPattern(range, opts);
                 break;
             default:
@@ -257,7 +275,7 @@ class Skill {
             restrictions: null,
             previous: null,
             step: 0,
-            min: this.range.min,
+            min: ~~this.range.min,
             max: this.range.max,
             z: this.range.z,
             color: 'white',
@@ -277,10 +295,11 @@ class Skill {
             restrictions: range,
             previous: null,
             step: 0,
-            min: this.target.min,
+            min: ~~this.target.min,
             max: this.target.max,
             z: this.target.z,
             color: 'red',
+            //secondary: 'yellow',
             includeHazards: true, // XXX account for movement skills
             includeEntities: true // XXX account for movement skills
         });

@@ -13,16 +13,16 @@ GAME_DATA.scenes['test'] = {
                 //headgear: 'rose'
                 //armor: 'iron-armor'
             },
-            basic: 'sword',
+            basic: 'spear',
             skills: ['magic', 'bow', 'spear']
         },
-        // {
-        //     id: 'slime',
-        //     x: 2,
-        //     y: 5,
-        //     orientation: 'south',
-        //     basic: 'spear'
-        // },
+        {
+            id: 'slime',
+            x: 2,
+            y: 5,
+            orientation: 'south',
+            basic: 'bow'
+        },
         // {
         //     id: 'mimic',
         //     x: 6,

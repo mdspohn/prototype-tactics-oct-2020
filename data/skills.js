@@ -29,9 +29,9 @@ GAME_DATA.skills['spear'] = {
         z: 2
     },
     target: {
-        min: 1,
-        max: 2,
-        pattern: 'FILL',
+        min: 0,
+        max: 1,
+        pattern: 'CONCURRENT',
         z: 2
     }
 };
@@ -69,6 +69,23 @@ GAME_DATA.skills['magic'] = {
         min: 0,
         max: 1,
         pattern: 'POINT',
+        z: 2
+    }
+};
+
+GAME_DATA.skills['earthquake'] = {
+    name: 'Earthquake',
+    description: '...',
+    range: {
+        min: 0,
+        max: null,
+        pattern: 'ENTITIES',
+        z: null
+    },
+    target: {
+        min: 0,
+        max: null,
+        pattern: 'ENTITIES',
         z: 2
     }
 };
