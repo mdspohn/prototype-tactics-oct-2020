@@ -10,7 +10,7 @@ class GameManager {
 
         // state controllers
         this.controllers = new Array(4);
-        this.controllers[0] = new MenuController();
+        this.controllers[0] = new TitleController();
         this.controllers[1] = new CombatController();
         this.controllers[2] = new TownController();
         this.controllers[3] = new WorldController();

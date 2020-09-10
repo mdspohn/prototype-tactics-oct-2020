@@ -1,4 +1,4 @@
-class MenuController {
+class TitleController {
     constructor() {
         
     }

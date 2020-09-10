@@ -361,23 +361,40 @@ class CombatController {
     // --------------------------
     
     update(step) {
-        this.layout.forEach(location => {
-            this.map.update(step, location);
-            this.decoration.update(step, location);
-        });
-        this.entities.forEach(entity => entity.update(step));
-        this.markers.update(step);
-        this.interface.update(step);
+        this.animations.updateMap(step, this.map);
+        this.animations.updateMakers(step, this.markers);
+        this.animations.updateDecorations(step, this.decorations);
+        this.animations.updateEntities(step, this.entities);
+        this.animations.updateSkills(step, this.skills);
+        this.animations.updateInterface(step, this.interface);
+
+        // this.layout.forEach(location => {
+        //     this.map.update(step, location);
+        //     this.decoration.update(step, location);
+        // });
+        // this.entities.forEach(entity => entity.update(step));
+        // this.markers.update(step);
+        // this.interface.update(step);
     }
 
     render(delta) {
         this.layout.forEach(location => {
-            this.map.render(delta, location);
-            this.markers.render(delta, location);
-            this.decoration.render(delta, location);
-            this.entities.filter(entity => entity.location == location).forEach(occupant => occupant.render(delta, location));
+            this.animations.renderMap(delta, Game.ctx, Game.camera, location, this.map);
+            this.animations.renderMarkers(delta, Game.ctx, Game.camera, location, this.markers);
+            this.animations.renderDecorations(delta, Game.ctx, Game.camera, location, this.decorations);
+            this.animations.renderEntities(delta, Game.ctx, Game.camera, location, this.entities);
+            this.animations.renderSkills(delta, Game.ctx, Game.camera, location, this.skills);
         });
-        this.interface.render(delta);
+
+        this.animations.renderInterface(delta, this.interface);
+
+        // this.layout.forEach(location => {
+        //     this.map.render(delta, location);
+        //     this.markers.render(delta, location);
+        //     this.decoration.render(delta, location);
+        //     this.entities.filter(entity => entity.location == location).forEach(occupant => occupant.render(delta, location));
+        // });
+        // this.interface.render(delta);
     }
 
     // -------------------

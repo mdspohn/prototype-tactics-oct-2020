@@ -8,12 +8,12 @@ GAME_DATA.scenes['test'] = {
             y: 4,
             orientation: 'east',
             equipment: {
-                //weapon: 'knife',
+                weapon: 'knife',
                 //accessory_1: 'buckler',
                 //headgear: 'rose'
                 //armor: 'iron-armor'
             },
-            basic: 'spear',
+            basic: 'sword',
             skills: ['magic', 'bow', 'spear']
         },
         {
