@@ -1,4 +1,4 @@
-class EquipmentRenderer extends DefaultRenderer {
+class EquipmentRenderer extends Renderer {
     constructor(config) {
         super(config);
     }

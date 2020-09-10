@@ -362,7 +362,7 @@ class CombatController {
     
     update(step) {
         this.animations.updateMap(step, this.map);
-        this.animations.updateMakers(step, this.markers);
+        this.animations.updateMarkers(step, this.markers);
         this.animations.updateDecorations(step, this.decorations);
         this.animations.updateEntities(step, this.entities);
         this.animations.updateSkills(step, this.skills);
@@ -378,7 +378,7 @@ class CombatController {
     }
 
     render(delta) {
-        this.layout.forEach(location => {
+        this.map.forEach(location => {
             this.animations.renderMap(delta, Game.ctx, Game.camera, location, this.map);
             this.animations.renderMarkers(delta, Game.ctx, Game.camera, location, this.markers);
             this.animations.renderDecorations(delta, Game.ctx, Game.camera, location, this.decorations);

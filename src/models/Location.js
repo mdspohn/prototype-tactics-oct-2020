@@ -1,55 +1,60 @@
 class Location {
-    constructor(x, y, map) {
-        // reference to parent map
-        this.map = map;
-        this.tw = map.tw;
-        this.th = map.th;
-        this.td = map.td;
-
-        // tile coordinates
+    constructor(x, y, tiles, config) {
         this.x = x;
         this.y = y;
+
+        this.tiles = new Array();
+        tiles.forEach(data => {
+            const tile = new Tile(data, config[data.id]);
+            this.tiles.push(tile);
+        });
     }
 
-    z() {
-        // total tiles stacked on this position
-        return this.map.tiles[this.x][this.y].length;
+    getTiles() {
+        return this.tiles;
     }
 
-    tile() {
-        return this.map.tiles[this.x][this.y][this.z() - 1];
+    _getTopTile() {
+        return this.tiles.slice(-1)[0];
     }
 
-    ox() {
-        // x offset of the tile, accounting for animation
-        return this.tile().ox;
+    getX() {
+        return this.x;
     }
 
-    oy() {
-        // y offset of the tile, accounting for animation
-        return this.tile().oy;
+    getY() {
+        return this.y;
     }
 
-    posX() {
-        // canvas x coordinate of the top left corner of the tile
-        return this.y * (this.tw / 2) - this.x * (this.tw / 2) + this.ox();
+    getZ() {
+        return this.tiles.length;
     }
 
-    posY() {
-        // canvas y coordinate of the top left corner of the tile
-        return this.y * (this.td / 2) + this.x * (this.td / 2) - (this.z() - 1) * this.th + this.oy();
+    getOffsetX() {
+        return ~~this._getTopTile().ox;
+    }
+
+    getOffsetY() {
+        return ~~this._getTopTile().oy;
+    }
+
+    getPosX() {
+        return this.getY() * (this.getTileWidth() / 2) - this.getX() * (this.getTileWidth() / 2) + this.getOffsetX();
+    }
+
+    getPosY() {
+        return this.getY() * (this.getTileDepth() / 2) + this.getX() * (this.getTileDepth() / 2) - (this.getZ() - 1) * this.getTileHeight() + this.getOffsetY();
     }
     
     isWater() {
-        return !!this.map.meta[this.tile().id].water;
+        return this._getTopTile().water;
     }
 
     isSlope() {
-        return !!this.map.meta[this.tile().id].slope;
+        return this._getTopTile().slope;
     }
 
     getOrientation() {
-        // cardinal orientation of the tile, if it exists, e.g. slopes
-        return this.map.meta[this.tile().id].orientation;
+        return this._getTopTile().orientation;
     }
 }

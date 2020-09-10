@@ -1,4 +1,4 @@
-class BeastRenderer extends AnimationRenderer2D {
+class BeastRenderer extends Renderer {
     constructor(config) {
         super(config);
     }

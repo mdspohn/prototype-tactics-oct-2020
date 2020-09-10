@@ -1,7 +1,7 @@
 class AnimationManager {
-    constructor(config = { speed: 1, scaling: 1 }) {
-        this.speed = config.speed;
-        this.scaling = config.scaling;
+    constructor(settings = { speed: 1, scaling: 1 }) {
+        this.speed = settings.speed;
+        this.scaling = settings.scaling;
 
         this.renderers = new Object();
         this.renderers.maps        = new MapRenderer(config);
@@ -71,7 +71,7 @@ class AnimationManager {
     }
 
     renderMarkers(delta, ctx, camera, location, markers) {
-
+        this.renderers.markers.render(delta, ctx, camera, location, markers);
     }
 
     renderBeasts(delta, ctx, camera, location, beasts) {
