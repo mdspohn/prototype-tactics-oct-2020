@@ -130,6 +130,8 @@
 
     </section>
 
+    <div style="position: absolute; left: calc(50% - 5px); top: calc(50% - 5px); width: 10px; height: 10px; background-color: red"></div>
+
     <!-------------------------------->
     <!------ SETTINGS INTERFACE ------>
     <!-------------------------------->
@@ -184,22 +186,36 @@
 
 
   <!-- GAME OBJECTS -->
-  <script type="text/javascript" src="src/models/Location.js"></script>
-  <script type="text/javascript" src="src/models/Layout.js"></script>
-  <script type="text/javascript" src="src/models/Map.js"></script>
-  <script type="text/javascript" src="src/models/Decoration.js"></script>
   <script type="text/javascript" src="src/models/Tileset.js"></script>
+  <script type="text/javascript" src="src/models/Map.js"></script>
+  <script type="text/javascript" src="src/models/Location.js"></script>
+  <script type="text/javascript" src="src/models/Tile.js"></script>
+  <script type="text/javascript" src="src/models/Decoration.js"></script>
   <script type="text/javascript" src="src/models/Beast.js"></script>
   <script type="text/javascript" src="src/models/Skill.js"></script>
   <script type="text/javascript" src="src/models/Equipment.js"></script>
+  <script type="text/javascript" src="src/models/Markers.js"></script>
 
-  <!-- UTILITY FUNCTION / HELPERS -->
-  <script type="text/javascript" src="src/helpers/Turns.js"></script>
-  <script type="text/javascript" src="src/helpers/Markers.js"></script>
-  <script type="text/javascript" src="src/helpers/Pathing.js"></script>
+  <!-- Renderers -->
+  <script type="text/javascript" src="src/renderers/Renderer.js"></script>
+  <script type="text/javascript" src="src/renderers/Map.js"></script>
+  <script type="text/javascript" src="src/renderers/Decoration.js"></script>
+  <script type="text/javascript" src="src/renderers/Beast.js"></script>
+  <script type="text/javascript" src="src/renderers/Equipment.js"></script>
+  <script type="text/javascript" src="src/renderers/Skill.js"></script>
+  <script type="text/javascript" src="src/renderers/Marker.js"></script>
+
+  <!-- Logic -->
+  <script type="text/javascript" src="src/logic/General.js"></script>
+  <script type="text/javascript" src="src/logic/Turns.js"></script>
+  <script type="text/javascript" src="src/logic/Range.js"></script>
+  <script type="text/javascript" src="src/logic/Pathing.js"></script>
 
   <!-- MANAGERS -->
-  <script type="text/javascript" src="src/managers/SkillManager.js"></script>
+  <script type="text/javascript" src="src/managers/Logic.js"></script>
+  <script type="text/javascript" src="src/managers/Animation.js"></script>
+  <script type="text/javascript" src="src/managers/Action.js"></script>
+  <script type="text/javascript" src="src/managers/Data.js"></script>
 
   <!-- GAME STATE CONTROLLERS -->
   <script type="text/javascript" src="src/controllers/Title.js"></script>
@@ -209,8 +225,7 @@
 
   <!-- GAME LOGIC -->
   <script type="text/javascript" src="src/Events.js"></script>
-  <script type="text/javascript" src="src/Data.js"></script>
-  <script type="text/javascript" src="src/Util.js"></script>
+  <script type="text/javascript" src="src/Loader.js"></script>
   <script type="text/javascript" src="src/Game.js"></script>
   <script type="text/javascript" src="src/Engine.js"></script>
   <script type="text/javascript" src="src/Input.js"></script>
@@ -220,8 +235,7 @@
   <!-- INITIALIZATION -->
   <script type="text/javascript">
     const Events = new EventManager(),
-          Data   = new DataManager(),
-          Util   = new GameUtil(),
+          Assets = new AssetLoader(),
           Game   = new GameManager(),
           Engine = new GameEngine();
     

@@ -1,4 +1,4 @@
-class Pathing {
+class PathingLogic {
     constructor() {
         this.patterns = new Object();
         this.patterns.POINT = (range, location, layout, opts) => {

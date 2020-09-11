@@ -197,7 +197,7 @@ class CombatInterface {
 
     async nextTurn(entity) {
         this._updateUnit(this.active, entity);
-        this._updateHeight(entity.location.z());
+        this._updateHeight(entity.location.getZ());
         this._setElement(this.active.dom.wrapper, 'left', 10, 'px');
         this._animateElement(this.active.dom.wrapper, 'left',   30, 500, 'px', 'active-show');
         this._animateElement(this.active.dom.wrapper, 'opacity', 1, 500);
@@ -276,18 +276,15 @@ class CombatController {
         this.map = null;
         this.decoration = null;
         this.entities = null;
-        this.layout = null;
 
         // -------------------
         // COMBAT STATE
         // -----------------------
 
-        this.turns     = new Turns();
         this.markers   = new Markers();
-        this.pathing   = new Pathing();
         this.interface = new CombatInterface();
 
-        this.skills = new SkillManager();
+        //this.skills = new SkillManager();
 
         this.states = new Object();
         this.states["NONE"]           = 0;
@@ -305,7 +302,7 @@ class CombatController {
 
         this.state = 0; // <0-29>
 
-        this.active = null;
+        this.active = null; // <Beast>
 
         // -------------------
         // EVENT LISTENERS
@@ -318,23 +315,22 @@ class CombatController {
     }
 
     async _load() {
-        await Promise.all([this.markers._load(), this.interface._load(), this.skills._load()]);
+        await Promise.all([this.markers._load(), this.interface._load()]);
     }
 
-    async _prepare(map, decoration, entities, layout) {
+    async _prepare(map, decoration, entities) {
         this.map = map;
         this.decoration = decoration;
-        this.layout = layout;
         this.entities = entities;
         this.entities.forEach(unit => {
-            unit._initialize(this.layout.getLocation(unit.initialX, unit.initialY))
-            this.skills.setSkills(unit, unit.skills);
-            this.skills.setAttack(unit, unit.getWeaponSkillId() || unit.basic);
+            unit._initialize(this.map.getLocation(unit.initialX, unit.initialY))
+            // this.skills.setSkills(unit, unit.skills);
+            // this.skills.setAttack(unit, unit.getWeaponSkillId() || unit.basic);
         });
     }
 
     async _initialize() {
-        Game.camera.toCenter(Game.canvas, this.layout);
+        Game.camera.toCenter(Game.canvas, this.map);
         this.nextTurn();
     }
 
@@ -344,12 +340,12 @@ class CombatController {
 
     async nextTurn() {
         // set new active entity
-        this.active = this.turns.getNext(this.entities);
+        this.active = Game.logic.turns.getNext(this.entities);
         this.active.resetTurn();
-        this.interface.updateTurns(this.turns.getForecast(this.entities), this.active);
+        this.interface.updateTurns(Game.logic.turns.getForecast(this.entities), this.active);
 
         // pan camera to entity
-        Game.camera.toLocation(this.active.location, 750, 'ease-out');
+        //Game.camera.toLocation(this.active.location, 750, 'ease-out');
 
         // enable interface and new state
         await this.interface.nextTurn(this.active);
@@ -361,40 +357,24 @@ class CombatController {
     // --------------------------
     
     update(step) {
-        this.animations.updateMap(step, this.map);
-        this.animations.updateMarkers(step, this.markers);
-        this.animations.updateDecorations(step, this.decorations);
-        this.animations.updateEntities(step, this.entities);
-        this.animations.updateSkills(step, this.skills);
-        this.animations.updateInterface(step, this.interface);
-
-        // this.layout.forEach(location => {
-        //     this.map.update(step, location);
-        //     this.decoration.update(step, location);
-        // });
-        // this.entities.forEach(entity => entity.update(step));
-        // this.markers.update(step);
-        // this.interface.update(step);
+        Game.animations.updateMap(step, this.map);
+        Game.animations.updateMarkers(step, this.markers);
+        Game.animations.updateDecorations(step, this.decorations);
+        Game.animations.updateBeasts(step, this.entities);
+        Game.animations.updateSkills(step, this.skills);
+        Game.animations.updateInterface(step, this.interface);
     }
 
     render(delta) {
         this.map.forEach(location => {
-            this.animations.renderMap(delta, Game.ctx, Game.camera, location, this.map);
-            this.animations.renderMarkers(delta, Game.ctx, Game.camera, location, this.markers);
-            this.animations.renderDecorations(delta, Game.ctx, Game.camera, location, this.decorations);
-            this.animations.renderEntities(delta, Game.ctx, Game.camera, location, this.entities);
-            this.animations.renderSkills(delta, Game.ctx, Game.camera, location, this.skills);
+            Game.animations.renderMap(delta, Game.ctx, Game.camera, location, this.map);
+            Game.animations.renderMarkers(delta, Game.ctx, Game.camera, location, this.markers);
+            Game.animations.renderDecorations(delta, Game.ctx, Game.camera, location, this.decorations);
+            Game.animations.renderBeasts(delta, Game.ctx, Game.camera, location, this.entities);
+            Game.animations.renderSkills(delta, Game.ctx, Game.camera, location, this.skills);
         });
 
-        this.animations.renderInterface(delta, this.interface);
-
-        // this.layout.forEach(location => {
-        //     this.map.render(delta, location);
-        //     this.markers.render(delta, location);
-        //     this.decoration.render(delta, location);
-        //     this.entities.filter(entity => entity.location == location).forEach(occupant => occupant.render(delta, location));
-        // });
-        // this.interface.render(delta);
+        Game.animations.renderInterface(delta, this.interface);
     }
 
     // -------------------
@@ -413,12 +393,12 @@ class CombatController {
         if (event !== undefined)
             event.stopPropagation();
 
-        this.markers.setRange(this.pathing.getMovementRange(this.active, this.entities, this.layout));
+        this.markers.setRange(Game.logic.pathing.getMovementRange(this.active, this.entities, this.map));
         this.interface.requestMove();
     }
 
     confirmMove(location) {
-        if (location === undefined || !this.pathing.isValidSelection(location, this.markers.range))
+        if (location === undefined || !Game.logic.pathing.isValidSelection(location, this.markers.range))
             return;
 
         this.state = this.states.MOVE_CONFIRM;
@@ -431,18 +411,18 @@ class CombatController {
             this.state = this.states.PLAYER_TURN;
             this.interface.confirmMove(this.active.getMovement());
             this.interface._updateHeight(this.active.location.z());
-            this.markers.clearFocus();
-            this.markers.clearPath();
+            this.markers.setFocus(null);
+            this.markers.setPath(null);
             Events.remove('move-step', stepListenerId);
         });
-        this.active.walkTo(location, this.markers.range);
-        this.markers.clearRange();
+        this.active.walkTo(location, this.markers.getRange());
+        this.markers.setRange(null);
     }
 
     cancelMove() {
         this.state = this.states.PLAYER_TURN;
-        this.markers.clearRange();
-        this.markers.clearPath();
+        this.markers.setRange(null);
+        this.markers.setPath(null);
         this.interface.cancelMove();
     }
 
@@ -467,11 +447,11 @@ class CombatController {
             event.stopPropagation();
 
     
-        const attackRange = this.active.actions.basic.getRange(this.active, this.entities, this.layout);
+        const attackRange = this.active.actions.basic.getRange(this.active, this.entities, this.map);
         this.markers.setRange(attackRange);
 
         // const atkData = this.active.getAttackData(),
-        //       atkRange = this.pathing.getSkillRange(this.active.location, this.layout, Object.assign(atkData.range, { markerType: 'white' }));
+        //       atkRange = this.pathing.getSkillRange(this.active.location, this.map, Object.assign(atkData.range, { markerType: 'white' }));
 
         // this.markers.setRange(atkRange);
         this.interface.requestAttack();
@@ -483,8 +463,8 @@ class CombatController {
 
     cancelAttack() {
         this.state = this.states.PLAYER_TURN;
-        this.markers.clearRange();
-        this.markers.clearSelection();
+        this.markers.setRange(null);
+        this.markers.setSelection(null);
         this.interface.cancelAttack();
     }
 
@@ -514,25 +494,25 @@ class CombatController {
         
         switch(this.state) {
             case this.states.MOVE_REQUEST:
-                if (this.markers.range.has(location) && this.markers.range.get(location).isSelectable) {
-                    this.markers.focus = location;
-                    this.markers.setPath(this.pathing.getPathing(location, this.markers.range));
+                if (this.markers.getRange().has(location) && this.markers.getRange().get(location).isSelectable) {
+                    this.markers.setFocus(location);
+                    this.markers.setPath(Game.logic.pathing.getPathing(location, this.markers.getRange()));
                 } else {
-                    this.markers.clearFocus();
-                    this.markers.clearPath();
+                    this.markers.setFocus(null);
+                    this.markers.setPath(null);
                 }
                 break;
             case this.states.MOVE_CONFIRM:
                 break;
             case this.states.ATTACK_REQUEST:
-                if (this.markers.range.has(location)) {
-                    this.markers.focus = location;
+                if (this.markers.getRange().has(location)) {
+                    this.markers.setFocus(location);
                 } else {
-                    this.markers.clearFocus();
+                    this.markers.setFocus(null);
                 }
                 break;
             default:
-                this.markers.clearFocus();
+                this.markers.setFocus(null);
         }
     }
 
@@ -554,15 +534,15 @@ class CombatController {
     // --------------------------
 
     onMouseMove(event) {
-        let location = Game.camera._windowToTile(event.x, event.y, this.layout);
+        let location = Game.camera._windowToTile(event.x, event.y, this.map);
         switch(this.state) {
             case this.states.MOVE_CONFIRM:
                 return;
             case this.states.ATTACK_REQUEST:
-                if (this.markers.range.has(location) && this.markers.range.get(location).isSelectable) {
-                    this.markers.setSelection(this.active.actions.basic.getTarget(location, this.entities, this.layout, this.markers.range));
+                if (this.markers.getRange().has(location) && this.markers.getRange().get(location).isSelectable) {
+                    this.markers.setSelection(this.active.actions.basic.getTarget(location, this.entities, this.map, this.markers.getRange()));
                 } else {
-                    this.markers.clearSelection();
+                    this.markers.setSelection(null);
                     location = null;
                 }
                 break;
@@ -578,7 +558,7 @@ class CombatController {
     }
 
     onClick(event) {
-        const location = Game.camera._windowToTile(event.x, event.y, this.layout);
+        const location = Game.camera._windowToTile(event.x, event.y, this.map);
         switch(this.state) {
             case this.states.NONE:
                 break;

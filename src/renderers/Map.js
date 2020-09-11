@@ -77,8 +77,8 @@ class MapRenderer extends Renderer {
                 Math.floor((tile.idx * map.getTileWidth()) / map.getImageWidth()) * (map.getTileHeight() + map.getTileDepth()),
                 map.getTileWidth(),
                 map.getTileHeight() + map.getTileDepth(),
-                tile.ox,
-                tile.oy,
+                this.scaling * tile.ox,
+                this.scaling * tile.oy,
                 this.scaling * map.getTileWidth(),
                 this.scaling * (map.getTileHeight() + map.getTileDepth())
             );

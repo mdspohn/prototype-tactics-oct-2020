@@ -1,4 +1,4 @@
-class GameUtil {
+class GeneralLogic {
     constructor() {
         this.ORIENTATIONS = new Object();
         this.ORIENTATIONS.NORTH = 'north';

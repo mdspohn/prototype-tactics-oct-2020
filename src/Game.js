@@ -4,9 +4,11 @@ class GameManager {
         this.ctx = this.canvas.getContext('2d');
         
         // managers
+        this.camera = new Camera({ canvas: this.canvas, ctx: this.ctx, scaling: 4 });
         this.input  = new InputManager();
-        this.camera = new Camera(this.canvas);
-        this.transition = null;
+        this.tools = new DevTools();
+        this.logic = new LogicManager();
+        this.animations = new AnimationManager({ speed: 1, scaling: 4 });
 
         // state controllers
         this.controllers = new Array(4);
@@ -17,7 +19,7 @@ class GameManager {
 
         // game states
         this.states = new Object();
-        this.states['MENU'] = 0;
+        this.states['TITLE'] = 0;
         this.states['COMBAT'] = 1;
         this.states['TOWN'] = 2;
         this.states['WORLD'] = 3;
@@ -29,13 +31,6 @@ class GameManager {
         this.map = null;
         this.decoration = null;
         this.entities = null;
-        this.layout = null;
-
-        // --------------
-        // XXX - DEVELOPMENT ONLY
-        // -----------------------
-
-        this.tools = new DevTools();
     }
 
     // -------------------
@@ -43,27 +38,27 @@ class GameManager {
     // -----------------------------------
 
     async _load() {
-        await Data._load();
+        await Assets._load();
         await Promise.all([...this.controllers.map(controller => controller._load())]);
 
         // --------------
         // XXX - This should be done when transitioning, not on game load
         // -----------------------
-        await this._prepare('test');
+        await this._prepare('arena');
         await this._initialize();
     }
 
     async _prepare(id) {
-        this.scene = Data.getScene(id);
+        this.scene = Assets.getScene(id);
+
+        if (this.map !== null)
+            this.map._destroy();
 
         this.map = this.scene.map;
         this.decoration = this.scene.decoration;
         this.entities = this.scene.entities;
-        if (this.layout !== null)
-            this.layout._destroy();
-        this.layout = new Layout(this.map);
 
-        await this.controllers[this.states[this.scene.type]]._prepare(this.map, this.decoration, this.entities, this.layout);
+        await this.controllers[this.states[this.scene.type]]._prepare(this.map, this.decoration, this.entities);
     }
 
     async _initialize() {
@@ -72,14 +67,9 @@ class GameManager {
     }
     
     update(step) {
-        this.camera.update(step);
         this.input.update(step);
+        this.camera.update(step);
         this.controllers[this.state].update(step);
-
-        // --------------
-        // XXX - DEVELOPMENT ONLY
-        // -----------------------
-
         this.tools.update(step);
     }
 
@@ -87,11 +77,6 @@ class GameManager {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.camera.render(delta);
         this.controllers[this.state].render(delta);
-
-        // --------------
-        // XXX - DEVELOPMENT ONLY
-        // -----------------------
-
         this.tools.render(delta);
     }
 

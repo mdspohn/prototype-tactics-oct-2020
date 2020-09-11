@@ -1,4 +1,4 @@
-class Turns {
+class TurnLogic {
     constructor() {
         // XXX: not sure if this will ever need an instance
     }

@@ -1,10 +1,11 @@
 class Camera {
-    constructor(canvas) {
+    constructor({ canvas, ctx, scaling } = settings) {
         this.window = new Object();
         this.window.x = window.innerWidth;
         this.window.y = window.innerHeight;
 
-        this.zoom = 4;
+        this.zoom = 1;
+        this.scaling = scaling;
 
         this.position = new Object();
         this.position.x = 0;
@@ -28,10 +29,10 @@ class Camera {
         this.posX = () => Math.round(this.position.x + this.delta.x);
         this.posY = () => Math.round(this.position.y + this.delta.y);
 
-        window.addEventListener('resize', () => this._resizeCanvas(canvas));
-        window.addEventListener('fullscreenchange', () => this._resizeCanvas(canvas));
+        window.addEventListener('resize', () => this._resizeCanvas(canvas, ctx));
+        window.addEventListener('fullscreenchange', () => this._resizeCanvas(canvas, ctx));
         
-        this._resizeCanvas(canvas);
+        this._resizeCanvas(canvas, ctx);
     }
 
     // ------------------------
@@ -39,15 +40,18 @@ class Camera {
     // ---------------------------------
 
     async toLocation(location, ms = 0, easing = null) {
-        const x = -Math.floor(location.posX() - (Game.canvas.width / 2) + (location.tw / 2)),
-              y = -Math.floor(location.posY() - (Game.canvas.height / 2) + (location.td / 2));
+        const x = -Math.floor((location.getPosX() * this.scaling) - (Game.canvas.width / 2) + (location.getTileWidth() * this.scaling / 2)),
+              y = -Math.floor((location.getPosY() * this.scaling) - (Game.canvas.height / 2) + (location.getTileDepth() * this.scaling / 2));
         
         return this._toPosition(x, y, ms, easing);
     }
 
-    async toCenter(canvas, layout, ms = 0, easing = null) {
-        const x = Math.floor((canvas.width  - layout.boundaries.x2 - layout.boundaries.x1) / 2) - (layout.tw / 2),
-              y = Math.floor((canvas.height - layout.boundaries.y2) / 2) - (layout.td / 2);
+    async toCenter(canvas, map, ms = 0, easing = null) {
+        const x = Math.floor((canvas.width  - (map.boundaries.x2 + map.boundaries.x1) * this.scaling) / 2) - (map.getTileWidth() * this.scaling / 2),
+              y = Math.floor((canvas.height - map.boundaries.y2 * this.scaling) / 2) - (map.getTileDepth() * this.scaling / 2) - (map.getTileHeight() * this.scaling);
+              
+        console.log(x, y)
+        console.log(map.boundaries.x2, map.boundaries.x1)
 
         return this._toPosition(x, y, ms, easing);
     }
@@ -88,25 +92,25 @@ class Camera {
         return Math.abs((p1[0] * (p2[1] - p3[1]) + p2[0] * (p3[1] - p1[1]) + p3[0] * (p1[1] - p2[1])) / 2);
     }
 
-    _canvasToTile(x, y, layout) {
+    _canvasToTile(x, y, map) {
         x -= this.position.x;
         y -= this.position.y;
 
         let match;
 
-        layout.filter(function(tile) {
-            const TILE_LEFT = tile.posX(),
-                  TILE_TOP  = tile.posY();
+        map.filter(location => {
+            const TILE_LEFT = location.getPosX() * this.scaling,
+                  TILE_TOP  = location.getPosY() * this.scaling;
 
-            return x >= TILE_LEFT && x < (TILE_LEFT + tile.tw) && y >= TILE_TOP && y < (TILE_TOP + tile.td + ((tile.z() - 1) * tile.th));
-        }).forEach(tile => {
-            const TILE_X = x - tile.posX(),
-                  TILE_Y = y - tile.posY();
+            return x >= TILE_LEFT && x < (TILE_LEFT + location.tw * this.scaling) && y >= TILE_TOP && y < (TILE_TOP + location.td * this.scaling + ((location.getZ() - 1) * location.th * this.scaling));
+        }).forEach(location => {
+            const TILE_X = x - location.getPosX() * this.scaling,
+                  TILE_Y = y - location.getPosY() * this.scaling;
             
             let p1, p2, p3, p4;
 
-            if (tile.isSlope()) {
-                switch(tile.getOrientation()) {
+            if (location.isSlope()) {
+                switch(location.getOrientation()) {
                     case 'north':
                         p1 = [0,  15], p2 = [15, 0], p3 = [31,  7], p4 = [15, 23];
                         break;
@@ -128,11 +132,11 @@ class Camera {
                                this._getArea([TILE_X, TILE_Y], p3, p4);
 
                 if (S_AREA == P_AREA)
-                    match = tile;
+                    match = location;
             } else {
                 const SURFACE_HIT = Math.floor((16 - Math.abs(16 - TILE_X)) / 2) >= Math.abs(8 - (TILE_Y));
                 if (SURFACE_HIT) {
-                    match = tile;
+                    match = location;
                 } else {
                     const SIDE_HIT = TILE_Y > (Math.floor((16 - Math.abs(16 - TILE_X)) / 2) + 8);
                     if (SIDE_HIT)
@@ -151,12 +155,12 @@ class Camera {
         return coords;
     }
 
-    _windowToTile(x, y, layout) {
+    _windowToTile(x, y, map) {
         const coords = this._windowToCanvas(x, y);
-        return this._canvasToTile(coords.x, coords.y, layout);
+        return this._canvasToTile(coords.x, coords.y, map);
     }
 
-    _resizeCanvas(canvas) {
+    _resizeCanvas(canvas, ctx) {
         if (this.isProcessingResize)
             return this.isPendingResize = true;
 
@@ -187,12 +191,13 @@ class Camera {
 
         // process any pending changes that came through during calculation
         this.isProcessingResize = false;
+        ctx.imageSmoothingEnabled = false;
 
         if (!this.isPendingResize)
             return false;
 
         this.isPendingResize = false;
-        this._resizeCanvas();
+        this._resizeCanvas(canvas, ctx);
     }
 
     _calculateCameraOffsets(ms) {

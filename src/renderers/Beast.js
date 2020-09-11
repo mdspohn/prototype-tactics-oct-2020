@@ -12,14 +12,14 @@ class BeastRenderer extends Renderer {
     // @step  <Integer> - milliseconds
     // ----------------------------------------
     update(beast, step) {
-        const adjustedStep = step * this.getAnimationSpeed();
+        // const adjustedStep = step * this.getAnimationSpeed();
         
-        let frame = this._getAnimationFrame(beast.animation[0]);
-        beast.animation[0].ms += adjustedStep;
+        // let frame = this._getAnimationFrame(beast.animation[0]);
+        // beast.animation[0].ms += adjustedStep;
 
-        while (beast.animation[0].ms > frame.ms) {
-            frame = this._handleFrameComplete(beast);
-        }
+        // while (beast.animation[0].ms > frame.ms) {
+        //     frame = this._handleFrameComplete(beast);
+        // }
     } 
 
     // --------------------
@@ -34,12 +34,12 @@ class BeastRenderer extends Renderer {
     // @delta    <Integer> - milliseconds
     // ---------------------------------------
     render(ctx, camera, beast, location, delta) {
-        const adjustedDelta = delta * this.getAnimationSpeed();
+        // const adjustedDelta = delta * this.getAnimationSpeed();
 
-        ctx.save();
-        ctx.translate(camera.getCanvasX() + location.getCanvasX(), camera.getCanvasY() + location.getCanvasY());
-        ctx.scale(1, 1);
-        ctx.drawImage(beast.tileset, 0, 0, beast.tw, beast.th, 0, 0, beast.tw, beast.th);
-        ctx.restore();
+        // ctx.save();
+        // ctx.translate(camera.getCanvasX() + location.getCanvasX(), camera.getCanvasY() + location.getCanvasY());
+        // ctx.scale(1, 1);
+        // ctx.drawImage(beast.tileset, 0, 0, beast.tw, beast.th, 0, 0, beast.tw, beast.th);
+        // ctx.restore();
     }
 }

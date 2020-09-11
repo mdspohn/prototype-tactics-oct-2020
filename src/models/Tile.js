@@ -1,6 +1,6 @@
 class Tile {
-    constructor(config) {
-        this.id = config.id;
+    constructor(id, config) {
+        this.id = id;
         this.idx = config.idx;
 
         this.water = Boolean(config.water);

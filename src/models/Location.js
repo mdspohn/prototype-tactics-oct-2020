@@ -1,11 +1,16 @@
 class Location {
-    constructor(x, y, tiles, config) {
+    constructor(x, y, tiles, tileset) {
         this.x = x;
         this.y = y;
 
+        this.tw = tileset.tw;
+        this.th = tileset.th;
+        this.td = tileset.td;
+
         this.tiles = new Array();
-        tiles.forEach(data => {
-            const tile = new Tile(data, config[data.id]);
+        tiles = Array.isArray(tiles) ? tiles : [tiles];
+        tiles.forEach(id => {
+            const tile = new Tile(id, tileset.config[id]);
             this.tiles.push(tile);
         });
     }
@@ -16,6 +21,18 @@ class Location {
 
     _getTopTile() {
         return this.tiles.slice(-1)[0];
+    }
+
+    getTileWidth() {
+        return this.tw;
+    }
+
+    getTileHeight() {
+        return this.th;
+    }
+
+    getTileDepth() {
+        return this.td;
     }
 
     getX() {
@@ -39,11 +56,11 @@ class Location {
     }
 
     getPosX() {
-        return this.getY() * (this.getTileWidth() / 2) - this.getX() * (this.getTileWidth() / 2) + this.getOffsetX();
+        return this.getY() * (this.tw / 2) - this.getX() * (this.tw / 2) + this.getOffsetX();
     }
 
     getPosY() {
-        return this.getY() * (this.getTileDepth() / 2) + this.getX() * (this.getTileDepth() / 2) - (this.getZ() - 1) * this.getTileHeight() + this.getOffsetY();
+        return this.getY() * (this.td / 2) + this.getX() * (this.td / 2) - (this.getZ() - 1) * this.th + this.getOffsetY();
     }
     
     isWater() {
