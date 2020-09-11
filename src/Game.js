@@ -2,13 +2,16 @@ class GameManager {
     constructor() {
         this.canvas = document.getElementById('canvas');
         this.ctx = this.canvas.getContext('2d');
+
+        this.speed = 1;
+        this.scaling = 4;
         
         // managers
-        this.camera = new Camera({ canvas: this.canvas, ctx: this.ctx, scaling: 4 });
+        this.camera = new Camera({ canvas: this.canvas, ctx: this.ctx, scaling: this.scaling });
         this.input  = new InputManager();
         this.tools = new DevTools();
         this.logic = new LogicManager();
-        this.animations = new AnimationManager({ speed: 1, scaling: 4 });
+        this.animations = new AnimationManager({ speed: this.speed, scaling: this.scaling });
 
         // state controllers
         this.controllers = new Array(4);

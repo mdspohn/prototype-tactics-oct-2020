@@ -404,13 +404,13 @@ class CombatController {
         this.state = this.states.MOVE_CONFIRM;
 
         const stepListenerId = Events.listen('move-step', (beast) => {
-            this.interface._updateHeight(beast.location.z());
+            this.interface._updateHeight(beast.location.getZ());
         }, true);
         Events.listen('move-complete', () => {
             this.active.hasMoved = true;
             this.state = this.states.PLAYER_TURN;
             this.interface.confirmMove(this.active.getMovement());
-            this.interface._updateHeight(this.active.location.z());
+            this.interface._updateHeight(this.active.location.getZ());
             this.markers.setFocus(null);
             this.markers.setPath(null);
             Events.remove('move-step', stepListenerId);

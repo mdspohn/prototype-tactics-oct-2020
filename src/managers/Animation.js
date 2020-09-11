@@ -43,7 +43,7 @@ class AnimationManager {
     }
 
     updateDecorations(step, decoration) {
-        this.renderers.decorations.update(step, decoration);
+        //this.renderers.decorations.update(step, decoration);
     }
 
     updateMarkers(step, markers) {
@@ -71,18 +71,18 @@ class AnimationManager {
     }
 
     renderDecorations(delta, ctx, camera, location, decoration) {
-        this.renderers.decorations.render(delta, ctx, camera, location, decoration);
+        //this.renderers.decorations.render(delta, ctx, camera, location, decoration);
     }
 
     renderMarkers(delta, ctx, camera, location, markers) {
         this.renderers.markers.render(delta, ctx, camera, location, markers);
     }
 
-    renderBeasts(delta, ctx, camera, location, beasts) {
-        beasts.forEach(beast => this.renderers.beasts.render(delta, ctx, camera, location, beast));
+    renderBeasts(delta, ctx, camera, location, beasts = []) {
+        beasts.filter(beast => beast.location === location).forEach(beast => this.renderers.beasts.render(delta, ctx, camera, location, beast));
     }
 
-    renderSkills(delta, ctx, camera, location, skills) {
+    renderSkills(delta, ctx, camera, location, skills = []) {
 
     }
 

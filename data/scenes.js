@@ -1,6 +1,6 @@
 GAME_DATA.scenes['test'] = {
     type: 'COMBAT',
-    area: 'test',
+    area: 'woodlands',
     entities: [
         {
             id: 'player',

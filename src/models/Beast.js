@@ -66,7 +66,7 @@ class Beast {
         this.y = () => (this.location != null) ? this.location.y : this.initialY;
 
         // current directional facing
-        this.orientation = config.orientation || Util.ORIENTATIONS.SOUTH;
+        this.orientation = config.orientation || Game.logic.general.ORIENTATIONS.SOUTH;
 
         // ----------------------
         // ANIMATIONS
@@ -220,13 +220,13 @@ class Beast {
     }
 
     _setMovementType(animation, start, end) {
-        const O   = Util.getOrientationTo(end, start),
+        const O   = Game.logic.general.getOrientationTo(end, start),
               SO  = start.getOrientation(),
               EO  = end.getOrientation(),
-              OSO = SO ? Util.getOppositeOrientation(SO) : undefined,
-              OEO = EO ? Util.getOppositeOrientation(EO) : undefined,
+              OSO = SO ? Game.logic.general.getOppositeOrientation(SO) : undefined,
+              OEO = EO ? Game.logic.general.getOppositeOrientation(EO) : undefined,
               DIFF = Math.abs(end.x - start.x) + Math.abs(end.y - start.y),
-              DIFF_Z = end.z() - start.z();
+              DIFF_Z = end.getZ() - start.getZ();
           
         if (Math.abs(DIFF_Z) <= 1 && (SO !== undefined || EO !== undefined)) {
             animation.sloped |= (SO === EO        && ((DIFF_Z < 0 && OSO == O) || (DIFF_Z > 0  && SO  == O)));
@@ -258,12 +258,12 @@ class Beast {
     }
 
     _setMovementData(animation, start, end) {
-        const w    = (start.tw / 2),
-              d    = (start.td / 2),
-              h    = (start.th / 2),
+        const w    = (start.tw / 2) * 4,
+              d    = (start.td / 2) * 4,
+              h    = (start.th / 2) * 4,
               x    = (end.x - start.x),
               y    = (end.y - start.y),
-              z    = (end.z() - start.z()),
+              z    = (end.getZ() - start.getZ()),
               s    = (~~end.isSlope()) - (~~start.isSlope());
 
         const dist = Math.abs((end.x - start.x)) + Math.abs((end.y - start.y)),
@@ -273,14 +273,14 @@ class Beast {
         animation.swap = swap;
 
         // derived initial and current offset
-        animation.ix = animation.cx = ~~swap * ((x  - y) * w + (start.ox() - end.ox()));
-        animation.iy = animation.cy = ~~swap * ((-x - y) * d + (start.oy() - end.oy()));
-        animation.iz = animation.cz = ~~swap * (-(s * h) + (z * start.th));
+        animation.ix = animation.cx = ~~swap * ((x  - y) * w + (start.getOffsetX() - end.getOffsetX()));
+        animation.iy = animation.cy = ~~swap * ((-x - y) * d + (start.getOffsetY() - end.getOffsetY()));
+        animation.iz = animation.cz = ~~swap * (-(s * h) + (z * start.th * 4));
 
         // derived target offset
-        animation.tx = ~~!swap * ((y - x) * w - (start.ox() - end.ox()));
-        animation.ty = ~~!swap * ((x + y) * d - (start.oy() - end.oy()));
-        animation.tz = ~~!swap * ((s * h) - (z * start.th));
+        animation.tx = ~~!swap * ((y - x) * w - (start.getOffsetX() - end.getOffsetX()));
+        animation.ty = ~~!swap * ((x + y) * d - (start.getOffsetY() - end.getOffsetY()));
+        animation.tz = ~~!swap * ((s * h) - (z * start.th * 4));
 
         // current movement progress
         animation.px = 0;
@@ -410,7 +410,7 @@ class Beast {
                   PROGRESS_X = this.animation.px + (PROGRESS_FRAME * (FRAME_META.px || 0)),
                   PROGRESS_Y = this.animation.py + (PROGRESS_FRAME * (FRAME_META.py || 0)),
                   PROGRESS_Z = this.animation.pz + (PROGRESS_FRAME * (FRAME_META.pz || 0)),
-                  DIFF_Z  = this.location.z() - this.animation.destination.z();
+                  DIFF_Z  = this.location.getZ() - this.animation.destination.getZ();
 
             // figure out if we should swap to rendering from the destination location (height difference related stuff)
             if (PROGRESS_Z !== 0 && (this.animation.destination != this.location) && !this.animation.sloped && (PROGRESS_Z >= 1 || DIFF_Z > 0))
@@ -425,8 +425,8 @@ class Beast {
         if (FRAME_META.idx === -1) 
             return;
 
-        const X = Game.camera.posX() + this.location.getPosX() - ((this.tw - this.location.tw) / 2),
-              Y = Game.camera.posY() + this.location.getPosY() - ((this.th - this.location.th) - (this.location.td / 2)) + (~~this.location.isSlope() * (this.location.th / 2)),
+        const X = this.location.getPosX() - ((this.tw - this.location.tw) / 2),
+              Y = this.location.getPosY() - ((this.th - this.location.th) - (this.location.td / 2)) + (~~this.location.isSlope() * (this.location.th / 2)),
               OFFSET_X = ~~this.animation.ox + ~~FRAME_META.ox + ~~this.animation.cx,
               OFFSET_Y = ~~this.animation.oy + ~~FRAME_META.oy + ~~this.animation.cy + ~~this.animation.cz,
               IS_MIRRORED = this.animation.meta.mirrored;
@@ -434,7 +434,7 @@ class Beast {
         this.equipment.render(Game.ctx, -1, FRAME_META.idx, IS_MIRRORED, X + OFFSET_X, Y + OFFSET_Y);
 
         Game.ctx.save();
-        Game.ctx.translate(X + (~~IS_MIRRORED * this.tw) + OFFSET_X, Y + OFFSET_Y);
+        Game.ctx.translate(Game.camera.posX() + X * 4 + (~~IS_MIRRORED * this.tw) * 4 + OFFSET_X, Game.camera.posY() + Y * 4 + OFFSET_Y);
 
         if (IS_MIRRORED)
             Game.ctx.scale(-1, 1);
@@ -447,8 +447,8 @@ class Beast {
             this.th,
             0,
             0,
-            this.tw,
-            this.th
+            this.tw * 4,
+            this.th * 4
         );
         Game.ctx.restore();
 

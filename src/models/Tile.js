@@ -23,4 +23,10 @@ class Tile {
             this.animation = null;
         }
     }
+
+    clone() {
+        const clone = Object.create(this);
+        clone.animation = Object.create(this.animation);
+        return;
+    }
 }

@@ -3,42 +3,37 @@ class MapRenderer extends Renderer {
         super(settings);
     }
 
-    _nextFrame(tile, map, peek = false) {
-        let config = tile;
-        if (peek) {
-            config = new Object();
-            config.animation = Object.create(tile.animation);
+    nextFrame(tile, map) {
+        if (tile.animation.next !== null) {
+            const config = map.getTileConfig(tile.animation.next);
+            tile.id = tile.animation.next;
+            tile.idx = config.idx;
+            tile.water = Boolean(config.water);
+            tile.slope = Boolean(config.slope);
+            tile.orientation = config.orientation;
+            tile.ox = 0;
+            tile.oy = 0;
         }
 
-        if (config.animation.next !== null) {
-            config.id  = config.next;
-            config.idx = map.getTileConfig(config.id).idx;
-            config.water = Boolean(map.getTileConfig(config.id).water);
-            config.slope = Boolean(map.getTileConfig(config.id).slope);
-            config.orientation = map.getTileConfig(config.id).orientation;
-            config.ox  = 0;
-            config.oy  = 0;
-        }
+        const config = map.getTileConfig(tile.id);
 
-        const TILE_CONFIG = map.getTileConfig(config.id);
+        if (config.frames !== undefined) {
+            tile.animation.ms -= config.frames[tile.animation.frame].ms;
+            tile.animation.frame = (tile.animation.frame + 1) % config.frames.length;
 
-        if (TILE_CONFIG.frames !== undefined) {
-            config.animation.ms -= TILE_CONFIG.frames[config.animation.frame].ms;
-            config.animation.frame = (config.animation.frame + 1) % TILE_CONFIG.frames.length;
-
-            const NEW_FRAME = TILE_CONFIG.frames[config.animation.frame];
-            config.animation.next = NEW_FRAME.next !== undefined ? NEW_FRAME.next : null;
-            config.idx  = NEW_FRAME.idx;
-            config.ox   = ~~NEW_FRAME.ox;
-            config.oy   = ~~NEW_FRAME.oy;
+            const frameConfig = config.frames[tile.animation.frame];
+            tile.animation.next = (frameConfig.next !== undefined) ? frameConfig.next : null;
+            tile.idx = frameConfig.idx;
+            tile.ox = ~~frameConfig.ox;
+            tile.oy = ~~frameConfig.oy;
         } else {
-            config.animation = null;
+            tile.animation = null;
         }
 
-        config.ox += ~~TILE_CONFIG.ox;
-        config.oy += ~~TILE_CONFIG.oy;
+        tile.ox += ~~config.ox;
+        tile.oy += ~~config.oy;
 
-        return config;
+        return tile;
     }
 
     update(step, map) {
@@ -47,7 +42,7 @@ class MapRenderer extends Renderer {
                 if (tile.animation !== null) {
                     tile.animation.ms += (step * this.speed);
                     while (tile.animation.ms > map.getTileConfig(tile.id).frames[tile.animation.frame].ms)
-                        this._nextFrame(tile, map);
+                        this.nextFrame(tile, map);
                 }
             });
         });
@@ -56,7 +51,7 @@ class MapRenderer extends Renderer {
     render(delta, ctx, camera, location, map) {
         location.getTiles().forEach((tile, z) => {
             while (tile.animation !== null && ((tile.animation.ms + (delta * this.speed)) > map.getTileConfig(tile.id).frames[tile.animation.frame].ms))
-                tile = this._nextFrame(tile, map, true);
+                tile = this.nextFrame(tile.clone(), map);
 
             if (tile.idx === -1)
                 return;

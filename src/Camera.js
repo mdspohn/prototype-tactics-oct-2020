@@ -104,21 +104,22 @@ class Camera {
             const TILE_X = x - location.getPosX() * this.scaling,
                   TILE_Y = y - location.getPosY() * this.scaling;
             
+            
             let p1, p2, p3, p4;
 
             if (location.isSlope()) {
                 switch(location.getOrientation()) {
                     case 'north':
-                        p1 = [0,  15], p2 = [15, 0], p3 = [31,  7], p4 = [15, 23];
+                        p1 = [0,  63], p2 = [63, 0], p3 = [127,  31], p4 = [63, 95];
                         break;
                     case 'west':
-                        p1 = [31, 15], p2 = [15, 0], p3 = [0,   7], p4 = [15, 23];
+                        p1 = [127, 63], p2 = [63, 0], p3 = [0,   31], p4 = [63, 95];
                         break;
                     case 'south':
-                        p1 = [0,   7], p2 = [15, 7], p3 = [31, 15], p4 = [15, 15];
+                        p1 = [0,   31], p2 = [63, 31], p3 = [127, 63], p4 = [63, 63];
                         break;
                     case 'east':
-                        p1 = [0,  15], p2 = [15, 7], p3 = [31,  7], p4 = [15, 15];
+                        p1 = [0,  63], p2 = [63, 31], p3 = [127,  31], p4 = [63, 63];
                         break;
                 }
 

@@ -94,7 +94,7 @@ class PathingLogic {
                 if (next === undefined)
                     return;
 
-                if (config.isHazard && ((Util.getOrientationTo(next, location) != Util.getOrientationTo(location, opts.previous)) || !config.canLeap))
+                if (config.isHazard && ((Game.logic.general.getOrientationTo(next, location) != Game.logic.general.getOrientationTo(location, opts.previous)) || !config.canLeap))
                     return;
 
                 const zDiff = next.getZ() - location.getZ();
