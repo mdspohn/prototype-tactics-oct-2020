@@ -59,11 +59,11 @@ class PathingLogic {
     _addToMovementRange(range, location, layout, entity, entities, opts) {
         if (!range.has(location) || range.get(location).steps > opts.steps) {
             const occupant = entities.find(entity => entity.location === location),
-                  allegiance = Util.getAllegiance(entity, occupant);
+                  allegiance = Game.logic.general.getAllegiance(entity, occupant);
             
             // check if tile should be considered a hazard to possibly jump over
             let isHazard = false;
-            isHazard |= location.z() === 0 && !entity.canFloat() && !entity.canFly();
+            isHazard |= location.getZ() === 0 && !entity.canFloat() && !entity.canFly();
             isHazard |= location.isWater() && !entity.canSwim() && !entity.canFly();
 
             // check if tile can be moved to
@@ -97,7 +97,7 @@ class PathingLogic {
                 if (config.isHazard && ((Util.getOrientationTo(next, location) != Util.getOrientationTo(location, opts.previous)) || !config.canLeap))
                     return;
 
-                const zDiff = next.z() - location.z();
+                const zDiff = next.getZ() - location.getZ();
                 if (zDiff < (-entity.jump - 1) || zDiff > entity.jump)
                     return;
                 

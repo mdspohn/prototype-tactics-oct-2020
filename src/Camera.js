@@ -49,9 +49,6 @@ class Camera {
     async toCenter(canvas, map, ms = 0, easing = null) {
         const x = Math.floor((canvas.width  - (map.boundaries.x2 + map.boundaries.x1) * this.scaling) / 2) - (map.getTileWidth() * this.scaling / 2),
               y = Math.floor((canvas.height - map.boundaries.y2 * this.scaling) / 2) - (map.getTileDepth() * this.scaling / 2) - (map.getTileHeight() * this.scaling);
-              
-        console.log(x, y)
-        console.log(map.boundaries.x2, map.boundaries.x1)
 
         return this._toPosition(x, y, ms, easing);
     }
@@ -134,11 +131,11 @@ class Camera {
                 if (S_AREA == P_AREA)
                     match = location;
             } else {
-                const SURFACE_HIT = Math.floor((16 - Math.abs(16 - TILE_X)) / 2) >= Math.abs(8 - (TILE_Y));
+                const SURFACE_HIT = Math.floor(((16 * this.scaling) - Math.abs((16 * this.scaling) - TILE_X)) / 2) >= Math.abs((8 * this.scaling) - (TILE_Y));
                 if (SURFACE_HIT) {
                     match = location;
                 } else {
-                    const SIDE_HIT = TILE_Y > (Math.floor((16 - Math.abs(16 - TILE_X)) / 2) + 8);
+                    const SIDE_HIT = TILE_Y > (Math.floor(((16 * this.scaling) - Math.abs((16 * this.scaling) - TILE_X)) / 2) + (8 * this.scaling));
                     if (SIDE_HIT)
                         match = undefined;
                 }

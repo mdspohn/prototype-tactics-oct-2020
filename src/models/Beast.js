@@ -425,8 +425,8 @@ class Beast {
         if (FRAME_META.idx === -1) 
             return;
 
-        const X = Game.camera.posX() + this.location.posX() - ((this.tw - this.location.tw) / 2),
-              Y = Game.camera.posY() + this.location.posY() - ((this.th - this.location.th) - (this.location.td / 2)) + (~~this.location.isSlope() * (this.location.th / 2)),
+        const X = Game.camera.posX() + this.location.getPosX() - ((this.tw - this.location.tw) / 2),
+              Y = Game.camera.posY() + this.location.getPosY() - ((this.th - this.location.th) - (this.location.td / 2)) + (~~this.location.isSlope() * (this.location.th / 2)),
               OFFSET_X = ~~this.animation.ox + ~~FRAME_META.ox + ~~this.animation.cx,
               OFFSET_Y = ~~this.animation.oy + ~~FRAME_META.oy + ~~this.animation.cy + ~~this.animation.cz,
               IS_MIRRORED = this.animation.meta.mirrored;

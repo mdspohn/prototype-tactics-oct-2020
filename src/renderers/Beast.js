@@ -11,7 +11,8 @@ class BeastRenderer extends Renderer {
     // @beast <Beast>
     // @step  <Integer> - milliseconds
     // ----------------------------------------
-    update(beast, step) {
+    update(step, beast) {
+        beast.update(step);
         // const adjustedStep = step * this.getAnimationSpeed();
         
         // let frame = this._getAnimationFrame(beast.animation[0]);
@@ -33,7 +34,8 @@ class BeastRenderer extends Renderer {
     // @location <Location>
     // @delta    <Integer> - milliseconds
     // ---------------------------------------
-    render(ctx, camera, beast, location, delta) {
+    render(delta, ctx, camera, location, beast) {
+        beast.render(delta)
         // const adjustedDelta = delta * this.getAnimationSpeed();
 
         // ctx.save();

@@ -44,7 +44,7 @@ class GameManager {
         // --------------
         // XXX - This should be done when transitioning, not on game load
         // -----------------------
-        await this._prepare('arena');
+        await this._prepare('test');
         await this._initialize();
     }
 

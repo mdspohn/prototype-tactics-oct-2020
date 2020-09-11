@@ -345,7 +345,7 @@ class CombatController {
         this.interface.updateTurns(Game.logic.turns.getForecast(this.entities), this.active);
 
         // pan camera to entity
-        //Game.camera.toLocation(this.active.location, 750, 'ease-out');
+        Game.camera.toLocation(this.active.location, 750, 'ease-out');
 
         // enable interface and new state
         await this.interface.nextTurn(this.active);
@@ -359,7 +359,7 @@ class CombatController {
     update(step) {
         Game.animations.updateMap(step, this.map);
         Game.animations.updateMarkers(step, this.markers);
-        Game.animations.updateDecorations(step, this.decorations);
+        Game.animations.updateDecorations(step, this.decoration);
         Game.animations.updateBeasts(step, this.entities);
         Game.animations.updateSkills(step, this.skills);
         Game.animations.updateInterface(step, this.interface);
@@ -369,7 +369,7 @@ class CombatController {
         this.map.forEach(location => {
             Game.animations.renderMap(delta, Game.ctx, Game.camera, location, this.map);
             Game.animations.renderMarkers(delta, Game.ctx, Game.camera, location, this.markers);
-            Game.animations.renderDecorations(delta, Game.ctx, Game.camera, location, this.decorations);
+            Game.animations.renderDecorations(delta, Game.ctx, Game.camera, location, this.decoration);
             Game.animations.renderBeasts(delta, Game.ctx, Game.camera, location, this.entities);
             Game.animations.renderSkills(delta, Game.ctx, Game.camera, location, this.skills);
         });
@@ -489,7 +489,7 @@ class CombatController {
     }
 
     _updateFocus(location) {
-        if (this.markers.focus === location)
+        if (this.markers.getFocus() === location)
             return;
         
         switch(this.state) {

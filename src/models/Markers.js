@@ -1,7 +1,7 @@
 class Markers {
     constructor() {
         this.range = new WeakMap();
-        this.path = new WeakMap();
+        this.path = new Array();
         this.selection = new WeakMap();
 
         this.focus = new Object();
@@ -60,16 +60,16 @@ class Markers {
     // Setters
     // -------------------------
 
-    setRange(range = new WeakMap()) {
-        this.range = range;
+    setRange(range) {
+        this.range = range === null ? new WeakMap() : range;
     }
 
-    setPath(path = new WeakMap()) {
-        this.path = path;
+    setPath(path) {
+        this.path = path === null ? new Array() : path;
     }
 
-    setSelection(selection = new WeakMap()) {
-        this.selection = selection;
+    setSelection(selection) {
+        this.selection = selection === null ? new WeakMap() : selection;
     }
 
     setFocus(location = null) {

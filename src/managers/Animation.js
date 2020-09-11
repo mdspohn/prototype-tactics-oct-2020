@@ -42,8 +42,8 @@ class AnimationManager {
         this.renderers.maps.update(step, map);
     }
 
-    updateDecorations(step, decorations) {
-        this.renderers.decorations.update(step, decorations);
+    updateDecorations(step, decoration) {
+        this.renderers.decorations.update(step, decoration);
     }
 
     updateMarkers(step, markers) {
@@ -70,8 +70,8 @@ class AnimationManager {
         this.renderers.maps.render(delta, ctx, camera, location, map);
     }
 
-    renderDecorations(delta, ctx, camera, location, decorations) {
-
+    renderDecorations(delta, ctx, camera, location, decoration) {
+        this.renderers.decorations.render(delta, ctx, camera, location, decoration);
     }
 
     renderMarkers(delta, ctx, camera, location, markers) {
@@ -79,7 +79,7 @@ class AnimationManager {
     }
 
     renderBeasts(delta, ctx, camera, location, beasts) {
-
+        beasts.forEach(beast => this.renderers.beasts.render(delta, ctx, camera, location, beast));
     }
 
     renderSkills(delta, ctx, camera, location, skills) {

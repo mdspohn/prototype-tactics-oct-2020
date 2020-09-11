@@ -6,6 +6,7 @@ class Tile {
         this.water = Boolean(config.water);
         this.slope = Boolean(config.slope);
         this.orientation = config.orientation;
+        this.mirror = Boolean(config.mirror);
 
         this.ox = ~~config.ox;
         this.oy = ~~config.oy;
