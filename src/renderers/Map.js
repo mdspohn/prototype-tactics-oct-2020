@@ -3,17 +3,21 @@ class MapRenderer extends Renderer {
         super(settings);
     }
 
+    nextAnimation(tile, map) {
+        const config = map.getTileConfig(tile.animation.next);
+        tile.id = tile.animation.next;
+        tile.idx = config.idx;
+        tile.water = Boolean(config.water);
+        tile.slope = Boolean(config.slope);
+        tile.mirror = Boolean(config.mirror);
+        tile.orientation = config.orientation;
+        tile.ox = 0;
+        tile.oy = 0;
+    }
+
     nextFrame(tile, map) {
-        if (tile.animation.next !== null) {
-            const config = map.getTileConfig(tile.animation.next);
-            tile.id = tile.animation.next;
-            tile.idx = config.idx;
-            tile.water = Boolean(config.water);
-            tile.slope = Boolean(config.slope);
-            tile.orientation = config.orientation;
-            tile.ox = 0;
-            tile.oy = 0;
-        }
+        if (tile.animation.next !== null)
+            this.nextAnimation(tile, map);
 
         const config = map.getTileConfig(tile.id);
 
@@ -56,16 +60,12 @@ class MapRenderer extends Renderer {
             if (tile.idx === -1)
                 return;
 
-            const IS_MIRRORED = map.getTileConfig(tile.id).mirror,
-                  POS_X = camera.posX() - (this.scaling * (((location.getX() - location.getY()) * (map.getTileWidth() / 2)) + (map.getTileWidth()  * ~~IS_MIRRORED))),
-                  POS_Y = camera.posY() + (this.scaling * (((location.getX() + location.getY()) * (map.getTileDepth() / 2)) - (map.getTileHeight() * z)));
+            const IS_MIRRORED = map.getTileConfig(tile.id).mirrored,
+                  POS_X = camera.getPosX() - (this.scaling * (((location.getX() - location.getY()) * (map.getTileWidth() / 2)) + (map.getTileWidth()  * ~~IS_MIRRORED))),
+                  POS_Y = camera.getPosY() + (this.scaling * (((location.getX() + location.getY()) * (map.getTileDepth() / 2)) - (map.getTileHeight() * z)));
           
             ctx.save();
             ctx.translate(POS_X, POS_Y);
-
-            if (IS_MIRRORED)
-                ctx.scale(-1, 1);
-
             ctx.drawImage(
                 map.getImage(),
                 (tile.idx * map.getTileWidth()) % map.getImageWidth(),

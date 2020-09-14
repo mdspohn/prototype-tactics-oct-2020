@@ -16,11 +16,11 @@ class MarkerRenderer extends Renderer {
               FOCUS_MARKER     = markers.getFocus() === location;
 
         if (RANGE_MARKER !== undefined || SELECTION_MARKER !== undefined || FOCUS_MARKER) {
-            const IS_SLOPE    = location.isSlope(),
-                  IS_MIRRORED = IS_SLOPE && [Game.logic.general.ORIENTATIONS.WEST, Game.logic.general.ORIENTATIONS.EAST].includes(location.getOrientation()),
-                  X_INDEX     = ~~IS_SLOPE * ([Game.logic.general.ORIENTATIONS.WEST, Game.logic.general.ORIENTATIONS.NORTH].includes(location.getOrientation()) ? 1 : 2),
-                  POS_X       = camera.posX() + (location.getPosX() * this.getScaling()) + (~~IS_MIRRORED * 32 * this.getScaling()),
-                  POS_Y       = camera.posY() + (location.getPosY() * this.getScaling());
+            const IS_SLOPED   = location.isSloped(),
+                  IS_MIRRORED = IS_SLOPED && [Game.logic.general.ORIENTATIONS.WEST, Game.logic.general.ORIENTATIONS.EAST].includes(location.getOrientation()),
+                  X_INDEX     = ~~IS_SLOPED * ([Game.logic.general.ORIENTATIONS.WEST, Game.logic.general.ORIENTATIONS.NORTH].includes(location.getOrientation()) ? 1 : 2),
+                  POS_X       = camera.getPosX() + (location.getPosX() * this.getScaling()) + (~~IS_MIRRORED * 32 * this.getScaling()),
+                  POS_Y       = camera.getPosY() + (location.getPosY() * this.getScaling());
             
             ctx.save();
             ctx.translate(POS_X, POS_Y);

@@ -26,13 +26,18 @@ class Camera {
         this.adjustment.x = 0;
         this.adjustment.y = 0;
 
-        this.posX = () => Math.round(this.position.x + this.delta.x);
-        this.posY = () => Math.round(this.position.y + this.delta.y);
-
         window.addEventListener('resize', () => this._resizeCanvas(canvas, ctx));
         window.addEventListener('fullscreenchange', () => this._resizeCanvas(canvas, ctx));
         
         this._resizeCanvas(canvas, ctx);
+    }
+
+    getPosX() {
+        return Math.round(this.position.x + this.delta.x);
+    }
+
+    getPosY() {
+        return Math.round(this.position.y + this.delta.y);
     }
 
     // ------------------------
@@ -47,7 +52,7 @@ class Camera {
     }
 
     async toCenter(canvas, map, ms = 0, easing = null) {
-        const x = Math.floor((canvas.width  - (map.boundaries.x2 + map.boundaries.x1) * this.scaling) / 2) - (map.getTileWidth() * this.scaling / 2),
+        const x = Math.floor((canvas.width - (map.boundaries.x2 + map.boundaries.x1) * this.scaling) / 2) - (map.getTileWidth() * this.scaling / 2),
               y = Math.floor((canvas.height - map.boundaries.y2 * this.scaling) / 2) - (map.getTileDepth() * this.scaling / 2) - (map.getTileHeight() * this.scaling);
 
         return this._toPosition(x, y, ms, easing);
@@ -107,7 +112,7 @@ class Camera {
             
             let p1, p2, p3, p4;
 
-            if (location.isSlope()) {
+            if (location.isSloped()) {
                 switch(location.getOrientation()) {
                     case 'north':
                         p1 = [0,  63], p2 = [63, 0], p3 = [127,  31], p4 = [63, 95];

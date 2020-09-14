@@ -67,7 +67,7 @@ class Location {
         return this._getTopTile().water;
     }
 
-    isSlope() {
+    isSloped() {
         return this._getTopTile().slope;
     }
 

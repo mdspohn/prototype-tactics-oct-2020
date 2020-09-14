@@ -357,24 +357,24 @@ class CombatController {
     // --------------------------
     
     update(step) {
-        Game.animations.updateMap(step, this.map);
-        Game.animations.updateMarkers(step, this.markers);
-        Game.animations.updateDecorations(step, this.decoration);
-        Game.animations.updateBeasts(step, this.entities);
-        Game.animations.updateSkills(step, this.skills);
-        Game.animations.updateInterface(step, this.interface);
+        Game.views.updateMap(step, this.map);
+        Game.views.updateMarkers(step, this.markers);
+        Game.views.updateDecorations(step, this.decoration);
+        Game.views.updateBeasts(step, this.entities);
+        Game.views.updateSkills(step, this.skills);
+        Game.views.updateInterface(step, this.interface);
     }
 
     render(delta) {
         this.map.forEach(location => {
-            Game.animations.renderMap(delta, Game.ctx, Game.camera, location, this.map);
-            Game.animations.renderMarkers(delta, Game.ctx, Game.camera, location, this.markers);
-            Game.animations.renderDecorations(delta, Game.ctx, Game.camera, location, this.decoration);
-            Game.animations.renderBeasts(delta, Game.ctx, Game.camera, location, this.entities);
-            Game.animations.renderSkills(delta, Game.ctx, Game.camera, location, this.skills);
+            Game.views.renderMap(delta, Game.ctx, Game.camera, location, this.map);
+            Game.views.renderMarkers(delta, Game.ctx, Game.camera, location, this.markers);
+            Game.views.renderDecorations(delta, Game.ctx, Game.camera, location, this.decoration);
+            Game.views.renderBeasts(delta, Game.ctx, Game.camera, location, this.entities);
+            Game.views.renderSkills(delta, Game.ctx, Game.camera, location, this.skills);
         });
 
-        Game.animations.renderInterface(delta, this.interface);
+        Game.views.renderInterface(delta, this.interface);
     }
 
     // -------------------

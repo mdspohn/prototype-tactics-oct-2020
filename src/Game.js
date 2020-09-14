@@ -11,7 +11,7 @@ class GameManager {
         this.input  = new InputManager();
         this.tools = new DevTools();
         this.logic = new LogicManager();
-        this.animations = new AnimationManager({ speed: this.speed, scaling: this.scaling });
+        this.views = new ViewManager({ speed: this.speed, scaling: this.scaling });
 
         // state controllers
         this.controllers = new Array(4);

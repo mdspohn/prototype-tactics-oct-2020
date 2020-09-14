@@ -2,9 +2,6 @@ class Decoration {
     constructor(config, tileset) {
         this.tileset = tileset;
 
-        // tile animation data
-        this.meta = tileset.config;
-
         // map layout
         this.tiles = config.tiles.map(row => {
             return row.map(col => {

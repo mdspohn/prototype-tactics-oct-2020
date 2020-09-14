@@ -3,43 +3,38 @@ class DecorationRenderer extends Renderer {
         super(settings);
     }
 
-    _nextFrame(tile, decorations, peek = false) {
-        let config = tile;
-        if (peek) {
-            config = new Object();
-            config.animation = Object.create(tile.animation);
-        }
+    nextAnimation(tile, decorations) {
+        const config = decorations.getTileConfig(tile.animation.next);
+        tile.id = tile.animation.next;
+        tile.idx = config.idx;
+        tile.mirror = Boolean(config.mirror);
+        tile.ox = 0;
+        tile.oy = 0;
+    }
 
-        if (config.animation.next !== null) {
-            config.id  = config.next;
-            config.idx = decorations.getTileConfig(config.id).idx;
-            config.water = Boolean(decorations.getTileConfig(config.id).water);
-            config.slope = Boolean(decorations.getTileConfig(config.id).slope);
-            config.orientation = decorations.getTileConfig(config.id).orientation;
-            config.mirror = Boolean(decorations.getTileConfig(config.id).mirror);
-            config.ox  = 0;
-            config.oy  = 0;
-        }
+    nextFrame(tile, decorations) {
+        if (tile.animation.next !== null)
+            this.nextAnimation(tile, decorations);
 
-        const TILE_CONFIG = decorations.getTileConfig(config.id);
+        const config = decorations.getTileConfig(tile.id);
 
-        if (TILE_CONFIG.frames !== undefined) {
-            config.animation.ms -= TILE_CONFIG.frames[config.animation.frame].ms;
-            config.animation.frame = (config.animation.frame + 1) % TILE_CONFIG.frames.length;
+        if (config.frames !== undefined) {
+            tile.animation.ms -= config.frames[tile.animation.frame].ms;
+            tile.animation.frame = (tile.animation.frame + 1) % config.frames.length;
 
-            const NEW_FRAME = TILE_CONFIG.frames[config.animation.frame];
-            config.animation.next = NEW_FRAME.next !== undefined ? NEW_FRAME.next : null;
-            config.idx  = NEW_FRAME.idx;
-            config.ox   = ~~NEW_FRAME.ox;
-            config.oy   = ~~NEW_FRAME.oy;
+            const frameConfig = config.frames[tile.animation.frame];
+            tile.animation.next = (frameConfig.next !== undefined) ? frameConfig.next : null;
+            tile.idx = frameConfig.idx;
+            tile.ox = ~~frameConfig.ox;
+            tile.oy = ~~frameConfig.oy;
         } else {
-            config.animation = null;
+            tile.animation = null;
         }
 
-        config.ox += ~~TILE_CONFIG.ox;
-        config.oy += ~~TILE_CONFIG.oy;
+        tile.ox += ~~config.ox;
+        tile.oy += ~~config.oy;
 
-        return config;
+        return tile;
     }
 
     update(step, decorations) {
@@ -50,7 +45,7 @@ class DecorationRenderer extends Renderer {
                         return;
                     tile.animation.ms += (step * this.speed);
                     while (tile.animation.ms > decorations.getTileConfig(tile.id).frames[tile.animation.frame].ms)
-                        this._nextFrame(tile, decorations);
+                        this.nextFrame(tile, decorations);
                 });
             });
         });
@@ -63,17 +58,17 @@ class DecorationRenderer extends Renderer {
         
         tiles.forEach((tile, z) => {
             while (tile.animation !== null && ((tile.animation.ms + (delta * this.speed)) > decorations.getTileConfig(tile.id).frames[tile.animation.frame].ms))
-                tile = this._nextFrame(tile, decorations, true);
+                tile = this.nextFrame(tile, decorations, true);
 
             if (tile.idx === -1)
                 return;
 
-            const IS_MIRRORED = decorations.getTileConfig(tile.id).mirror,
+            const IS_MIRRORED = decorations.getTileConfig(tile.id).mirrored,
                   POS_X = (~~IS_MIRRORED * decorations.getTileWidth()) - (location.getPosX()) - ((decorations.getTileWidth() - location.getTileWidth()) / 2),
                   POS_Y = (location.getPosY()) - (decorations.getTileHeight() - location.getTileDepth() - location.getTileHeight()) - (decorations.getTileHeight() * z);
           
             ctx.save();
-            ctx.translate(camera.posX() - (POS_X * this.scaling), camera.posY() + (POS_Y * this.scaling));
+            ctx.translate(camera.getPosX() - (POS_X * this.scaling), camera.getPosY() + (POS_Y * this.scaling));
 
             if (IS_MIRRORED)
                 ctx.scale(-1, 1);
