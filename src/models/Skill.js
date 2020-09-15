@@ -6,13 +6,9 @@ class Skill {
         // ------------------------------
 
         this.range = new Object();
-        // @range.min <Integer>
         this.range.min = ~~config.range?.min;
-        // @range.max <Integer>
         this.range.max = config.range?.max;
-        // @range.z <Integer>
         this.range.z = ~~config.range?.z;
-        // @range.pattern <String> >> 'POINT', 'ALL', 'ALLY', 'ENEMY'
         this.range.pattern = config.range.pattern;
 
         // --------------------
@@ -20,18 +16,16 @@ class Skill {
         // ------------------------------
 
         this.target = new Object();
-        // @target.min <Integer>
         this.target.min = ~~config.target?.min;
-        // @target.max <Integer>
         this.target.max = config.target?.max;
-        // @target.z <Integer>
         this.target.z = ~~config.target?.z;
-        // @target.pattern <String> >> 'POINT', 'ALL', 'CONCURRENT'
         this.target.pattern = config.target.pattern;
 
         // --------------------
         // DAMAGE MODIFIERS [% damage modifier from stats] <Integer>
         // ------------------------------
+
+        this.power = ~~config.power; // base damage/healing number
 
         this.modifiers = new Object();
         this.modifiers.attack  = ~~config.modifiers?.attack  / 100;

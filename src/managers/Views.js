@@ -51,11 +51,11 @@ class ViewManager {
     }
 
     updateBeasts(step, beasts = []) {
-        beasts.forEach(beast => this.views.beasts.update(step, beast));
+        this.views.beasts.update(step, beasts);
     }
 
     updateSkills(step, skills = []) {
-        skills.forEach(skill => this.views.skills.update(step, skill));
+        this.views.skills.update(step, skills);
     }
 
     updateInterface(step, ui) {

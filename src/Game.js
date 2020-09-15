@@ -3,15 +3,15 @@ class GameManager {
         this.canvas = document.getElementById('canvas');
         this.ctx = this.canvas.getContext('2d');
 
-        this.speed = 1;
+        this.speed = 2;
         this.scaling = 4;
         
         // managers
-        this.camera = new Camera({ canvas: this.canvas, ctx: this.ctx, scaling: this.scaling });
         this.input  = new InputManager();
-        this.tools = new DevTools();
-        this.logic = new LogicManager();
-        this.views = new ViewManager({ speed: this.speed, scaling: this.scaling });
+        this.camera = new Camera({ canvas: this.canvas, ctx: this.ctx, scaling: this.scaling });
+        this.tools  = new DevTools();
+        this.logic  = new LogicManager();
+        this.views  = new ViewManager({ speed: this.speed, scaling: this.scaling });
 
         // state controllers
         this.controllers = new Array(4);
@@ -22,10 +22,10 @@ class GameManager {
 
         // game states
         this.states = new Object();
-        this.states['TITLE'] = 0;
+        this.states['TITLE']  = 0;
         this.states['COMBAT'] = 1;
-        this.states['TOWN'] = 2;
-        this.states['WORLD'] = 3;
+        this.states['TOWN']   = 2;
+        this.states['WORLD']  = 3;
 
         this.state = null; // <0-3>
 

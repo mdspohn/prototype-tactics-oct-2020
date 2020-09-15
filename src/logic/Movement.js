@@ -1,48 +1,5 @@
-class PathingLogic {
+class MovementLogic {
     constructor() {
-        this.patterns = new Object();
-        this.patterns.POINT = (range, location, layout, opts) => {
-            range.set(location, { color: opts.color });
-        };
-        this.patterns.CROSS_EXCLUSIVE = (range, location, layout, opts) => {
-            // expects opts.z, opts.distance
-            for(let i = 1; i <= opts.distance; i++) {
-                const n = layout.getLocation(location.x + i, location.y),
-                      e = layout.getLocation(location.x, location.y + i),
-                      s = layout.getLocation(location.x - i, location.y),
-                      w = layout.getLocation(location.x, location.y - i);
-
-                [n, e, s, w].forEach(tile => {
-                    if (tile === undefined)
-                        return;
-                    
-                    const zo = Math.abs(location.z() - tile.z());
-                    if (zo > ~~opts.z)
-                        return;
-
-                    range.set(tile, { color: opts.color });
-                });
-            }
-        };
-        this.patterns.CROSS_INCLUSIVE = (range, location, layout, opts) => {
-            range.set(location, { color: opts.color });
-            this.patterns.CROSS_EXCLUSIVE(range, location, layout, opts);
-        };
-    }
-
-    getSelectionRange(location, layout, opts) {
-        const range = new WeakMap();
-        this.patterns[opts.pattern](range, location, layout, Object.assign({ color: 'red' }, opts));
-        return range;
-    }
-
-    getSkillRange(location, layout, opts) {
-        if (!this.patterns.hasOwnProperty(opts.pattern))
-            return console.warn('Skill pattern not found: ', opts.pattern);
-
-        const range = new WeakMap();
-        this.patterns[opts.pattern](range, location, layout, Object.assign({ color: 'yellow' }, opts));
-        return range;
     }
 
     getMovementRange(beast, entities, layout) {

@@ -204,7 +204,7 @@ class Camera {
     }
 
     _calculateCameraOffsets(ms) {
-        let p = ms / this.msRemaining;
+        let p = Math.min(ms / this.msRemaining, 1);
 
         if (this.easing != 'linear')
             p *= (this.easing == 'ease-out') ? (2 - p) : (p * 10);
@@ -249,7 +249,7 @@ class Camera {
 
     render(delta) {
         if (this.isProcessingCameraMovement) {
-            const changes = this._calculateCameraOffsets(delta);
+            const changes = this._calculateCameraOffsets(Math.min(delta, this.msRemaining));
             this.delta.x = changes.x;
             this.delta.y = changes.y;
         }
