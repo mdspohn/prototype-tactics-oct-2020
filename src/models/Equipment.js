@@ -26,15 +26,12 @@ class Equipment {
         // ANIMATIONS
         // ---------------------------
 
-        this.tileset = tileset.img;
+        this.tileset = tileset;
 
         // tile dimensions
         this.tw = tileset.tw;
         this.td = tileset.td;
         this.th = tileset.th;
-
-        // tile animation data
-        this.meta = tileset.config;
     }
 
     getSkillId() {
@@ -122,35 +119,5 @@ class EquipmentManager {
         this.move  -= ~~equipment.move;
         this.jump  -= ~~equipment.jump;
         this.speed -= ~~equipment.speed;
-    }
-
-    render(ctx, layer, index, mirrored, x, y) {
-        Object.values(this.equipment).forEach(item => {
-            if (item === null)
-                return;
-            
-            const META = item.meta[index]?.[~~mirrored];
-            if (META === undefined || META.layer !== layer)
-                return;
-
-            ctx.save();
-            ctx.translate(x + ~~META.ox + (~~META.mirrored * item.tw), y + ~~META.oy);
-    
-            if (META.mirrored)
-                ctx.scale(-1, 1);
-
-            ctx.drawImage(
-                item.tileset,
-                (META.idx * item.tw) % item.tileset.width,
-                Math.floor((META.idx * item.tw) / item.tileset.width) * (item.th),
-                item.tw,
-                item.th,
-                0,
-                0,
-                item.tw,
-                item.th 
-            );
-            ctx.restore();
-        });
     }
 }

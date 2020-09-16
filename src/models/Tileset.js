@@ -16,5 +16,7 @@ class Tileset {
             this.img.src = this.src;
         };
         await new Promise(loader);
+        this.width = this.img.width;
+        this.height = this.img.height;
     }
 }

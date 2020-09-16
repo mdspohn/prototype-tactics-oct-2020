@@ -12,6 +12,26 @@ class ViewManager {
         this.views.skills      = new SkillRenderer(settings);
     }
 
+    // ---------------------
+    // Renderer Access
+    // -------------------------
+
+    getMapRenderer() {
+        return this.views.maps;
+    }
+
+    getDecorationRenderer() {
+        return this.views.decorations;
+    }
+    
+    getMarkerRenderer() {
+        return this.views.markers;
+    }
+
+    getBeastRenderer() {
+        return this.views.beasts;
+    }
+
     // ----------------------
     // Animation Settings
     // ----------------------------

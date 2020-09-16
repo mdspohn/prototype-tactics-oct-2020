@@ -146,7 +146,8 @@ class CombatInterface {
         ctx.save();
         if (opacity !== 1)
             ctx.globalAlpha = opacity;
-        entity.renderToUICanvas(ctx, x, (canvas.height - entity.th) - (~~showTile * 8), mirrored);
+        
+        Game.views.getBeastRenderer().renderToCanvas(ctx, entity, 0, mirrored, x, (canvas.height - entity.tileset.th) - (~~showTile * 8), 1);
         ctx.restore();
     }
 

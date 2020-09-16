@@ -72,27 +72,20 @@ class Beast {
         // ANIMATIONS
         // ---------------------------
 
-        this.tileset = tileset.img;
-
-        // sprite dimensions
-        this.tw = tileset.tw;
-        this.td = tileset.td;
-        this.th = tileset.th;
-
-        // sprite animation data
-        this.meta = tileset.config;
+        this.tileset = tileset;
 
         // queued animations and movement
         this.animationQueue = new Array();
 
         // current animation
-        this.animation = this._getDefaultAnimation();
+        this.animation = null;
     }
     
     _initialize(location) {
         // set location and defaults at beginning of combat
         this.energy = 0;
         this.location = location;
+        this.animation = this.getDefaultAnimation(null);
     }
 
     getWeaponSkillId() {
@@ -166,6 +159,14 @@ class Beast {
 
     canPhase() {
         return false;
+    }
+
+    isFlying() {
+        return (this.canFly() || this.canFloat()) && this.location.isHazard();
+    }
+
+    isSwimming() {
+        return this.canSwim() && this.location.isWater();
     }
     
     moveTo(destination, animation_id = null, orientation = null, event = null) {
@@ -318,151 +319,41 @@ class Beast {
         return animation;
     }
 
-    _reverseOffsets(animation) {
-        this.location = animation.destination;
-        [animation.ix, animation.tx] = [-animation.tx, -animation.ix];
-        [animation.iy, animation.ty] = [-animation.ty, -animation.iy];
-        [animation.iz, animation.tz] = [-animation.tz, -animation.iz];
-    }
-
-    _handleAnimationComplete(META) {
-        const NEXT = this.animationQueue.shift(),
-              REMAINING_MS = this.animation.ms;
-
-        if (META.event !== undefined)
-            Events.dispatch(META.event, this);
-
-        if (this.animation.event !== null)
-            Events.dispatch(this.animation.event, this);
-
-        // animation finished, so swap to new location if it hasn't been done yet
-        if (this.animation.destination !== undefined && this.animation.destination !== this.location)
-            this.location = this.animation.destination;
-        
-        this.animation = NEXT || this._getDefaultAnimation();
-        this.animation.ms = REMAINING_MS;
-        this.animation.frame = 0;
-
-        this.orientation = this.animation.orientation || this.orientation;
-
-        if (!this.animation.movement)
-            return;
-
-        // TODO: doesn't update until the next rendering cycle, so maybe this shouldn't ever be called by the render function?
-        Events.dispatch('sort', ((this.animation.destination.x - this.location.x) !== 0) ? 'Y' : 'X');
-
-        // immediately swap rendering location if we need to
-        if (this.animation.swap)
-            this.location = this.animation.destination;
-    }
-
-    _handleFrameComplete(META, FRAME_META) {
-        // broadcast frame event
-        if (FRAME_META.event)
-            Events.dispatch(FRAME_META.event, this);
-        
-        // update animation progress
-        if (this.animation.movement) {
-            this.animation.px += FRAME_META.px || 0;
-            this.animation.py += FRAME_META.py || 0;
-            this.animation.pz += FRAME_META.pz || 0;
-        }
-
-        this.animation.ms -= FRAME_META.ms;
-        this.animation.frame += 1;
-
-        // still in the same animation, nothing more to update
-        if (this.animation.frame >= META.frames.length)
-            this._handleAnimationComplete(META);
-    }
-
     _getFrameMeta(animation) {
         return animation.meta[(animation.variation ? 'variation' : 'frames')][animation.frame];
     }
 
-    // ----------------------
-    // ENGINE HOOKS
-    // ---------------------------
-
-    update(step) {
-        let FRAME_META = this._getFrameMeta(this.animation);
-
-        this.animation.ms += step;
-
-        while (this.animation.ms > FRAME_META.ms) {
-            this._handleFrameComplete(this.animation.meta, FRAME_META);
-            FRAME_META = this._getFrameMeta(this.animation);
+    getAnimationConfig(base) {
+        if (this.isFlying()) {
+            const config = this.tileset.config[`${base}-flying`]?.[this.orientation];
+            if (config !== undefined)
+                return config;
         }
-    }
-    
-    render(delta) {
-        let FRAME_META = this._getFrameMeta(this.animation);
-        
-        // check if frame should swap
-        while ((this.animation.ms + delta) > FRAME_META.ms) {
-            this._handleFrameComplete(this.animation.meta, FRAME_META);
-            FRAME_META = this._getFrameMeta(this.animation);
+        if (this.isSwimming()) {
+            const config = this.tileset.config[`${base}-swimming`]?.[this.orientation];
+            if (config !== undefined)
+                return config;
         }
-
-        // update movement offsets
-        if (this.animation.movement) {
-            const PROGRESS_FRAME = Math.min(1, ((this.animation.ms + delta) / FRAME_META.ms)),
-                  PROGRESS_X = this.animation.px + (PROGRESS_FRAME * (FRAME_META.px || 0)),
-                  PROGRESS_Y = this.animation.py + (PROGRESS_FRAME * (FRAME_META.py || 0)),
-                  PROGRESS_Z = this.animation.pz + (PROGRESS_FRAME * (FRAME_META.pz || 0)),
-                  DIFF_Z  = this.location.getZ() - this.animation.destination.getZ();
-
-            // figure out if we should swap to rendering from the destination location (height difference related stuff)
-            if (PROGRESS_Z !== 0 && (this.animation.destination != this.location) && !this.animation.sloped && (PROGRESS_Z >= 1 || DIFF_Z > 0))
-                this._reverseOffsets(this.animation);
-
-            this.animation.cx = this.animation.ix + Math.round(PROGRESS_X * (this.animation.tx - this.animation.ix));
-            this.animation.cy = this.animation.iy + Math.round(PROGRESS_Y * (this.animation.ty - this.animation.iy));
-            this.animation.cz = this.animation.iz + Math.round(PROGRESS_Z * (this.animation.tz - this.animation.iz));
-        }
-
-        // nothing to do
-        if (FRAME_META.idx === -1) 
-            return;
-
-        const X = this.location.getPosX() - ((this.tw - this.location.tw) / 2),
-              Y = this.location.getPosY() - ((this.th - this.location.th) - (this.location.td / 2)) + (~~this.location.isSloped() * (this.location.th / 2)),
-              OFFSET_X = ~~this.animation.ox + ~~FRAME_META.ox + ~~this.animation.cx,
-              OFFSET_Y = ~~this.animation.oy + ~~FRAME_META.oy + ~~this.animation.cy + ~~this.animation.cz,
-              IS_MIRRORED = this.animation.meta.mirrored;
-        
-        this.equipment.render(Game.ctx, -1, FRAME_META.idx, IS_MIRRORED, X + OFFSET_X, Y + OFFSET_Y);
-
-        Game.ctx.save();
-        Game.ctx.translate(Game.camera.getPosX() + X * 4 + (~~IS_MIRRORED * this.tw) * 4 + OFFSET_X, Game.camera.getPosY() + Y * 4 + OFFSET_Y);
-
-        if (IS_MIRRORED)
-            Game.ctx.scale(-1, 1);
-        
-        Game.ctx.drawImage(
-            this.tileset,
-            FRAME_META.idx * this.tw % this.tileset.width,
-            Math.floor((FRAME_META.idx * this.tw) / this.tileset.width) * (this.th),
-            this.tw,
-            this.th,
-            0,
-            0,
-            this.tw * 4,
-            this.th * 4
-        );
-        Game.ctx.restore();
-
-        this.equipment.render(Game.ctx, 1, FRAME_META.idx, IS_MIRRORED, X + OFFSET_X, Y + OFFSET_Y);
+        return this.tileset.config[base][this.orientation];
     }
 
-    renderToUICanvas(ctx, x, y, IS_MIRRORED) {
-        this.equipment.render(ctx, -1, 0, IS_MIRRORED, x, y);
-        ctx.save();
-        ctx.translate(x + (~~IS_MIRRORED * this.tw), y);
-        if (IS_MIRRORED)
-            ctx.scale(-1, 1);
-        ctx.drawImage(this.tileset, 0, 0, this.tw, this.th, 0, 0, this.tw, this.th);
-        ctx.restore();
-        this.equipment.render(ctx, 1, 0, IS_MIRRORED, x, y);
+    getDefaultAnimation(previous = null) {
+        const animation = new Object(),
+              config = this.getAnimationConfig('idle');
+
+        animation.id = 'idle';
+        animation.variation = !previous?.variation;
+        animation.mirrored = Boolean(config.mirrored);
+        animation.config = (animation.variation && config.variation !== undefined) ? config.variation : config.frames;
+        animation.ms = previous?.ms || 0;
+        animation.frame = 0;
+        animation.destination = this.location;
+        animation.orientation = this.orientation;
+        animation.movement = false;
+        animation.events = new Array();
+        animation.ox = ~~config.ox;
+        animation.oy = ~~config.oy;
+
+        return animation;
     }
 }
