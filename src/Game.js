@@ -7,11 +7,11 @@ class GameManager {
         this.scaling = 4;
         
         // managers
-        this.input  = new InputManager();
-        this.camera = new Camera({ canvas: this.canvas, ctx: this.ctx, scaling: this.scaling });
-        this.tools  = new DevTools();
-        this.logic  = new LogicManager();
-        this.views  = new ViewManager({ speed: this.speed, scaling: this.scaling });
+        this.input   = new InputManager();
+        this.camera  = new Camera({ canvas: this.canvas, ctx: this.ctx, scaling: this.scaling });
+        this.tools   = new DevTools();
+        this.actions = new ActionManager();
+        this.views   = new ViewManager({ speed: this.speed, scaling: this.scaling });
 
         // state controllers
         this.controllers = new Array(4);
@@ -72,15 +72,14 @@ class GameManager {
     update(step) {
         this.input.update(step);
         this.camera.update(step);
-        this.controllers[this.state].update(step);
         this.tools.update(step);
+        this.controllers[this.state].update(step);
     }
 
     render(delta) {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.camera.render(delta);
-        this.controllers[this.state].render(delta);
         this.tools.render(delta);
+        this.controllers[this.state].render(delta);
     }
 
     // --------------------

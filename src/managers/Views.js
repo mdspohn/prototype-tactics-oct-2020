@@ -99,7 +99,7 @@ class ViewManager {
     }
 
     renderBeasts(delta, ctx, camera, location, beasts = []) {
-        beasts.filter(beast => beast.location === location).forEach(beast => this.views.beasts.render(delta, ctx, camera, location, beast));
+        return beasts.filter(beast => beast.location === location).some(beast => this.views.beasts.render(delta, ctx, camera, location, beast));
     }
 
     renderSkills(delta, ctx, camera, location, skills = []) {

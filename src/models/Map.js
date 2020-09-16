@@ -40,6 +40,10 @@ class Map {
         return this.structure[x]?.[y];
     }
 
+    getLocations() {
+        return this.sorted[this.method];
+    }
+
     forEach(fn) {
         this.sorted[this.method].forEach(location => fn(location));
     }

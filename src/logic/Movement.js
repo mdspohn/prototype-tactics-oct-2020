@@ -1,10 +1,7 @@
 class MovementLogic {
-    constructor() {
-    }
-
-    getMovementRange(beast, entities, layout) {
+    static getMovementRange(beast, entities, layout) {
         const range = new WeakMap();
-        this._addToMovementRange(range, beast.location, layout, beast, entities, {
+        this.addToMovementRange(range, beast.location, layout, beast, entities, {
             previous: undefined,
             distance: beast.getMovement(),
             steps: 0,
@@ -13,10 +10,10 @@ class MovementLogic {
         return range;
     }
 
-    _addToMovementRange(range, location, layout, entity, entities, opts) {
+    static addToMovementRange(range, location, layout, entity, entities, opts) {
         if (!range.has(location) || range.get(location).steps > opts.steps) {
             const occupant = entities.find(entity => entity.location === location),
-                  allegiance = Game.logic.general.getAllegiance(entity, occupant);
+                  allegiance = GeneralLogic.getAllegiance(entity, occupant);
             
             // check if tile should be considered a hazard to possibly jump over
             let isHazard = false;
@@ -51,14 +48,14 @@ class MovementLogic {
                 if (next === undefined)
                     return;
 
-                if (config.isHazard && ((Game.logic.general.getOrientationTo(next, location) != Game.logic.general.getOrientationTo(location, opts.previous)) || !config.canLeap))
+                if (config.isHazard && ((GeneralLogic.getOrientationTo(next, location) != GeneralLogic.getOrientationTo(location, opts.previous)) || !config.canLeap))
                     return;
 
                 const zDiff = next.getZ() - location.getZ();
                 if (zDiff < (-entity.jump - 1) || zDiff > entity.jump)
                     return;
                 
-                this._addToMovementRange(range, next, layout, entity, entities, {
+                this.addToMovementRange(range, next, layout, entity, entities, {
                     previous: location,
                     distance: opts.distance,
                     steps: opts.steps + 1,
@@ -68,23 +65,23 @@ class MovementLogic {
         }
     }
 
-    isValidSelection(location, range) {
-        return !!range && range.has(location) && range.get(location).isSelectable;
-    }
-
-    isInRange(location, range) {
-       return range.has(location);
-    }
-
-    getPathing(location, range) {
+    static getPathing(location, range) {
         const path = new Array();
 
         let next = location;
-        while (range.has(next)) {
+        while (range.get(next).previous !== undefined) {
             path.push(next);
             next = range.get(next).previous;
         }
 
         return path;
+    }
+
+    static isValidSelection(location, range) {
+        return !!range && range.has(location) && range.get(location).isSelectable;
+    }
+
+    static isInRange(location, range) {
+       return range.has(location);
     }
 }

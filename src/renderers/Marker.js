@@ -17,8 +17,8 @@ class MarkerRenderer extends Renderer {
 
         if (RANGE_MARKER !== undefined || SELECTION_MARKER !== undefined || FOCUS_MARKER) {
             const IS_SLOPED   = location.isSloped(),
-                  IS_MIRRORED = IS_SLOPED && [Game.logic.general.ORIENTATIONS.WEST, Game.logic.general.ORIENTATIONS.EAST].includes(location.getOrientation()),
-                  X_INDEX     = ~~IS_SLOPED * ([Game.logic.general.ORIENTATIONS.WEST, Game.logic.general.ORIENTATIONS.NORTH].includes(location.getOrientation()) ? 1 : 2),
+                  IS_MIRRORED = IS_SLOPED && ['west', 'east'].includes(location.getOrientation()),
+                  X_INDEX     = ~~IS_SLOPED * (['west', 'north'].includes(location.getOrientation()) ? 1 : 2),
                   POS_X       = camera.getPosX() + (location.getPosX() * this.getScaling()) + (~~IS_MIRRORED * 32 * this.getScaling()),
                   POS_Y       = camera.getPosY() + (location.getPosY() * this.getScaling());
             

@@ -278,6 +278,8 @@ class CombatController {
         this.decoration = null;
         this.entities = null;
 
+        this.active = null; // <Beast>
+
         // -------------------
         // COMBAT STATE
         // -----------------------
@@ -303,8 +305,6 @@ class CombatController {
 
         this.state = 0; // <0-29>
 
-        this.active = null; // <Beast>
-
         // -------------------
         // EVENT LISTENERS
         // -----------------------
@@ -324,9 +324,7 @@ class CombatController {
         this.decoration = decoration;
         this.entities = entities;
         this.entities.forEach(unit => {
-            unit._initialize(this.map.getLocation(unit.initialX, unit.initialY))
-            // this.skills.setSkills(unit, unit.skills);
-            // this.skills.setAttack(unit, unit.getWeaponSkillId() || unit.basic);
+            unit.initialize(this.map.getLocation(unit.initialX, unit.initialY))
         });
     }
 
@@ -340,10 +338,21 @@ class CombatController {
     // --------------------------
 
     async nextTurn() {
+        // this.active = Game.actions.getNextTurn(this.entities);
+        // this.active.resetTurn();
+
+        // const forecast = Game.actions.getTurnForecast(this.entities);
+        // this.interface.updateTurnForecast(forecast, this.active);
+
+        // Game.camera.toLocation(this.active.location, 750, 'ease-out');
+
+        // this.state = this.states.PLAYER_TURN;
+        // await this.interface.nextTurn(this.active);
+
         // set new active entity
-        this.active = Game.logic.turns.getNext(this.entities);
+        this.active = TurnLogic.getNext(this.entities);
         this.active.resetTurn();
-        this.interface.updateTurns(Game.logic.turns.getForecast(this.entities), this.active);
+        this.interface.updateTurns(TurnLogic.getForecast(this.entities), this.active);
 
         // pan camera to entity
         Game.camera.toLocation(this.active.location, 750, 'ease-out');
@@ -367,13 +376,22 @@ class CombatController {
     }
 
     render(delta) {
-        this.map.forEach(location => {
-            Game.views.renderMap(delta, Game.ctx, Game.camera, location, this.map);
-            Game.views.renderMarkers(delta, Game.ctx, Game.camera, location, this.markers);
-            Game.views.renderDecorations(delta, Game.ctx, Game.camera, location, this.decoration);
-            Game.views.renderBeasts(delta, Game.ctx, Game.camera, location, this.entities);
-            Game.views.renderSkills(delta, Game.ctx, Game.camera, location, this.skills);
-        });
+        Game.ctx.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
+        const locations = this.map.getLocations();
+
+        let restart = false;
+        for (let i = 0; i < locations.length; i++) {
+            Game.views.renderMap(delta, Game.ctx, Game.camera, locations[i], this.map);
+            Game.views.renderMarkers(delta, Game.ctx, Game.camera, locations[i], this.markers);
+            Game.views.renderDecorations(delta, Game.ctx, Game.camera, locations[i], this.decoration);
+            restart |= Game.views.renderBeasts(delta, Game.ctx, Game.camera, locations[i], this.entities);
+            restart |= Game.views.renderSkills(delta, Game.ctx, Game.camera, locations[i], this.skills);
+            if (restart)
+                break;
+        }
+
+        if (restart)
+            return this.render(delta);
 
         Game.views.renderInterface(delta, this.interface);
     }
@@ -394,20 +412,21 @@ class CombatController {
         if (event !== undefined)
             event.stopPropagation();
 
-        this.markers.setRange(Game.logic.pathing.getMovementRange(this.active, this.entities, this.map));
+        this.markers.setRange(MovementLogic.getMovementRange(this.active, this.entities, this.map));
         this.interface.requestMove();
     }
 
     confirmMove(location) {
-        if (location === undefined || !Game.logic.pathing.isValidSelection(location, this.markers.range))
+        if (location === undefined || !MovementLogic.isValidSelection(location, this.markers.range))
             return;
 
         this.state = this.states.MOVE_CONFIRM;
 
         const stepListenerId = Events.listen('move-step', (beast) => {
-            this.interface._updateHeight(beast.location.getZ());
+            this.interface._updateHeight(beast.animation.destination.getZ());
         }, true);
-        Events.listen('move-complete', () => {
+        this.markers.setRange(null);
+        Game.actions.move(this.active, this.markers.getPath()).then(() => {
             this.active.hasMoved = true;
             this.state = this.states.PLAYER_TURN;
             this.interface.confirmMove(this.active.getMovement());
@@ -416,8 +435,6 @@ class CombatController {
             this.markers.setPath(null);
             Events.remove('move-step', stepListenerId);
         });
-        this.active.walkTo(location, this.markers.getRange());
-        this.markers.setRange(null);
     }
 
     cancelMove() {
@@ -497,7 +514,7 @@ class CombatController {
             case this.states.MOVE_REQUEST:
                 if (this.markers.getRange().has(location) && this.markers.getRange().get(location).isSelectable) {
                     this.markers.setFocus(location);
-                    this.markers.setPath(Game.logic.pathing.getPathing(location, this.markers.getRange()));
+                    this.markers.setPath(MovementLogic.getPathing(location, this.markers.getRange()));
                 } else {
                     this.markers.setFocus(null);
                     this.markers.setPath(null);

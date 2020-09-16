@@ -1,4 +1,4 @@
-class RangeLogic {
+class SkillsLogic {
     constructor() {
         
     }
