@@ -237,8 +237,9 @@ class CombatInterface {
         this._updateSuggestion('Select an action. The mouse wheel can be used to navigate menus.');
     }
 
-    async resetMove() {
+    async resetMove(unit) {
         this.menu.dom.actions_move.classList.toggle('dim', false);
+        this._updateHeight(unit.location.getZ());
     }
 
     async requestAttack() {
@@ -445,9 +446,9 @@ class CombatController {
     }
 
     resetMove() {
-        if (this.active.lastMoved !== 0) {
-            this.active.resetMove();
-            this.interface.resetMove();
+        if (this.active.checkpoint.last !== 0) {
+            Game.actions.resetMove(this.active);
+            this.interface.resetMove(this.active);
             this.requestMove();
         }
     }

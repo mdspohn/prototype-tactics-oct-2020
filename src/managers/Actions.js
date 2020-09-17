@@ -3,10 +3,6 @@ class ActionManager {
         this.cinematicMode = false;
     }
 
-    initialize() {
-        this.disableCinematicMode();
-    }
-
     isCinematic() {
         return this.cinematicMode;
     }
@@ -88,7 +84,6 @@ class ActionManager {
 
     async move(unit, path) {
         const origin = unit.location,
-              oriented = unit.orientation,
               destination = path[0],
               distance = Math.abs(destination.x - origin.x) + Math.abs(destination.y - origin.y);
 
@@ -102,6 +97,9 @@ class ActionManager {
         };
 
         let previous = unit.animationQueue[unit.animationQueue.length - 1] || unit.animation;
+        if (unit.checkpoint.animation === null)
+            unit.checkpoint.animation = previous;
+
         path.reverse().forEach(location => {
             const animation = new Object();
             animation.ms = 0;
@@ -112,12 +110,22 @@ class ActionManager {
             const config = unit.getAnimationConfig(animation.id, animation.orientation);
             animation.mirrored = Boolean(config.mirrored);
             animation.variation = !previous.variation;
-            animation.ox = ~~config.ox;
-            animation.oy = ~~config.oy;
+            animation.x = animation.ox = ~~config.ox;
+            animation.y = animation.oy = ~~config.oy;
             animation.config = (animation.variation && config.variation) ? config.variation : config.frames;
 
+            // ms multipliers for frames that want it
+            animation.multipliers = new Array();
+            animation.config.forEach(frame => {
+                let multiplier = 0;
+                multiplier += ~~frame.zmult * Math.abs(location.getZ() - previous.destination.getZ());
+                multiplier += ~~frame.xmult * Math.abs(location.x - previous.destination.x);
+                multiplier += ~~frame.ymult * Math.abs(location.y - location.y);
+                animation.multipliers.push(Math.max(multiplier, 1));
+            });
+
             animation.events = new Object();
-            animation.events.start = 'move-step';
+            animation.events.end = 'move-step';
             if (location === destination)
                 animation.events.end = 'move-complete';
 
@@ -125,26 +133,25 @@ class ActionManager {
             previous = animation;
         });
 
-        unit.lastLocation = origin;
-        unit.lastOrientation = oriented;
-        unit.lastMoved += distance;
-        unit.totalMoved += distance;
+        unit.checkpoint.last += distance;
+        unit.checkpoint.total += distance;
 
         return new Promise(complete);
     }
 
     resetMove(unit) {
-        // TODO
-        if (unit.lastLocation === null)
+        if (unit.checkpoint.animation === null)
             return;
         
-        unit.animation.destination = unit.lastLocation;
-        unit.orientation = unit.lastOrientation;
-        unit._handleAnimationComplete(unit.animation.meta);
+        console.log(unit.checkpoint.animation, unit.checkpoint.animation.orientation, unit.checkpoint.animation.destination)
+        unit.animation = unit.checkpoint.animation;
+        unit.animation.ms = 0;
+        unit.animation.frame = 0;
+        unit.orientation = unit.checkpoint.animation.orientation;
+        unit.location = unit.checkpoint.animation.destination;
 
-        unit.lastLocation = null;
-        unit.lastOrientation = null;
-        unit.totalMoved -= unit.lastMoved;
-        unit.lastMoved = 0;
+        unit.checkpoint.animation = null;
+        unit.checkpoint.total -= unit.checkpoint.last;
+        unit.checkpoint.last = 0;
     }
 }

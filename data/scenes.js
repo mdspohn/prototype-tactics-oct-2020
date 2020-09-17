@@ -1,15 +1,15 @@
 GAME_DATA.scenes['test'] = {
     type: 'COMBAT',
-    area: 'woodlands',
+    area: 'test',
     entities: [
         {
             id: 'player',
             x: 4,
-            y: 4,
+            y: 2,
             orientation: 'east',
             equipment: {
                 weapon: 'knife',
-                accessory_1: 'buckler',
+                //accessory_1: 'buckler',
                 headgear: 'rose',
                 // armor: 'iron-armor'
             },

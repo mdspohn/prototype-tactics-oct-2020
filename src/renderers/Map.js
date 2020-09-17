@@ -59,7 +59,7 @@ class MapRenderer extends Renderer {
 
             if (tile.idx === -1)
                 return;
-
+            
             const IS_MIRRORED = map.getTileConfig(tile.id).mirrored,
                   POS_X = camera.getPosX() - (this.scaling * (((location.getX() - location.getY()) * (map.getTileWidth() / 2)) + (map.getTileWidth()  * ~~IS_MIRRORED))),
                   POS_Y = camera.getPosY() + (this.scaling * (((location.getX() + location.getY()) * (map.getTileDepth() / 2)) - (map.getTileHeight() * z)));

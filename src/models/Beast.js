@@ -42,10 +42,10 @@ class Beast {
 
         this.energy = 0;
 
-        this.lastLocation;
-        this.lastOrientation;
-        this.totalMoved = 0;
-        this.lastMoved = 0;
+        this.checkpoint = new Object();
+        this.checkpoint.animation = null;
+        this.checkpoint.last = 0;
+        this.checkpoint.total = 0;
 
         this.hasAttacked = false;
 
@@ -97,15 +97,14 @@ class Beast {
     // ---------------------------
 
     resetTurn() {
-        this.lastLocation = null;
-        this.lastOrientation = null;
-        this.totalMoved = 0;
-        this.lastMoved = 0;
+        this.checkpoint.animation = null;
+        this.checkpoint.last = 0;
+        this.checkpoint.total = 0;
         this.hasAttacked = false;
     }
 
     getMovement() {
-        return this.move - this.totalMoved;
+        return this.move - this.checkpoint.total;
     }
 
     canMove() {
@@ -172,13 +171,14 @@ class Beast {
         animation.mirrored = Boolean(config.mirrored);
         animation.config = (animation.variation && config.variation !== undefined) ? config.variation : config.frames;
         animation.ms = previous?.ms || 0;
+        animation.multipliers = new Array(animation.config.length).fill(1);
         animation.frame = 0;
         animation.destination = previous?.destination || this.location;
         animation.orientation = previous?.orientation || this.orientation;
         animation.movement = false;
         animation.events = new Object();
-        animation.ox = ~~config.ox;
-        animation.oy = ~~config.oy;
+        animation.x = animation.ox = ~~config.ox;
+        animation.y = animation.oy = ~~config.oy;
 
         return animation;
     }

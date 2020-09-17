@@ -51,11 +51,19 @@ class BeastRenderer extends Renderer {
         animation.py += animation.config[animation.frame].py || 0;
         animation.pz += animation.config[animation.frame].pz || 0;
 
-        animation.ms -= animation.config[animation.frame].ms;
+        // make interpolated frame offset the baseline for the next frame
+        animation.x = ~~animation.ox + ~~animation.config[animation.frame].intx;
+        animation.y = ~~animation.oy + ~~animation.config[animation.frame].inty;
+
+        animation.ms -= animation.config[animation.frame].ms * animation.multipliers[animation.frame];
         animation.frame += 1;
 
-        if (animation.frame >= animation.config.length)
+        if (animation.frame >= animation.config.length) {
             return this.nextAnimation(beast, animation);
+        } else {
+            animation.intx = (~~animation.ox + ~~animation.config[animation.frame].intx) - animation.x;
+            animation.inty = (~~animation.oy + ~~animation.config[animation.frame].inty) - animation.y;
+        }
 
         return animation;
     }
@@ -64,7 +72,7 @@ class BeastRenderer extends Renderer {
         beasts.forEach(beast => {
             let animation = beast.animation;
             animation.ms += (step * speed);
-            while (animation.ms > animation.config[animation.frame].ms) {
+            while (animation.ms > (animation.config[animation.frame].ms * animation.multipliers[animation.frame])) {
                 if (animation.config[animation.frame].event !== undefined)
                     Events.dispatch(animation.config[animation.frame].event, beast);
                 animation = this.nextFrame(beast, animation);
@@ -74,7 +82,7 @@ class BeastRenderer extends Renderer {
     
     render(delta, ctx, camera, location, beast, scaling = this.scaling, speed = this.speed) {
         let animation = beast.animation;
-        while ((animation.ms + (delta * speed)) > animation.config[animation.frame].ms)
+        while ((animation.ms + (delta * speed)) > (animation.config[animation.frame].ms * animation.multipliers[animation.frame]))
             animation = this.nextFrame(beast, animation);
 
         const frame = animation.config[animation.frame];
@@ -84,7 +92,7 @@ class BeastRenderer extends Renderer {
             cz = 0;
 
         if (animation.movement) {
-            const p  = Math.max(0, Math.min(1, (animation.ms + (delta * speed)) / frame.ms)),
+            const p  = Math.max(0, Math.min(1, (animation.ms + (delta * speed)) / (frame.ms * animation.multipliers[animation.frame]))),
                   d  = beast.location.getZ() - animation.destination.getZ(),
                   px = animation.px + (p * (frame.px || 0)),
                   py = animation.py + (p * (frame.py || 0)),
@@ -94,8 +102,8 @@ class BeastRenderer extends Renderer {
             if (pz !== 0 && (animation.destination !== beast.location) && !animation.sloped && (pz >= 1 || d > 0))
                 this.reverseLocation(beast, animation);
 
-            cx = animation.ix + Math.round(px * (animation.tx - animation.ix));
-            cy = animation.iy + Math.round(py * (animation.ty - animation.iy));
+            cx = animation.ix + Math.round(px * (animation.tx - animation.ix)) + Math.round(p * ~~animation.intx * scaling);
+            cy = animation.iy + Math.round(py * (animation.ty - animation.iy)) + Math.round(p * ~~animation.inty * scaling);
             cz = animation.iz + Math.round(pz * (animation.tz - animation.iz));
         }
 
@@ -108,10 +116,10 @@ class BeastRenderer extends Renderer {
 
         const x = location.getPosX() - ((beast.tileset.tw - location.tw) / 2),
               y = location.getPosY() - ((beast.tileset.th - location.th) - (location.td / 2)) + (~~location.isSloped() * (location.th / 2)),
-              ox = ~~animation.ox + ~~frame.ox + ~~cx,
-              oy = ~~animation.oy + ~~frame.oy + ~~cy + ~~cz,
-              translateX = camera.getPosX() + (x * scaling) + ox,
-              translateY = camera.getPosY() + (y * scaling) + oy;
+              ox = ~~animation.x + ~~frame.ox,
+              oy = ~~animation.y + ~~frame.oy,
+              translateX = camera.getPosX() + ((x + ox) * scaling) + ~~cx,
+              translateY = camera.getPosY() + ((y + oy) * scaling) + ~~cy + ~~cz;
 
         this.renderToCanvas(ctx, beast, frame.idx, animation.mirrored, translateX, translateY, scaling);
     }
