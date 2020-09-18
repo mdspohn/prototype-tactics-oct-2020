@@ -164,7 +164,7 @@ class Beast {
 
     getDefaultAnimation(previous = null) {
         const animation = new Object(),
-              config = this.getAnimationConfig('idle', previous?.orientation);
+              config = this.getAnimationConfig('idle', this.orientation);
 
         animation.id = 'idle';
         animation.variation = !previous?.variation;
@@ -173,8 +173,8 @@ class Beast {
         animation.ms = previous?.ms || 0;
         animation.multipliers = new Array(animation.config.length).fill(1);
         animation.frame = 0;
-        animation.destination = previous?.destination || this.location;
-        animation.orientation = previous?.orientation || this.orientation;
+        animation.destination = this.location;
+        animation.orientation = this.orientation;
         animation.movement = false;
         animation.events = new Object();
         animation.x = animation.ox = ~~config.ox;

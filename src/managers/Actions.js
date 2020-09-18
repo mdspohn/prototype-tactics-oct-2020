@@ -84,7 +84,7 @@ class ActionManager {
 
     async move(unit, path) {
         const origin = unit.location,
-              destination = path[0],
+              destination = path[path.length - 1],
               distance = Math.abs(destination.x - origin.x) + Math.abs(destination.y - origin.y);
 
         const complete = (resolve) => {
@@ -100,7 +100,7 @@ class ActionManager {
         if (unit.checkpoint.animation === null)
             unit.checkpoint.animation = previous;
 
-        path.reverse().forEach(location => {
+        path.forEach(location => {
             const animation = new Object();
             animation.ms = 0;
             animation.frame = 0;
@@ -143,7 +143,6 @@ class ActionManager {
         if (unit.checkpoint.animation === null)
             return;
         
-        console.log(unit.checkpoint.animation, unit.checkpoint.animation.orientation, unit.checkpoint.animation.destination)
         unit.animation = unit.checkpoint.animation;
         unit.animation.ms = 0;
         unit.animation.frame = 0;
@@ -153,5 +152,82 @@ class ActionManager {
         unit.checkpoint.animation = null;
         unit.checkpoint.total -= unit.checkpoint.last;
         unit.checkpoint.last = 0;
+    }
+
+    changeOrientation(unit, x, y) {
+        const reference = {
+            x: Game.camera.getPosX() + ((unit.location.getPosX() + (unit.location.tw / 2)) * Game.scaling),
+            y: Game.camera.getPosY() + ((unit.location.getPosY() + (unit.location.td / 2)) * Game.scaling)
+        };
+
+        let orientation = (reference.x - x > 0) ? ((reference.y - y > 0) ? 'west' : 'south') : (reference.y - y > 0) ? 'north' : 'east';
+        if (unit.orientation === orientation)
+            return;
+        
+        unit.orientation = orientation;
+        const animation = unit.getDefaultAnimation(unit.animation);
+        animation.frame = unit.animation.frame;
+        animation.ms = unit.animation.ms;
+        unit.animation = animation;
+
+        return orientation;
+    }
+
+    // -------------------------
+    // Unit Attacking
+    // -----------------------------------
+
+    async useSkill(unit, skill, selection) {
+    //     const skill = {
+    //         id: 'slash',
+    //         range: {},
+    //         selection: {},
+    //         basic: true,
+    //         tp: 10,
+    //         power: 100,
+    //         sequence: [
+    //             {
+    //                 category: 'sound',
+    //                 id: 'slash'
+    //             },
+    //             {
+    //                 category: 'effect',
+    //                 type: 'tile', // tile or map
+    //                 target: 'self',
+    //                 id: 'dust',
+    //                 z: 1
+    //             },
+    //             {
+    //                 category: 'animation',
+    //                 target: 'self',
+    //                 id: 'slash',
+    //                 wait: true
+    //             },
+    //             {
+    //                 category: 'sound',
+    //                 id: 'hit'
+    //             },
+    //             {
+    //                 category: 'effect',
+    //                 type: 'tile',
+    //                 target: 'selection',
+    //                 restrictions: 'entities',
+    //                 id: 'slash',
+    //                 z: 1,
+    //                 wait: true
+    //             },
+    //             {
+    //                 category: 'animation',
+    //                 target: 'selection',
+    //                 restrictions: 'entities',
+    //                 id: 'hit',
+    //                 stagger: true
+    //             },
+    //             {
+    //                 category: 'damage',
+    //                 wait: true
+    //             }
+    //         ]
+    //     }
     }
 }

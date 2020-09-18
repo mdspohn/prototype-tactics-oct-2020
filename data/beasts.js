@@ -29,7 +29,7 @@ GAME_DATA.beasts['player'] = {
     "tileset": "player",
     "stats": {
         "move": 5,
-        "jump": 3,
+        "jump": 2,
         "speed": 50,
         "health": 35
     }

@@ -98,8 +98,14 @@ class ViewManager {
         this.views.markers.render(delta, ctx, camera, location, markers);
     }
 
+    renderDirectionalArrows(delta, ctx, camera, beast, markers) {
+        this.views.markers.renderDirectionalArrows(delta, ctx, camera, beast, markers);
+    }
+
     renderBeasts(delta, ctx, camera, location, beasts = []) {
-        return beasts.filter(beast => beast.location === location).some(beast => this.views.beasts.render(delta, ctx, camera, location, beast));
+        const restart = beasts.filter(beast => beast.location === location).some(beast => this.views.beasts.render(delta, ctx, camera, location, beast));
+        if (restart)
+            return true;
     }
 
     renderSkills(delta, ctx, camera, location, skills = []) {

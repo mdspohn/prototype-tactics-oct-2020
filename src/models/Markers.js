@@ -3,6 +3,7 @@ class Markers {
         this.range = new WeakMap();
         this.path = new Array();
         this.selection = new WeakMap();
+        this.directionalArrows = null;
 
         this.focus = new Object();
         this.focus.location = null;
@@ -56,6 +57,10 @@ class Markers {
         return this.focus.location;
     }
 
+    getDirectionalArrows() {
+        return this.directionalArrows;
+    }
+
     // -------------------
     // Setters
     // -------------------------
@@ -74,5 +79,9 @@ class Markers {
 
     setFocus(location = null) {
         this.focus.location = location;
+    }
+
+    setDirectionalArrows(orientation = null) {
+        this.directionalArrows = orientation;
     }
 }

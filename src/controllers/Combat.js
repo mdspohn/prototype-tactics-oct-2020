@@ -74,10 +74,22 @@ class CombatInterface {
         this.target.ctx = this.target.dom.canvas.getContext('2d');
 
         // Click Event Listeners
-        this.menu.dom.actions_move.addEventListener('click', () => Events.dispatch('MOVE_REQUEST'));
-        this.menu.dom.actions_attack.addEventListener('click', () => Events.dispatch('ATTACK_REQUEST'));
-        this.menu.dom.actions_skills.addEventListener('click', () => Events.dispatch('SKILLS_MENU'));
-        this.menu.dom.actions_wait.addEventListener('click', () => Events.dispatch('WAIT_REQUEST'));
+        this.menu.dom.actions_move.addEventListener('click', (e) => {
+            e.stopPropagation();
+            Events.dispatch('MOVE_REQUEST');
+        });
+        this.menu.dom.actions_attack.addEventListener('click', (e) => {
+            e.stopPropagation();
+            Events.dispatch('ATTACK_REQUEST');
+        });
+        this.menu.dom.actions_skills.addEventListener('click', (e) => {
+            e.stopPropagation();
+            Events.dispatch('SKILLS_MENU');
+        });
+        this.menu.dom.actions_wait.addEventListener('click', (e) => {
+            e.stopPropagation();
+            Events.dispatch('WAIT_REQUEST');
+        });
     }
 
     async _load() {
@@ -393,7 +405,8 @@ class CombatController {
 
         if (restart)
             return this.render(delta);
-
+        
+        Game.views.renderDirectionalArrows(delta, Game.ctx, Game.camera, this.active, this.markers);
         Game.views.renderInterface(delta, this.interface);
     }
 
@@ -409,10 +422,6 @@ class CombatController {
             return;
 
         this.state = this.states.MOVE_REQUEST;
-
-        if (event !== undefined)
-            event.stopPropagation();
-
         this.markers.setRange(MovementLogic.getMovementRange(this.active, this.entities, this.map));
         this.interface.requestMove();
     }
@@ -426,8 +435,7 @@ class CombatController {
         const stepListenerId = Events.listen('move-step', (beast) => {
             this.interface._updateHeight(beast.animation.destination.getZ());
         }, true);
-        this.markers.setRange(null);
-        Game.actions.move(this.active, this.markers.getPath()).then(() => {
+        Game.actions.move(this.active, MovementLogic.getPathing(location, this.markers.getRange())).then(() => {
             this.active.hasMoved = true;
             this.state = this.states.PLAYER_TURN;
             this.interface.confirmMove(this.active.getMovement());
@@ -436,6 +444,7 @@ class CombatController {
             this.markers.setPath(null);
             Events.remove('move-step', stepListenerId);
         });
+        this.markers.setRange(null);
     }
 
     cancelMove() {
@@ -461,10 +470,6 @@ class CombatController {
             return;
 
         this.state = this.states.ATTACK_REQUEST;
-
-        if (event !== undefined)
-            event.stopPropagation();
-
     
         const attackRange = this.active.actions.basic.getRange(this.active, this.entities, this.map);
         this.markers.setRange(attackRange);
@@ -493,18 +498,18 @@ class CombatController {
 
     confirmSkill(entity) {}
 
-    requestWait(entity) {
+    requestWait(event) {
         if (this.state !== this.states.PLAYER_TURN)
             return;
         this.state = this.states.WAIT_REQUEST;
-        this.interface.endTurn().then(() => {
-            this.confirmWait(entity);
-        });
     }
 
-    confirmWait(entity) {
+    confirmWait(event) {
         this.state = this.states.WAIT_CONFIRM;
-        this.nextTurn();
+        this.markers.setDirectionalArrows(null);
+        this.interface.endTurn().then(() => {
+            this.nextTurn();
+        });
     }
 
     _updateFocus(location) {
@@ -565,6 +570,10 @@ class CombatController {
                     location = null;
                 }
                 break;
+            case this.states.WAIT_REQUEST:
+                const orientation = Game.actions.changeOrientation(this.active, event.x, event.y) || this.active.orientation;
+                this.markers.setDirectionalArrows(orientation);
+                break;
             default:
                 break;
         }
@@ -586,6 +595,9 @@ class CombatController {
                 break;
             case this.states.ATTACK_REQUEST:
                 this.confirmAttack(location);
+                break;
+            case this.states.WAIT_REQUEST:
+                this.confirmWait(this.active);
                 break;
         }
     }

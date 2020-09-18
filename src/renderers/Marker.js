@@ -10,47 +10,80 @@ class MarkerRenderer extends Renderer {
     }
 
     render(delta, ctx, camera, location, markers) {
-        const RANGE_MARKER     = markers.getRange().get(location),
-              PATH_MARKER      = markers.getPath().includes(location),
-              SELECTION_MARKER = markers.getSelection().get(location),
-              FOCUS_MARKER     = markers.getFocus() === location;
+        const rangeMarker     = markers.getRange().get(location),
+              pathMarker      = markers.getPath().includes(location),
+              selectionMarker = markers.getSelection().get(location),
+              focusMarker     = markers.getFocus() === location;
 
-        if (RANGE_MARKER !== undefined || SELECTION_MARKER !== undefined || FOCUS_MARKER) {
-            const IS_SLOPED   = location.isSloped(),
-                  IS_MIRRORED = IS_SLOPED && ['west', 'east'].includes(location.getOrientation()),
-                  X_INDEX     = ~~IS_SLOPED * (['west', 'north'].includes(location.getOrientation()) ? 1 : 2),
-                  POS_X       = camera.getPosX() + (location.getPosX() * this.getScaling()) + (~~IS_MIRRORED * 32 * this.getScaling()),
-                  POS_Y       = camera.getPosY() + (location.getPosY() * this.getScaling());
+        if (rangeMarker !== undefined || selectionMarker !== undefined || focusMarker) {
+            const isSloped   = location.isSloped(),
+                  isMirrored = isSloped && ['west', 'east'].includes(location.getOrientation()),
+                  xIndex     = ~~isSloped * (['west', 'north'].includes(location.getOrientation()) ? 1 : 2),
+                  translateX = camera.getPosX() + (location.getPosX() * this.getScaling()) + (~~isMirrored * 32 * this.getScaling()),
+                  translateY = camera.getPosY() + (location.getPosY() * this.getScaling());
             
             ctx.save();
-            ctx.translate(POS_X, POS_Y);
+            ctx.translate(translateX, translateY);
 
-            if (IS_MIRRORED)
+            if (isMirrored)
                 ctx.scale(-1, 1);
 
-            let CONFIG = null;
+            let config = null;
 
-            if (SELECTION_MARKER !== undefined && SELECTION_MARKER.isSelectable) {
-                CONFIG = markers.colors[SELECTION_MARKER.color];
-            } else if (RANGE_MARKER !== undefined && RANGE_MARKER.isSelectable) {
-                CONFIG = markers.colors[RANGE_MARKER.color];
+            if (selectionMarker !== undefined && selectionMarker.isSelectable) {
+                config = markers.colors[selectionMarker.color];
+            } else if (rangeMarker !== undefined && rangeMarker.isSelectable) {
+                config = markers.colors[rangeMarker.color];
             }
 
-            if (CONFIG !== null) {
-                const DELTA_MS = (CONFIG.ms + delta) % CONFIG.duration;
-                ctx.globalAlpha = CONFIG.opacity + Math.floor(Math.abs(DELTA_MS - (CONFIG.duration / 2))) / (CONFIG.duration * 2) + (~~PATH_MARKER * 0.4);
-                ctx.drawImage(markers.getImage(), X_INDEX * 32, CONFIG.index * 32, 32, 24, 0, 0, (32 * this.getScaling()), (24 * this.getScaling()));
+            if (config !== null) {
+                const deltaMs = (config.ms + delta) % config.duration;
+                ctx.globalAlpha = config.opacity + Math.floor(Math.abs(deltaMs - (config.duration / 2))) / (config.duration * 2) + (~~pathMarker * 0.4);
+                ctx.drawImage(markers.getImage(), xIndex * 32, config.index * 32, 32, 24, 0, 0, (32 * this.getScaling()), (24 * this.getScaling()));
                 ctx.globalAlpha = 1;
             }
 
-            if (FOCUS_MARKER) {
-                const DELTA_MS = (markers.focus.ms + delta) % markers.focus.duration,
-                      DERIVED_INDEX = Math.floor((DELTA_MS % (markers.focus.duration * .75)) / (markers.focus.duration * .25)),
-                      OVERFLOW_INDEX = ~~!DERIVED_INDEX * Math.floor(DELTA_MS / (markers.focus.duration * .5));
-                ctx.drawImage(markers.getImage(), (DERIVED_INDEX + OVERFLOW_INDEX) * 32, (X_INDEX * 32) + 96, 32, 24, 0, 0, (32 * this.getScaling()), (24 * this.getScaling()));
+            if (focusMarker) {
+                const deltaMs = (markers.focus.ms + delta) % markers.focus.duration,
+                      derivedIndex = Math.floor((deltaMs % (markers.focus.duration * .75)) / (markers.focus.duration * .25)),
+                      overflowIndex = ~~!derivedIndex * Math.floor(deltaMs / (markers.focus.duration * .5));
+                ctx.drawImage(markers.getImage(), (derivedIndex + overflowIndex) * 32, (xIndex * 32) + 96, 32, 24, 0, 0, (32 * this.getScaling()), (24 * this.getScaling()));
             }
 
             ctx.restore();
         }
+    }
+
+    renderDirectionalArrows(delta, ctx, camera, beast, markers) {
+        if (markers.getDirectionalArrows() === null)
+            return;
+
+        const translateX = camera.getPosX() + ((beast.location.getPosX()) * this.getScaling()),
+              translateY = camera.getPosY() + ((beast.location.getPosY() - beast.tileset.th + beast.location.td + 3) * this.getScaling());
+
+        let x, y;
+        switch(markers.getDirectionalArrows()) {
+            case 'north':
+                x = 0;
+                y = 0;
+                break;
+            case 'east':
+                x = 0;
+                y = 1;
+                break;
+            case 'south':
+                x = 1;
+                y = 1;
+                break;
+            case 'west':
+                x = 1;
+                y = 0;
+                break;
+        }
+
+        ctx.save();
+        ctx.translate(translateX, translateY);
+        ctx.drawImage(markers.getImage(), x * 32, (y * 16) + 192, 32, 16, 0, 0, (32 * this.getScaling()), (16 * this.getScaling()))
+        ctx.restore();
     }
 }

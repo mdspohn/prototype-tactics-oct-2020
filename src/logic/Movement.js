@@ -70,7 +70,7 @@ class MovementLogic {
 
         let next = location;
         while (range.get(next).previous !== undefined) {
-            path.push(next);
+            path.unshift(next);
             next = range.get(next).previous;
         }
 

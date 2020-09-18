@@ -39,6 +39,8 @@ class BeastRenderer extends Renderer {
                     Events.dispatch('sort', 'Y');
             }
 
+            next.sorted = true;
+
             if (next.swap)
                 beast.location = next.destination;
         }
@@ -108,8 +110,11 @@ class BeastRenderer extends Renderer {
         }
 
         // does delta change require rerender?
-        if (location !== beast.location)
-            return ['west', 'north'].includes(GeneralLogic.getOrientationTo(beast.location, location));
+        if (location !== beast.location || animation.sorted) {
+            animation.sorted = false;
+            return true;
+            //return ['west', 'north'].includes(GeneralLogic.getOrientationTo(beast.location, location));
+        }
 
         if (frame.idx === -1)
             return false;
