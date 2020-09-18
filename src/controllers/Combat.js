@@ -512,6 +512,11 @@ class CombatController {
         });
     }
 
+    cancelWait() {
+        this.state = this.states.PLAYER_TURN;
+        this.markers.setDirectionalArrows(null);
+    }
+
     _updateFocus(location) {
         if (this.markers.getFocus() === location)
             return;
@@ -612,6 +617,9 @@ class CombatController {
                 break;
             case this.states.PLAYER_TURN:
                 this.resetMove();
+                break;
+            case this.states.WAIT_REQUEST:
+                this.cancelWait();
                 break;
         }
     }
