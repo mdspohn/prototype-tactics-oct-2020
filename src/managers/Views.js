@@ -6,10 +6,8 @@ class ViewManager {
         this.views = new Object();
         this.views.maps        = new MapRenderer(settings);
         this.views.decorations = new DecorationRenderer(settings);
-        this.views.markers     = new MarkerRenderer(settings);
         this.views.beasts      = new BeastRenderer(settings);
-        this.views.equipment   = new EquipmentRenderer(settings);
-        this.views.skills      = new SkillRenderer(settings);
+        this.views.effects     = new EffectRenderer(settings);
     }
 
     // ---------------------
@@ -23,13 +21,13 @@ class ViewManager {
     getDecorationRenderer() {
         return this.views.decorations;
     }
-    
-    getMarkerRenderer() {
-        return this.views.markers;
-    }
 
     getBeastRenderer() {
         return this.views.beasts;
+    }
+
+    getEffectRenderer() {
+        return this.views.effects;
     }
 
     // ----------------------
@@ -66,20 +64,12 @@ class ViewManager {
         this.views.decorations.update(step, decorations);
     }
 
-    updateMarkers(step, markers) {
-        this.views.markers.update(step, markers);
-    }
-
     updateBeasts(step, beasts = []) {
         this.views.beasts.update(step, beasts);
     }
 
-    updateSkills(step, skills = []) {
-        this.views.skills.update(step, skills);
-    }
-
-    updateInterface(step, ui) {
-        ui.update(step);
+    updateEffects(step, effects) {
+        this.views.effects.update(step, effects);
     }
 
     // ----------------------
@@ -94,25 +84,13 @@ class ViewManager {
         this.views.decorations.render(delta, ctx, camera, location, decoration);
     }
 
-    renderMarkers(delta, ctx, camera, location, markers) {
-        this.views.markers.render(delta, ctx, camera, location, markers);
-    }
-
-    renderDirectionalArrows(delta, ctx, camera, beast, markers) {
-        this.views.markers.renderDirectionalArrows(delta, ctx, camera, beast, markers);
-    }
-
     renderBeasts(delta, ctx, camera, location, beasts = []) {
         const restart = beasts.filter(beast => beast.location === location).some(beast => this.views.beasts.render(delta, ctx, camera, location, beast));
         if (restart)
             return true;
     }
 
-    renderSkills(delta, ctx, camera, location, skills = []) {
+    renderEffects(delta, ctx, camera, location, effects = []) {
 
-    }
-
-    renderInterface(delta, ui) {
-        ui.render(delta);
     }
 }

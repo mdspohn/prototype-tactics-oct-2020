@@ -66,7 +66,7 @@ class Beast {
         this.y = () => (this.location != null) ? this.location.y : this.initialY;
 
         // current directional facing
-        this.orientation = config.orientation || 'south';
+        this.orientation = config.orientation || CombatLogic.ORIENTATIONS.SOUTH;
 
         // ----------------------
         // ANIMATIONS
@@ -74,11 +74,12 @@ class Beast {
 
         this.tileset = tileset;
 
+        // current animation
+        this.animation = null;
+
         // queued animations and movement
         this.animationQueue = new Array();
 
-        // current animation
-        this.animation = null;
     }
     
     initialize(location) {
@@ -91,10 +92,6 @@ class Beast {
     getWeaponSkillId() {
         return this.equipment.getWeaponSkillId();
     }
-
-    // ----------------------
-    // COMBAT COMMANDS / HELPERS
-    // ---------------------------
 
     resetTurn() {
         this.checkpoint.animation = null;
@@ -146,19 +143,11 @@ class Beast {
         return false;
     }
 
-    isFlying() {
-        return (this.canFly() || this.canFloat()) && this.location.isHazard();
-    }
-
-    isSwimming() {
-        return this.canSwim() && this.location.isWater();
-    }
-
     // ----------------------
     // ANIMATIONS
     // ---------------------------
 
-    getAnimationConfig(base, orientation = this.orientation, swimming = this.isSwimming(), flying = this.isFlying()) {
+    getAnimationConfig(base, orientation = this.orientation) {
         return this.tileset.config[base][orientation];
     }
 

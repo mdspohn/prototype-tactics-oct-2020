@@ -30,6 +30,17 @@ class CombatLogic {
         ].sort((a, b) => b[1] - a[1])[0][0];
     }
 
+    static getOrientationToCoords(unit, x, y) {
+        const unitX = Game.camera.getPosX() + ((unit.location.getPosX() + (unit.location.tw / 2)) * Game.scaling),
+              unitY = Game.camera.getPosY() + ((unit.location.getPosY() + (unit.location.td / 2)) * Game.scaling);
+
+        if (unitX - x > 0) {
+            return (unitY - y > 0) ? CombatLogic.ORIENTATIONS.WEST : CombatLogic.ORIENTATIONS.SOUTH;
+        } else {
+            return (unitY - y > 0) ? CombatLogic.ORIENTATIONS.NORTH : CombatLogic.ORIENTATIONS.EAST;
+        }
+    }
+
     static getOppositeOrientation(orientation) {
         switch(orientation) {
             case CombatLogic.ORIENTATIONS.NORTH:
@@ -106,9 +117,9 @@ class CombatLogic {
         if (!BeastLogic.isAlive(unit))
             return false;
         
-        const energy = entity.energy + (entity.speed * loops),
+        const energy = unit.energy + (unit.speed * loops),
               energized = energy >= 100,
-              isNewlyEnergized = Math.floor(energy / 100) > Math.floor((energy - (entity.speed * 1)) / 100);
+              isNewlyEnergized = Math.floor(energy / 100) > Math.floor((energy - (unit.speed * 1)) / 100);
 
         return energized && isNewlyEnergized;
     }
