@@ -101,6 +101,36 @@ class BeastLogic {
         }
     }
 
+    // ---------------------------
+    // Animations
+    // -----------------------------------
+
+    static getAnimationConfig(unit, base, orientation) {
+        orientation = orientation || unit.orientation;
+        return unit.tileset.config[base][orientation];
+    }
+
+    static getDefaultAnimation(unit, previous = null) {
+        const animation = new Object(),
+              config = BeastLogic.getAnimationConfig(unit, 'idle', unit.orientation);
+
+        animation.id = 'idle';
+        animation.variation = !previous?.variation;
+        animation.mirrored = Boolean(config.mirrored);
+        animation.config = (animation.variation && config.variation !== undefined) ? config.variation : config.frames;
+        animation.ms = previous?.ms || 0;
+        animation.multipliers = new Array(animation.config.length).fill(1);
+        animation.frame = 0;
+        animation.destination = unit.location;
+        animation.orientation = unit.orientation;
+        animation.movement = false;
+        animation.events = new Object();
+        animation.x = animation.ox = ~~config.ox;
+        animation.y = animation.oy = ~~config.oy;
+
+        return animation;
+    }
+
     static getMovementAnimations(unit, path, destination) {
         let animations = new Array(),
             previous = unit.animationQueue[unit.animationQueue.length - 1] || unit.animation;
@@ -115,7 +145,7 @@ class BeastLogic {
             animation.destination = location;
             BeastLogic._addAnimationProperties(animation, previous.destination, animation.destination);
 
-            const config = unit.getAnimationConfig(animation.id, animation.orientation);
+            const config = BeastLogic.getAnimationConfig(unit, animation.id, animation.orientation);
             animation.mirrored = Boolean(config.mirrored);
             animation.variation = !previous.variation;
             animation.x = animation.ox = ~~config.ox;

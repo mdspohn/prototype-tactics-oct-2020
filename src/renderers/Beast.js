@@ -23,7 +23,7 @@ class BeastRenderer extends Renderer {
 
         // default to beast idle animation if nothing is left in the queue
         if (next === undefined)
-            next = beast.getDefaultAnimation(animation);
+            next = BeastLogic.getDefaultAnimation(beast, animation);
 
         beast.animation = next;
         beast.orientation = next.orientation;

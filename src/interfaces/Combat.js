@@ -73,23 +73,6 @@ class CombatInterface {
         this.target.dom.tp_bar  = document.getElementById('ctistp__bar');
         this.target.ctx = this.target.dom.canvas.getContext('2d');
 
-        this.markers = new Object();
-        this.markers.focus = new Object();
-        this.markers.focus.ms = 0;
-        this.markers.focus.duration = 750;
-
-        this.markers.white = new Object();
-        this.markers.white.index = 0;
-        this.markers.white.opacity = 0.2;
-        this.markers.white.ms = 0;
-        this.markers.white.duration = 4000;
-
-        this.markers.red = new Object();
-        this.markers.red.index = 2;
-        this.markers.red.opacity = 1;
-        this.markers.red.ms = 0;
-        this.markers.red.duration = 4000;
-
         // Click Event Listeners
         this.menu.dom.actions_move.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -110,28 +93,15 @@ class CombatInterface {
     }
 
     async _load() {
-        const portraits = resolve => {
+        const loader = resolve => {
             this.img = new Image();
             this.img.onload = resolve;
             this.img.src = `${ASSET_DIR}${OS_FILE_SEPARATOR}miscellaneous${OS_FILE_SEPARATOR}combat-ui-tiles.png`;
         };
-        const markers = resolve => {
-            this.markers.img = new Image();
-            this.markers.img.onload = resolve;
-            this.markers.img.src = `${ASSET_DIR}${OS_FILE_SEPARATOR}miscellaneous${OS_FILE_SEPARATOR}tile-markers.png`;
-        };
-        await Promise.all([new Promise(portraits), new Promise(markers)]);
+        await new Promise(loader);
     }
 
     update(step) {
-        // -----------------
-        // Tile Marker Animations
-        // -----------------------
-        Object.values(this.markers).forEach(config => config.ms = (config.ms + step) % config.duration);
-
-        // --------------------
-        // UI Animations
-        // ----------------------
         this.animations.forEach((animation) => {
             const differenceRemaining = animation.target - animation.current,
                   percentChange = Math.min(step / animation.ms, 1);
@@ -177,84 +147,6 @@ class CombatInterface {
                   
             this._renderEntity(this.turns.dom.canvas, this.turns.ctx, entity, false, clear, x + offset, true, opacity);
         });
-    }
-
-    renderMarkers(delta, ctx, camera, location, range, path, selection, focus) {
-        const rangeMarker     = range.get(location),
-              pathMarker      = path.includes(location),
-              selectionMarker = selection.get(location),
-              focusMarker     = focus === location;
-
-        if (rangeMarker !== undefined || selectionMarker !== undefined || focusMarker) {
-            const isSloped   = location.isSloped(),
-                  isMirrored = isSloped && [CombatLogic.ORIENTATIONS.WEST, CombatLogic.ORIENTATIONS.EAST].includes(location.getOrientation()),
-                  xIndex     = ~~isSloped * ([CombatLogic.ORIENTATIONS.WEST, CombatLogic.ORIENTATIONS.NORTH].includes(location.getOrientation()) ? 1 : 2),
-                  translateX = camera.getPosX() + (location.getPosX() * Game.scaling) + (~~isMirrored * 32 * Game.scaling),
-                  translateY = camera.getPosY() + (location.getPosY() * Game.scaling);
-            
-            ctx.save();
-            ctx.translate(translateX, translateY);
-
-            if (isMirrored)
-                ctx.scale(-1, 1);
-
-            let config = null;
-
-            if (selectionMarker !== undefined && selectionMarker.isSelectable) {
-                config = this.markers[selectionMarker.color];
-            } else if (rangeMarker !== undefined && rangeMarker.isSelectable) {
-                config = this.markers[rangeMarker.color];
-            }
-
-            if (config !== null) {
-                const deltaMs = (config.ms + delta) % config.duration;
-                ctx.globalAlpha = config.opacity + Math.floor(Math.abs(deltaMs - (config.duration / 2))) / (config.duration * 2) + (~~pathMarker * 0.4);
-                ctx.drawImage(this.markers.img, xIndex * 32, config.index * 32, 32, 24, 0, 0, (32 * Game.scaling), (24 * Game.scaling));
-                ctx.globalAlpha = 1;
-            }
-
-            if (focusMarker) {
-                const deltaMs = (this.markers.focus.ms + delta) % this.markers.focus.duration,
-                      derivedIndex = Math.floor((deltaMs % (this.markers.focus.duration * .75)) / (this.markers.focus.duration * .25)),
-                      overflowIndex = ~~!derivedIndex * Math.floor(deltaMs / (this.markers.focus.duration * .5));
-                ctx.drawImage(this.markers.img, (derivedIndex + overflowIndex) * 32, (xIndex * 32) + 96, 32, 24, 0, 0, (32 * Game.scaling), (24 * Game.scaling));
-            }
-
-            ctx.restore();
-        }
-    }
-
-    renderOrientation(delta, ctx, camera, beast, orientation) {
-        if (orientation === null)
-            return;
-
-        const translateX = camera.getPosX() + ((beast.location.getPosX()) * Game.scaling),
-              translateY = camera.getPosY() + ((beast.location.getPosY() - beast.tileset.th + beast.location.td + 3) * Game.scaling);
-
-        let x, y;
-        switch(orientation) {
-            case CombatLogic.ORIENTATIONS.NORTH:
-                x = 0;
-                y = 0;
-                break;
-            case CombatLogic.ORIENTATIONS.EAST:
-                x = 0;
-                y = 1;
-                break;
-            case CombatLogic.ORIENTATIONS.SOUTH:
-                x = 1;
-                y = 1;
-                break;
-            case CombatLogic.ORIENTATIONS.WEST:
-                x = 1;
-                y = 0;
-                break;
-        }
-
-        ctx.save();
-        ctx.translate(translateX, translateY);
-        ctx.drawImage(this.markers.img, x * 32, (y * 16) + 192, 32, 16, 0, 0, (32 * Game.scaling), (16 * Game.scaling))
-        ctx.restore();
     }
 
     _renderEntity(canvas, ctx, entity, showTile = true, clearCanvas = true, x = 0, mirrored = false, opacity = 1) {

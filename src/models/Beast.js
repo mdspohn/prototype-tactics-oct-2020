@@ -86,7 +86,7 @@ class Beast {
         // set location and defaults at beginning of combat
         this.energy = 0;
         this.location = location;
-        this.animation = this.getDefaultAnimation(null);
+        this.animation = BeastLogic.getDefaultAnimation(this, null);
     }
 
     getWeaponSkillId() {
@@ -141,34 +141,5 @@ class Beast {
 
     canPhase() {
         return false;
-    }
-
-    // ----------------------
-    // ANIMATIONS
-    // ---------------------------
-
-    getAnimationConfig(base, orientation = this.orientation) {
-        return this.tileset.config[base][orientation];
-    }
-
-    getDefaultAnimation(previous = null) {
-        const animation = new Object(),
-              config = this.getAnimationConfig('idle', this.orientation);
-
-        animation.id = 'idle';
-        animation.variation = !previous?.variation;
-        animation.mirrored = Boolean(config.mirrored);
-        animation.config = (animation.variation && config.variation !== undefined) ? config.variation : config.frames;
-        animation.ms = previous?.ms || 0;
-        animation.multipliers = new Array(animation.config.length).fill(1);
-        animation.frame = 0;
-        animation.destination = this.location;
-        animation.orientation = this.orientation;
-        animation.movement = false;
-        animation.events = new Object();
-        animation.x = animation.ox = ~~config.ox;
-        animation.y = animation.oy = ~~config.oy;
-
-        return animation;
     }
 }

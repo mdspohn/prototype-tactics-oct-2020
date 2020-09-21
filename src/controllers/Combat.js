@@ -1,29 +1,21 @@
 class CombatController {
     constructor() {
-
-        // ----------------
-        // SCENE
-        // --------------------
-        
-        this.interface = new CombatInterface();
+        // -------------------
+        // Scene
+        // -----------------------
 
         this.map = null;
         this.decoration = null;
         this.units = null;
         this.effects = null;
 
-        this.active = null; // <Beast>
-        this.range = new WeakMap();
-        this.selection = new WeakMap();
-        this.path = new Array();
-        this.focus = null; // <Location>
-        this.orientation = null; // <String>
+        this.active = null;
+
+        this.interface = new CombatInterface();
 
         // -------------------
-        // COMBAT STATE
+        // Combat State
         // -----------------------
-
-        this.state = 0; // <0-29>
 
         this.states = new Object();
         this.states["NONE"]           = 0;
@@ -39,6 +31,34 @@ class CombatController {
         this.states["WAIT_REQUEST"]   = 28;
         this.states["WAIT_CONFIRM"]   = 29;
 
+        this.state = this.states.NONE;
+        
+        // -------------------
+        // Tile Markers / Indicators
+        // -----------------------
+
+        this.indicators = {
+            EMPTY_WEAKMAP: new WeakMap(),
+            EMPTY_ARRAY: new Array(),
+            range: null,
+            selection: null,
+            path: null,
+            focus: null,
+            orientation: null,
+            configurations: {
+                white:  { ms: 0, duration: 4000, opacity: 0.2, index: 0 },
+                yellow: { ms: 0, duration: 4000, opacity: 1,   index: 1 },
+                red:    { ms: 0, duration: 4000, opactiy: 1,   index: 2 },
+                focus:  { ms: 0, duration: 750,                index: 3 },
+                orientation: {
+                    [CombatLogic.ORIENTATIONS.NORTH]: [0, 0],
+                    [CombatLogic.ORIENTATIONS.SOUTH]: [1, 1],
+                    [CombatLogic.ORIENTATIONS.EAST]:  [0, 1],
+                    [CombatLogic.ORIENTATIONS.WEST]:  [1, 0]
+                }
+            }
+        };
+
         // -------------------
         // EVENT LISTENERS
         // -----------------------
@@ -49,8 +69,33 @@ class CombatController {
         Events.listen('WAIT_REQUEST',   (event) => this.requestWait(event),   true);
     }
 
+    // -------------------
+    // Map Indicators / Current Targets
+    // --------------------------
+
+    get range()       { return this.indicators.range     || this.indicators.EMPTY_WEAKMAP; }
+    get selection()   { return this.indicators.selection || this.indicators.EMPTY_WEAKMAP; }
+    get path()        { return this.indicators.path      || this.indicators.EMPTY_ARRAY;   }
+    get focus()       { return this.indicators.focus;                                      }
+    get orientation() { return this.indicators.orientation;                                }
+
+    set range(range)             { this.indicators.range       = range;       }
+    set selection(selection)     { this.indicators.selection   = selection;   }
+    set path(path)               { this.indicators.path        = path;        }
+    set focus(location)          { this.indicators.focus       = location;    }
+    set orientation(orientation) { this.indicators.orientation = orientation; }
+
+    // -------------------
+    // Asset Prep and Loading
+    // --------------------------
+
     async _load() {
-        await this.interface._load();
+        const markers = resolve => {
+            this.indicators.img = new Image();
+            this.indicators.img.onload = resolve;
+            this.indicators.img.src = `${ASSET_DIR}${OS_FILE_SEPARATOR}miscellaneous${OS_FILE_SEPARATOR}tile-markers.png`;
+        };
+        await Promise.all([new Promise(markers), this.interface._load()]);
     }
 
     async _prepare(map, decoration, units) {
@@ -66,7 +111,143 @@ class CombatController {
     }
 
     // -------------------
-    // COMBAT STATE CHANGES
+    // Update and Rendering
+    // --------------------------
+    
+    update(step) {
+        this.updateMap(step);
+        this.updateDecorations(step);
+        this.updateBeasts(step);
+        this.updateEffects(step);
+        this.updateTileIndicators(step);
+        this.updateInterface(step);
+    }
+
+    render(delta) {
+        Game.ctx.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
+
+        const locations = this.map.getLocations();
+        for (let i = 0; i < locations.length; i++) {
+            let complete = true;
+            complete &= this.renderLocation(delta, Game.ctx, Game.camera, locations[i]);
+            complete &= this.renderTileIndicators(delta, Game.ctx, Game.camera, locations[i]);
+            complete &= this.renderDecorations(delta, Game.ctx, Game.camera, locations[i]);
+            complete &= this.renderBeasts(delta, Game.ctx, Game.camera, locations[i]);
+            complete &= this.renderEffects(delta, Game.ctx, Game.camera, locations[i]);
+
+            if (!complete) {
+                this.render(delta);
+                break;
+            }
+        }
+        
+        this.renderOrientationIndicator(delta, Game.ctx, Game.camera);
+        this.renderInterface(delta);
+    }
+
+    updateMap(step) {
+        Game.views.updateMap(step, this.map);
+    }
+
+    updateDecorations(step) {
+        Game.views.updateDecorations(step, this.decoration);
+    }
+
+    updateBeasts(step) {
+        Game.views.updateBeasts(step, this.units);
+    }
+
+    updateEffects(step) {
+        Game.views.updateEffects(step, this.effects);
+    }
+
+    updateTileIndicators(step) {
+        Object.values(this.indicators.configurations).forEach(config => config.ms = (config.ms + step) % config.duration);
+    }
+
+    updateInterface(step) {
+        this.interface.update(step);
+    }
+
+    renderLocation(delta, ctx, camera, location) {
+        return Game.views.renderLocation(delta, ctx, camera, location, this.map);
+    }
+
+    renderTileIndicators(delta, ctx, camera, location) {
+        const range = this.range.get(location),
+              path = this.path.includes(location),
+              selection = this.selection.get(location),
+              isFocus = this.focus === location;
+        
+        if (range === undefined && selection === undefined && !isFocus)
+            return true;
+
+        const isMirrored = location.isSloped() && [CombatLogic.ORIENTATIONS.WEST, CombatLogic.ORIENTATIONS.EAST].includes(location.getOrientation()),
+              translateX = camera.getPosX() + (location.getPosX() * Game.scaling) + (~~isMirrored * 32 * Game.scaling),
+              translateY = camera.getPosY() + (location.getPosY() * Game.scaling),
+              xIndex = (!location.isSloped()) ? 0 : [CombatLogic.ORIENTATIONS.WEST, CombatLogic.ORIENTATIONS.NORTH].includes(location.getOrientation()) ? 1 : 2,
+              color = (selection !== undefined && selection.isSelectable) ? selection.color : (range !== undefined && range.isSelectable) ? range.color : null;
+
+        ctx.save();
+        ctx.translate(translateX, translateY);
+
+        if (isMirrored)
+            ctx.scale(-1, 1);
+        
+        if (color !== null) {
+            const config = this.indicators.configurations[color],
+                  ms = (config.ms + delta) % config.duration;
+            
+            ctx.globalAlpha = config.opacity + Math.floor(Math.abs(ms - (config.duration / 2))) / (config.duration * 2) + (~~path * 0.4);
+            ctx.drawImage(this.indicators.img, xIndex * 32, config.index * 32, 32, 24, 0, 0, (32 * Game.scaling), (24 * Game.scaling));
+            ctx.globalAlpha = 1;
+        }
+
+        if (isFocus) {
+            const config = this.indicators.focus,
+                  ms = (config.ms + delta) % config.duration,
+                  index = Math.floor((ms % (config.duration * .75)) / (config.duration * .25)),
+                  overflow = ~~!index * Math.floor(ms / (config.duration * .5));
+            ctx.drawImage(this.indicators.img, (index + overflow) * 32, (xIndex * 32) + 96, 32, 24, 0, 0, (32 * Game.scaling), (24 * Game.scaling));
+        }
+
+        ctx.restore();
+        return true;
+    }
+
+    renderDecorations(delta, ctx, camera, location) {
+        return Game.views.renderDecorations(delta, ctx, camera, location, this.decoration);
+    }
+
+    renderBeasts(delta, ctx, camera, location) {
+        return Game.views.renderBeasts(delta, ctx, camera, location, this.units);
+    }
+
+    renderEffects(delta, ctx, camera, location) {
+        return Game.views.renderEffects(delta, ctx, camera, location, this.effects);
+    }
+
+    renderOrientationIndicator(delta, ctx, camera) {
+        if (this.orientation === null)
+            return;
+
+        const translateX = camera.getPosX() + ((this.active.location.getPosX()) * Game.scaling),
+              translateY = camera.getPosY() + ((this.active.location.getPosY() - this.active.tileset.th + this.active.location.td + 3) * Game.scaling),
+              xIndex = this.indicators.configurations.orientation[this.orientation][0],
+              yIndex = this.indicators.configurations.orientation[this.orientation][1];
+
+        ctx.save();
+        ctx.translate(translateX, translateY);
+        ctx.drawImage(this.indicators.img, xIndex * 32, (yIndex * 16) + 192, 32, 16, 0, 0, (32 * Game.scaling), (16 * Game.scaling))
+        ctx.restore();
+    }
+
+    renderInterface(delta) {
+        this.interface.render(delta);
+    }
+
+    // -------------------
+    // Turn Management
     // --------------------------
 
     async nextTurn() {
@@ -80,40 +261,6 @@ class CombatController {
         // enable interface and new state
         await this.interface.nextTurn(this.active);
         this.state = this.states.PLAYER_TURN;
-    }
-
-    // -------------------
-    // ENGINE HOOKS
-    // --------------------------
-    
-    update(step) {
-        Game.views.updateMap(step, this.map);
-        Game.views.updateDecorations(step, this.decoration);
-        Game.views.updateBeasts(step, this.units);
-        Game.views.updateEffects(step, this.skills);
-
-        this.interface.update(step);
-    }
-
-    render(delta) {
-        Game.ctx.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
-        const locations = this.map.getLocations();
-
-        let restart = false;
-        for (let i = 0; i < locations.length; i++) {
-            Game.views.renderMap(delta, Game.ctx, Game.camera, locations[i], this.map);
-            this.interface.renderMarkers(delta, Game.ctx, Game.camera, locations[i], this.range, this.path, this.selection, this.focus);
-            Game.views.renderDecorations(delta, Game.ctx, Game.camera, locations[i], this.decoration);
-            restart = Game.views.renderBeasts(delta, Game.ctx, Game.camera, locations[i], this.units);
-            if (restart)
-                break;
-        }
-
-        if (restart)
-            return this.render(delta);
-        
-        this.interface.renderOrientation(delta, Game.ctx, Game.camera, this.active, this.orientation);
-        this.interface.render(delta);
     }
 
     // -------------------
@@ -148,17 +295,17 @@ class CombatController {
             this.interface._updateHeight(this.active.location.getZ());
 
             this.focus = null;
-            this.path = new Array();
+            this.path = null;
 
             Events.remove('move-step', stepListenerId);
         });
-        this.range = new WeakMap();
+        this.range = null;
     }
 
     cancelMove() {
         this.state = this.states.PLAYER_TURN;
-        this.range = new WeakMap();
-        this.path = new Array();
+        this.range = null;
+        this.path = null;
         this.interface.cancelMove();
     }
 
@@ -190,8 +337,8 @@ class CombatController {
 
     cancelAttack() {
         this.state = this.states.PLAYER_TURN;
-        this.range = new WeakMap();
-        this.selection = new WeakMap();
+        this.range = null;
+        this.selection = null;
         this.interface.cancelAttack();
     }
 
@@ -230,7 +377,7 @@ class CombatController {
                     this.path = BeastLogic.getPath(location, this.range);
                 } else {
                     this.focus = null;
-                    this.path = new Array();
+                    this.path = null;
                 }
                 break;
             case this.states.MOVE_CONFIRM:

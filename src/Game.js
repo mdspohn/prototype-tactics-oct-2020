@@ -21,13 +21,13 @@ class GameManager {
         this.controllers[3] = new WorldController();
 
         // game states
+        this.state = null; // <0-3>
+        
         this.states = new Object();
         this.states['TITLE']  = 0;
         this.states['COMBAT'] = 1;
         this.states['TOWN']   = 2;
         this.states['WORLD']  = 3;
-
-        this.state = null; // <0-3>
 
         // upcoming/active scene
         this.scene = null;

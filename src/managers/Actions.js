@@ -61,7 +61,7 @@ class ActionManager {
             return;
         
         unit.orientation = orientation;
-        const animation = unit.getDefaultAnimation(unit.animation);
+        const animation = BeastLogic.getDefaultAnimation(unit, unit.animation);
         animation.frame = unit.animation.frame;
         animation.ms = unit.animation.ms;
         unit.animation = animation;
@@ -73,7 +73,19 @@ class ActionManager {
     // Unit Attacking
     // -----------------------------------
 
-    async useSkill(unit, skill, selection) {
+    async useSkill(skill, unit, selection, entities, map, effects, sounds) {
+        const sequence = SkillLogic.getSequence(skill);
+
+        await effects.animate('dust', unit.location);
+        BeastLogic.animate(unit, 'slash');
+        effects.animate('slash', target.location);
+        await BeastLogic.animate(target, 'hit');
+
+        const damage = 23;
+        effects.damage(damage, target.location, 'white');
+
+        unit.tp -= skill.tp;
+
     //     const skill = {
     //         id: 'slash',
     //         range: {},

@@ -76,21 +76,19 @@ class ViewManager {
     // Animation Rendering
     // ----------------------------
 
-    renderMap(delta, ctx, camera, location, map) {
-        this.views.maps.render(delta, ctx, camera, location, map);
+    renderLocation(delta, ctx, camera, location, map) {
+        return !this.views.maps.render(delta, ctx, camera, location, map);
     }
 
     renderDecorations(delta, ctx, camera, location, decoration) {
-        this.views.decorations.render(delta, ctx, camera, location, decoration);
+        return !this.views.decorations.render(delta, ctx, camera, location, decoration);
     }
 
     renderBeasts(delta, ctx, camera, location, beasts = []) {
-        const restart = beasts.filter(beast => beast.location === location).some(beast => this.views.beasts.render(delta, ctx, camera, location, beast));
-        if (restart)
-            return true;
+        return !beasts.filter(beast => beast.location === location).some(beast => this.views.beasts.render(delta, ctx, camera, location, beast));
     }
 
     renderEffects(delta, ctx, camera, location, effects = []) {
-
+        return true;
     }
 }
