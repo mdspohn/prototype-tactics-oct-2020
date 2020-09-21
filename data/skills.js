@@ -16,7 +16,26 @@ GAME_DATA.skills['sword'] = {
         max: 0,
         pattern: 'POINT',
         z: 2
-    }
+    },
+    sequence: [
+        {
+            type: 'animation',
+            id: 'slash',
+            actor: 'attacker',
+            wait: 'hit'
+        },
+        {
+            type: 'animation',
+            id: 'hit',
+            actor: 'defender'
+        },
+        {
+            type: 'damage',
+            actor: 'defender',
+            percentage: 100
+        }
+
+    ]
 };
 
 GAME_DATA.skills['spear'] = {
@@ -55,6 +74,53 @@ GAME_DATA.skills['bow'] = {
 // -----------------------
 // TP-COST SKILLS
 // ---------------------------
+
+GAME_DATA.skills['flicker'] = {
+    name: 'Flicker Strike',
+    description: '...',
+    range: {
+        min: 1,
+        max: 6,
+        pattern: 'CARDINAL',
+        z: 0
+    },
+    target: {
+        min: 0,
+        max: 0,
+        pattern: 'POINT',
+        z: 0
+    },
+    sequence: [
+        {
+            type: 'animation',
+            id: 'brace',
+            actor: 'attacker'
+        },
+        {
+            type: 'movement',
+            id: 'crouch',
+            actor: 'attacker',
+            destination: 'before-target',
+            wait: 'move-complete'
+        },
+        {
+            type: 'animation',
+            id: 'slash',
+            actor: 'attacker',
+            wait: 'hit'
+        },
+        {
+            type: 'animation',
+            id: 'hit',
+            actor: 'defender'
+        },
+        {
+            type: 'damage',
+            actor: 'defender',
+            percentage: 100
+        }
+    ]
+};
 
 GAME_DATA.skills['magic'] = {
     name: 'Magic AoE Attack',

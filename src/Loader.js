@@ -35,6 +35,10 @@ class AssetLoader {
         return entity;
     }
 
+    getSkill(id) {
+        return new Skill(this.data.skills[id]);
+    }
+
     getEquipment(id) {
         return new Equipment(this.data.equipment[id], this.assets.equipment[this.data.equipment[id].tileset])
     }

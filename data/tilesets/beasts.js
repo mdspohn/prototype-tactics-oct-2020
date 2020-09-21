@@ -284,7 +284,7 @@ GAME_DATA.tilesets.beasts['player'] = {
                     { "idx": 13, "ms": 75, "inty": -7, "px": 0.2, "py": 0.2, "pz": 0.2 },
                     { "idx": 13, "ms": 75, "inty": -5, "px": 0.2, "py": 0.2, "pz": 0.2 },
                     { "idx": 13, "ms": 75, "inty": -3, "px": 0.2, "py": 0.2, "pz": 0.2 },
-                    { "idx": 13, "ms": 75,           "px": 0.2, "py": 0.2, "pz": 0.2 },
+                    { "idx": 13, "ms": 75,             "px": 0.2, "py": 0.2, "pz": 0.2 },
                     { "idx": 12, "ms": 150 },
                     { "idx": 8,  "ms": 250 }
                 ]
@@ -293,16 +293,17 @@ GAME_DATA.tilesets.beasts['player'] = {
         "slash": {
             "east": {
                 "frames": [
-                    { "idx": 20, "ms": 500, "ix": -4, "inty": -2 },
-                    { "idx": 21, "ms": 50,  "ix": -2, "inty": -1, "px": 0.2, "py": 0.2 },
-                    { "idx": 22, "ms": 200,                     "px": 0.8, "py": 0.8 },
-                    { "idx": 22, "ms": 200,                     "px": 0, "py": 0 },
-                    { "idx": 21, "ms": 100 },
-                    { "idx": 22, "ms": 200,                     "px": 0, "py": 0 },
-                    { "idx": 21, "ms": 100 },
-                    { "idx": 22, "ms": 200,                     "px": 0, "py": 0 },
-                    { "idx": 21, "ms": 100 },
-                    { "idx": 3,  "ms": 250 }
+                    { "idx": 20, "ms": 500 },
+                    { "idx": 21, "ms": 50, "event": "hit" },
+                    { "idx": 22, "ms": 500 },
+                    { "idx": 21, "ms": 50 },
+                    // { "idx": 22, "ms": 200,                       "px": 0, "py": 0 },
+                    // { "idx": 21, "ms": 100 },
+                    // { "idx": 22, "ms": 200,                       "px": 0, "py": 0 },
+                    // { "idx": 21, "ms": 100 },
+                    // { "idx": 22, "ms": 200,                       "px": 0, "py": 0 },
+                    // { "idx": 21, "ms": 100 },
+                    // { "idx": 3,  "ms": 250 }
                 ]
             },
             "south": {
@@ -324,6 +325,56 @@ GAME_DATA.tilesets.beasts['player'] = {
                 "mirrored": true,
                 "frames": [
 
+                ]
+            }
+        },
+        "crouch": {
+            "east": {
+                "frames": [
+                    { "idx": 10, "ms": 200, "px": 1, "py": 1 }
+                ]
+            },
+            "south": {
+                "mirrored": true,
+                "frames": [
+                    { "idx": 10, "ms": 200, "px": 1, "py": 1 }
+                ]
+            },
+            "west": {
+                "frames": [
+                    { "idx": 12, "ms": 200, "px": 1, "py": 1 }
+
+                ]
+            },
+            "north": {
+                "mirrored": true,
+                "frames": [
+                    { "idx": 12, "ms": 200, "px": 1, "py": 1 }
+                ]
+            }
+        },
+        "brace": {
+            "east": {
+                "frames": [
+                    { "idx": 3, "ms": 1000, "px": 1, "py": 1 }
+                ]
+            },
+            "south": {
+                "mirrored": true,
+                "frames": [
+                    { "idx": 3, "ms": 1000, "px": 1, "py": 1 }
+                ]
+            },
+            "west": {
+                "frames": [
+                    { "idx": 5, "ms": 1000, "px": 1, "py": 1 }
+
+                ]
+            },
+            "north": {
+                "mirrored": true,
+                "frames": [
+                    { "idx": 5, "ms": 1000, "px": 1, "py": 1 }
                 ]
             }
         }
@@ -624,6 +675,50 @@ GAME_DATA.tilesets.beasts['slime'] = {
                     { "idx": 2, "ms": 25, "oy": -3,  "py": 0.15, "pz": 0.15 },
                     { "idx": 6, "ms": 100,           "py": 0.5, "pz": 0.5 },
                     { "idx": 1, "ms": 250 }
+                ]
+            }
+        },
+        "hit": {
+            "east": {
+                "frames": [
+                    { "idx": 1, "ms": 50,  "intx": -1 },
+                    { "idx": 1, "ms": 50,  "intx": 1 },
+                    { "idx": 1, "ms": 50,  "intx": -1 },
+                    { "idx": 1, "ms": 50,  "intx": 1 },
+                    { "idx": 1, "ms": 50,  "intx": -1 },
+                    { "idx": 1, "ms": 50,  "intx": 1 }
+                ]
+            },
+            "south": {
+                "mirrored": true,
+                "frames": [
+                    { "idx": 1, "ms": 50,  "intx": -1 },
+                    { "idx": 1, "ms": 50,  "intx": 1 },
+                    { "idx": 1, "ms": 50,  "intx": -1 },
+                    { "idx": 1, "ms": 50,  "intx": 1 },
+                    { "idx": 1, "ms": 50,  "intx": -1 },
+                    { "idx": 1, "ms": 50,  "intx": 1 }
+                ]
+            },
+            "west": {
+                "frames": [
+                    { "idx": 1, "ms": 50,  "intx": -1 },
+                    { "idx": 1, "ms": 50,  "intx": 1 },
+                    { "idx": 1, "ms": 50,  "intx": -1 },
+                    { "idx": 1, "ms": 50,  "intx": 1 },
+                    { "idx": 1, "ms": 50,  "intx": -1 },
+                    { "idx": 1, "ms": 50,  "intx": 1 }
+                ]
+            },
+            "north": {
+                "mirrored": true,
+                "frames": [
+                    { "idx": 1, "ms": 50,  "intx": -1 },
+                    { "idx": 1, "ms": 50,  "intx": 1 },
+                    { "idx": 1, "ms": 50,  "intx": -1 },
+                    { "idx": 1, "ms": 50,  "intx": 1 },
+                    { "idx": 1, "ms": 50,  "intx": -1 },
+                    { "idx": 1, "ms": 50,  "intx": 1 }
                 ]
             }
         }

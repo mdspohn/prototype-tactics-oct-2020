@@ -3,10 +3,6 @@ class SkillLogic {
         
     }
 
-    static getSequence(skill) {
-        
-    }
-
     static getRange(skill, attacker, entities, layout) {
         const range = new WeakMap();
         SkillLogic._addPattern(skill.range.pattern, range, {
@@ -78,7 +74,7 @@ class SkillLogic {
                 return;
             
             // z-axis restrictions
-            if (opts.previous != null && opts.z != null && Math.abs(opts.location.z() - opts.previous.z()) > opts.z)
+            if (opts.previous != null && opts.z != null && Math.abs(opts.location.getZ() - opts.previous.getZ()) > opts.z)
                 return;
             
             // add location and details to range
@@ -110,7 +106,7 @@ class SkillLogic {
                 NEXT_OPTS.location = next;
                 NEXT_OPTS.previous = opts.location;
                 NEXT_OPTS.step = opts.step + 1;
-                NEXT_OPTS.orientation = Util.getOrientationTo(opts.location, next);
+                NEXT_OPTS.orientation = CombatLogic.getOrientation(opts.location, next);
 
                 SkillLogic._addPointPattern(range, NEXT_OPTS);
             });
@@ -136,7 +132,7 @@ class SkillLogic {
                 return false;
             if (opts.restrictions != null && !opts.restrictions.has(next))
                 return false;
-            if (opts.z != null && Math.abs(next.z() - previous.z()) > opts.z)
+            if (opts.z != null && Math.abs(next.getZ() - previous.getZ()) > opts.z)
                 return false;
             return true;
         }
@@ -153,25 +149,25 @@ class SkillLogic {
                   NORTH = opts.layout.getLocation(X - i, Y);
 
             if (passesRestrictions(PREVIOUS_WEST, WEST)) {
-                range.set(WEST, { orientation: Util.ORIENTATIONS.WEST, previous: PREVIOUS_WEST,  isSelectable: i >= opts.min, color: opts.color });
+                range.set(WEST, { orientation: CombatLogic.ORIENTATIONS.WEST, previous: PREVIOUS_WEST,  isSelectable: i >= opts.min, color: opts.color });
                 PREVIOUS_WEST = WEST;
             } else {
                 PREVIOUS_WEST = null;
             }
             if (passesRestrictions(PREVIOUS_EAST, EAST)) {
-                range.set(EAST, { orientation: Util.ORIENTATIONS.EAST, previous: PREVIOUS_EAST,  isSelectable: i >= opts.min, color: opts.color });
+                range.set(EAST, { orientation: CombatLogic.ORIENTATIONS.EAST, previous: PREVIOUS_EAST,  isSelectable: i >= opts.min, color: opts.color });
                 PREVIOUS_EAST = EAST;
             } else {
                 PREVIOUS_EAST = null;
             }
             if (passesRestrictions(PREVIOUS_SOUTH, SOUTH)) {
-                range.set(SOUTH, { orientation: Util.ORIENTATIONS.SOUTH, previous: PREVIOUS_SOUTH,  isSelectable: i >= opts.min, color: opts.color });
+                range.set(SOUTH, { orientation: CombatLogic.ORIENTATIONS.SOUTH, previous: PREVIOUS_SOUTH,  isSelectable: i >= opts.min, color: opts.color });
                 PREVIOUS_SOUTH = SOUTH;
             } else {
                 PREVIOUS_SOUTH = null;
             }
             if (passesRestrictions(PREVIOUS_NORTH, NORTH)) {
-                range.set(NORTH, { orientation: Util.ORIENTATIONS.NORTH, previous: PREVIOUS_NORTH,  isSelectable: i >= opts.min, color: opts.color });
+                range.set(NORTH, { orientation: CombatLogic.ORIENTATIONS.NORTH, previous: PREVIOUS_NORTH,  isSelectable: i >= opts.min, color: opts.color });
                 PREVIOUS_NORTH = NORTH;
             } else {
                 PREVIOUS_NORTH = null;
@@ -198,7 +194,7 @@ class SkillLogic {
                 return;
             
             // z-axis restrictions
-            if (opts.previous != null && opts.z != null && Math.abs(opts.location.z() - opts.previous.z()) > opts.z)
+            if (opts.previous != null && opts.z != null && Math.abs(opts.location.getZ() - opts.previous.getZ()) > opts.z)
                 return;
             
             // add location and details to range
@@ -230,7 +226,7 @@ class SkillLogic {
                 NEXT_OPTS.location = next;
                 NEXT_OPTS.previous = opts.location;
                 NEXT_OPTS.step = opts.step + 1;
-                NEXT_OPTS.orientation = Util.getOrientationTo(opts.location, next);
+                NEXT_OPTS.orientation = CombatLogic.getOrientation(opts.location, next);
 
                 SkillLogic._addPointPattern(range, NEXT_OPTS);
             });

@@ -1,11 +1,11 @@
 GAME_DATA.scenes['test'] = {
     type: 'COMBAT',
-    area: 'woodlands',
+    area: 'test',
     entities: [
         {
             id: 'player',
             x: 4,
-            y: 2,
+            y: 0,
             orientation: 'east',
             equipment: {
                 weapon: 'knife',
@@ -18,8 +18,8 @@ GAME_DATA.scenes['test'] = {
         },
         {
             id: 'slime',
-            x: 2,
-            y: 5,
+            x: 4,
+            y: 6,
             orientation: 'south',
             basic: 'bow'
         },

@@ -15,7 +15,7 @@ class BeastRenderer extends Renderer {
 
         // animation end event request
         if (animation.events?.end !== undefined)
-            Events.dispatch(animation.events.end, beast);
+            Events.dispatch(animation.events.end.id, animation.events.end.data);
 
         // start rendering at new destination because animation is complete
         if (animation.destination !== undefined && animation.destination !== beast.location)
@@ -28,7 +28,7 @@ class BeastRenderer extends Renderer {
         beast.animation = next;
         beast.orientation = next.orientation;
         if (next.events?.start !== undefined)
-            Events.dispatch(next.events.start, beast);
+            Events.dispatch(next.events.start.id, next.events.start.data);
 
         if (next.movement) {
             switch (next.destination.x - beast.location.x) {
@@ -49,6 +49,9 @@ class BeastRenderer extends Renderer {
     }
 
     nextFrame(beast, animation) {
+        if (animation.config[animation.frame].event)
+            Events.dispatch(animation.config[animation.frame].event, beast);
+
         animation.px += animation.config[animation.frame].px || 0;
         animation.py += animation.config[animation.frame].py || 0;
         animation.pz += animation.config[animation.frame].pz || 0;

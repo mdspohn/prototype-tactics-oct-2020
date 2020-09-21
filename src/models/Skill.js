@@ -8,7 +8,7 @@ class Skill {
         this.range = new Object();
         this.range.min = ~~config.range?.min;
         this.range.max = config.range?.max;
-        this.range.z = ~~config.range?.z;
+        this.range.z = config.range?.z;
         this.range.pattern = config.range.pattern;
 
         // --------------------
@@ -18,8 +18,14 @@ class Skill {
         this.target = new Object();
         this.target.min = ~~config.target?.min;
         this.target.max = config.target?.max;
-        this.target.z = ~~config.target?.z;
+        this.target.z = config.target?.z;
         this.target.pattern = config.target.pattern;
+
+        // ------------------------
+        // SEQUENCE
+        // -----------------------------
+
+        this.sequence = config.sequence;
 
         // --------------------
         // DAMAGE MODIFIERS [% damage modifier from stats] <Integer>

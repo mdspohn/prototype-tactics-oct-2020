@@ -279,4 +279,16 @@ class CombatInterface {
     async confirmWait() {
 
     }
+
+    async requestSkill() {
+
+    }
+
+    async cancelSkill() {
+
+    }
+
+    async confirmSkill() {
+
+    }
 }

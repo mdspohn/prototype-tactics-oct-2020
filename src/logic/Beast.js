@@ -24,7 +24,7 @@ class BeastLogic {
         let path = new Array(),
             next = location;
 
-        while (range.get(next).previous instanceof Location) {
+        while (range.get(next) !== undefined && range.get(next).previous instanceof Location) {
             path.unshift(next);
             next = range.get(next).previous;
         }
@@ -131,7 +131,7 @@ class BeastLogic {
         return animation;
     }
 
-    static getMovementAnimations(unit, path, destination) {
+    static getMovementAnimations(unit, path, destination, customAnimation) {
         let animations = new Array(),
             previous = unit.animationQueue[unit.animationQueue.length - 1] || unit.animation;
         
@@ -143,6 +143,7 @@ class BeastLogic {
             animation.ms = 0;
             animation.frame = 0;
             animation.destination = location;
+            animation.id = customAnimation;
             BeastLogic._addAnimationProperties(animation, previous.destination, animation.destination);
 
             const config = BeastLogic.getAnimationConfig(unit, animation.id, animation.orientation);
@@ -163,9 +164,9 @@ class BeastLogic {
             });
 
             animation.events = new Object();
-            animation.events.end = 'move-step';
+            animation.events.end = { id: 'move-step', data: animation };
             if (location === destination)
-                animation.events.end = 'move-complete';
+                animation.events.end = { id: 'move-complete', data: unit };
 
             animations.push(animation);
             previous = animation;
@@ -192,18 +193,20 @@ class BeastLogic {
         animation.movement = true;
         animation.orientation = o;
 
-        if (diff > 1 && Math.abs(diff_z) <= 1) {
-            animation.id = 'leap';
-        } else if (animation.sloped && diff <= 1) {
-            animation.id = 'walk';
-        } else if (Math.abs(diff_z) > 0) {
-            animation.id = (diff_z > 0) ? 'jump-up' : 'jump-down';
-        } else if (so !== undefined && eo !== undefined) {
-            animation.id = (so === eo && ![so, oso].includes(o)) ? 'walk' : (so == o) ? 'jump-down' : 'jump-up';
-        } else if (so === undefined && eo === undefined) {
-            animation.id = 'walk';
-        } else {
-            animation.id = (so !== undefined) ? 'jump-up' : 'jump-down';
+        if (animation.id === null) {
+            if (diff > 1 && Math.abs(diff_z) <= 1) {
+                animation.id = 'leap';
+            } else if (animation.sloped && diff <= 1) {
+                animation.id = 'walk';
+            } else if (Math.abs(diff_z) > 0) {
+                animation.id = (diff_z > 0) ? 'jump-up' : 'jump-down';
+            } else if (so !== undefined && eo !== undefined) {
+                animation.id = (so === eo && ![so, oso].includes(o)) ? 'walk' : (so == o) ? 'jump-down' : 'jump-up';
+            } else if (so === undefined && eo === undefined) {
+                animation.id = 'walk';
+            } else {
+                animation.id = (so !== undefined) ? 'jump-up' : 'jump-down';
+            }
         }
 
         const scaling = Game.views.getMapRenderer().getScaling();

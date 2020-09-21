@@ -65,7 +65,7 @@ class CombatController {
 
         Events.listen('MOVE_REQUEST',   (event) => this.requestMove(event),   true);
         Events.listen('ATTACK_REQUEST', (event) => this.requestAttack(event), true);
-        Events.listen('SKILLS_MENU',    (event) => this.skillsMenu(event),    true);
+        Events.listen('SKILLS_MENU',    (event) => this.requestSkill(event),  true);
         Events.listen('WAIT_REQUEST',   (event) => this.requestWait(event),   true);
     }
 
@@ -204,10 +204,11 @@ class CombatController {
         }
 
         if (isFocus) {
-            const config = this.indicators.focus,
+            const config = this.indicators.configurations.focus,
                   ms = (config.ms + delta) % config.duration,
                   index = Math.floor((ms % (config.duration * .75)) / (config.duration * .25)),
                   overflow = ~~!index * Math.floor(ms / (config.duration * .5));
+            
             ctx.drawImage(this.indicators.img, (index + overflow) * 32, (xIndex * 32) + 96, 32, 24, 0, 0, (32 * Game.scaling), (24 * Game.scaling));
         }
 
@@ -285,8 +286,8 @@ class CombatController {
 
         this.state = this.states.MOVE_CONFIRM;
 
-        const stepListenerId = Events.listen('move-step', (beast) => {
-            this.interface._updateHeight(beast.animation.destination.getZ());
+        const stepListenerId = Events.listen('move-step', (animation) => {
+            this.interface._updateHeight(animation.destination.getZ());
         }, true);
         Game.actions.move(this.active, BeastLogic.getPath(location, this.range)).then(() => {
             this.active.hasMoved = true;
@@ -326,27 +327,57 @@ class CombatController {
 
         this.state = this.states.ATTACK_REQUEST;
     
-        const attackRange = this.active.actions.basic.getRange(this.active, this.units, this.map);
+        const attackRange = SkillLogic.getRange(Assets.getSkill('sword'), this.active, this.units, this.map);
         this.range = attackRange;
         this.interface.requestAttack();
     }
 
     confirmAttack(location) {
-
+        Game.actions.useSkill(Assets.getSkill('sword'), this.active, location, this.path, this.selection, this.units, this.map, null, null).then(() => {
+        });
     }
 
     cancelAttack() {
         this.state = this.states.PLAYER_TURN;
         this.range = null;
         this.selection = null;
+        this.focus = null;
         this.interface.cancelAttack();
     }
 
     requestSkillsMenu(entity) {}
 
-    requestSkill(entity) {}
+    requestSkill(entity) {
+        if (this.state === this.states.SKILL_REQUEST)
+            return this.cancelSkill();
+        
+        if (this.state !== this.states.PLAYER_TURN || !this.active.canAttack())
+            return;
 
-    confirmSkill(entity) {}
+        this.state = this.states.SKILL_REQUEST;
+    
+        const attackRange = SkillLogic.getRange(Assets.getSkill('flicker'), this.active, this.units, this.map);
+        this.range = attackRange;
+        this.interface.requestSkill();
+    }
+
+    confirmSkill(location) {
+        Game.actions.useSkill(Assets.getSkill('flicker'), this.active, location, this.path, this.selection, this.units, this.map, null, null).then(() => {
+            this.state = this.states.PLAYER_TURN;
+        });
+        this.range = null;
+        this.path = null;
+        this.focus = null;
+        this.selection = null;
+    }
+
+    cancelSkill() {
+        this.state = this.states.PLAYER_TURN;
+        this.range = null;
+        this.selection = null;
+        this.focus = null;
+        this.interface.cancelSkill();
+    }
 
     requestWait(event) {
         if (this.state !== this.states.PLAYER_TURN)
@@ -389,6 +420,13 @@ class CombatController {
                     this.focus = null;
                 }
                 break;
+            case this.states.SKILL_REQUEST:
+                if (BeastLogic.isInRange(location, this.range)) {
+                    this.focus = location;
+                } else {
+                    this.focus = null;
+                }
+                break;
             default:
                 this.focus = null;
         }
@@ -405,8 +443,20 @@ class CombatController {
                 return;
             case this.states.ATTACK_REQUEST:
                 if (BeastLogic.isValidSelection(location, this.range)) {
-                    this.selection = this.active.actions.basic.getTarget(location, this.units, this.map, this.range);
+                    this.selection = SkillLogic.getTarget(Assets.getSkill('sword'), location, this.units, this.map, this.range);
+                    Game.actions.changeOrientation(this.active, event.x, event.y);
                 } else {
+                    this.selection = null;
+                    location = null;
+                }
+                break;
+            case this.states.SKILL_REQUEST:
+                if (BeastLogic.isValidSelection(location, this.range)) {
+                    this.path = BeastLogic.getPath(location, this.range);
+                    this.selection = SkillLogic.getTarget(Assets.getSkill('flicker'), location, this.units, this.map, this.range);
+                    Game.actions.changeOrientation(this.active, event.x, event.y);
+                } else {
+                    this.path = null;
                     this.selection = null;
                     location = null;
                 }
@@ -436,6 +486,9 @@ class CombatController {
             case this.states.ATTACK_REQUEST:
                 this.confirmAttack(location);
                 break;
+            case this.states.SKILL_REQUEST:
+                this.confirmSkill(location);
+                break;
             case this.states.WAIT_REQUEST:
                 this.confirmWait(this.active);
                 break;
@@ -449,6 +502,9 @@ class CombatController {
                 break;
             case this.states.ATTACK_REQUEST:
                 this.cancelAttack();
+                break;
+            case this.states.SKILL_REQUEST:
+                this.cancelSkill(location);
                 break;
             case this.states.PLAYER_TURN:
                 this.resetMove();
