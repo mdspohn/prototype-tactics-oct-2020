@@ -1,7 +1,8 @@
 class SkillLogic {
 
-    static getRange(skill, attacker, entities, layout) {
-        const range = new WeakMap();
+    static getRange(id, attacker, entities, layout) {
+        const skill = Assets.getSkill(id),
+              range = new WeakMap();
         SkillLogic._addPattern(skill.range.pattern, range, {
             location: attacker.location,
             orientation: null,
@@ -20,9 +21,10 @@ class SkillLogic {
         return range;
     }
 
-    static getTarget(skill, location, entities, layout, range = null) {
-        const selection = new WeakMap();
-        SkillLogic._addPattern(skill.target.pattern, selection, {
+    static getSelection(id, location, entities, layout, range = null) {
+        const skill = Assets.getSkill(id),
+              selection = new WeakMap();
+        SkillLogic._addPattern(skill.selection.pattern, selection, {
             location: location,
             orientation: null,
             entities: entities,
@@ -30,9 +32,9 @@ class SkillLogic {
             restrictions: range,
             previous: null,
             step: 0,
-            min: ~~skill.target.min,
-            max: skill.target.max,
-            z: skill.target.z,
+            min: ~~skill.selection.min,
+            max: skill.selection.max,
+            z: skill.selection.z,
             color: 'red',
             //secondary: 'yellow',
             includeHazards: true, // XXX account for movement skills

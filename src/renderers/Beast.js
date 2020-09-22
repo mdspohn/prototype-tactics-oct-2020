@@ -77,6 +77,8 @@ class BeastRenderer extends Renderer {
     update(step, beasts, speed = this.speed) {
         beasts.forEach(beast => {
             let animation = beast.animations.current;
+            if (animation.terminate)
+                animation = this.nextAnimation(beast, animation);
             animation.ms += (step * speed);
             while (animation.ms > (animation.config[animation.frame].ms * animation.multipliers[animation.frame])) {
                 if (animation.config[animation.frame].event !== undefined)
@@ -88,6 +90,8 @@ class BeastRenderer extends Renderer {
     
     render(delta, ctx, camera, location, beast, scaling = this.scaling, speed = this.speed) {
         let animation = beast.animations.current;
+        if (animation.terminate)
+            animation = this.nextAnimation(beast, animation);
 
         while ((animation.ms + (delta * speed)) > (animation.config[animation.frame].ms * animation.multipliers[animation.frame]))
             animation = this.nextFrame(beast, animation);
@@ -118,7 +122,6 @@ class BeastRenderer extends Renderer {
         if (location !== beast.location || animation.sorted) {
             animation.sorted = false;
             return true;
-            //return ['west', 'north'].includes(GeneralLogic.getOrientationTo(beast.location, location));
         }
 
         if (frame.idx === -1)

@@ -41,7 +41,7 @@ class AssetLoader {
     }
 
     getSkill(id) {
-        return new Skill(this.data.skills[id]);
+        return this.data.skills[id];
     }
 
     getEquipment(id) {

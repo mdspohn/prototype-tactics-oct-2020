@@ -66,69 +66,107 @@ class ActionManager {
     // Attacks / Skills
     // -----------------------------------
 
-    async useSkill(skill, unit, target, path, selection, entities, map, effects, sounds) {
-        const sequence = skill.sequence;
+    async useSkill(id, unit, target, entities, map, camera, effects, sounds) {
+        const skill = Assets.getSkill(id),
+              range = SkillLogic.getRange(id, unit, entities, map),
+              selection = SkillLogic.getSelection(id, target, entities, map, range);
 
-        for (let i = 0; i < sequence.length; i++)
-            await this._handleSegment(sequence, i, skill, unit, target, path, selection, entities, map, effects, sounds);
+        // TODO: damage/crit calculations
+        // - if melee crit, consider adding knockback movement to animation segment of defenders
+
+        for (let i = 0; i < skill.sequence.length; i++) {
+            switch (skill.sequence[i].type) {
+                case 'animation':
+                    await this.doAnimationSegment(skill.sequence[i], unit, target, selection, range, entities, map);
+                    break;
+                case 'effect':
+                    await this.doEffectSegment(skill.sequence[i], unit, target, selection, range, entities, map, effects);
+                    break;
+                case 'sound':
+                    await this.doSoundSegment(skill.sequence[i], sounds);
+                    break;
+                case 'camera':
+                    await this.doCameraSegment(skill.sequence[i], camera);
+                    break;
+                case 'wait':
+                    await this.doWaitSegment(skill.sequence[i]);
+                    break;
+            }
+        }
 
         return Promise.resolve();
     }
 
-    _handleSegment(sequence, index, skill, unit, target, path, selection, entities, map, effects, sounds) {
-        const segment  = sequence[index],
-              actor   = segment.actor,
-              category = segment.type;
+    doAnimationSegment(segment, unit, target, selection, range, entities, map) {
+        const unitsToAnimate = segment.unit === 'attacker' ? [unit] : entities.filter(entity => selection.has(entity.location)),
+              pending = new Array();
 
-        if (category === 'animation') {
-            switch (actor) {
-                case 'attacker':
-                    return this._animateUnit(unit, segment, true);
-                case 'defender':
-                    const targetUnit = entities.find(entity => entity.location === target);
-                    if (targetUnit !== undefined)
-                        return this._animateUnit(targetUnit, segment, true);
-                    return Promise.resolve();
-                case 'adjacent':
-                    return Promise.resolve();
-            }
-        } else if (category === 'movement') {
-            switch (actor) {
-                case 'attacker':
-                    const destinationIndex = (segment.destination === 'to-target') ? path.length - 1 : path.length - 2;
-                    return this._moveUnit(unit, path.slice(0, destinationIndex + 1), path[destinationIndex], segment, true);
-                case 'defender':
-                    break;
-                case 'adjacent':
-                    break;
+        for (let i = 0; i < unitsToAnimate.length; i++) {
+            const actor = unitsToAnimate[i];
+            let destination = target, path = new Array();
+
+            if (segment.movement) {
+                switch (segment.location) {
+                    case 'before-target':
+                        destination = range.get(target).previous;
+                        if (destination !== actor.location) {
+                            let next = destination;
+                            while (range.get(next) !== undefined && range.get(next).previous instanceof Location) {
+                                path.unshift(next);
+                                next = range.get(next).previous;
+                            }
+                        } else {
+                            // skip movement animation segment if we don't actually move
+                            continue;
+                        }
+                        break;
+                    case 'knockback':
+                        const location = CombatLogic.getKnockbackTile(unit, actor, map);
+                        if (location !== undefined && !entities.some(entity => entity.location === location) && location.getZ() <= actor.location.getZ()) {
+                            destination = location;
+                            path = [destination];
+                        } else {
+                            destination = actor.location;
+                        }
+                        break;
+                }
             }
             
-        }
-    }
-
-    _moveUnit(unit, path, destination, segment, force) {
-        const animations = BeastLogic.getMovementAnimations(unit, path, destination, segment.id);
-        unit.animate(animations);
-
-        if (segment.wait) {
-            return new Promise((resolve) => {
-                const id = Events.listen(segment.wait, (actor) => {
-                    if (actor !== unit)
-                        return;
-                    Events.remove(segment.wait, id);
-                    resolve();
-                }, true);
+            pending.push({
+                unit: actor,
+                animationId: segment.id,
+                destination,
+                path,
+                event: segment.await
             });
         }
 
+        if (segment.await !== undefined && pending.length !== 0)
+            return Promise.all([...pending.map(opts => this._animateUnit(opts))]);
+
+        pending.forEach(opts => this._animateUnit(opts));
+
         return Promise.resolve();
     }
 
-    _animateUnit(unit, segment, force = false) {
-        const animation = new Object(),
-              config = BeastLogic.getAnimationConfig(unit, segment.id, unit.orientation);
+    _animateUnit({ unit, animationId, destination, path, event } = opts) {
+        if (path.length !== 0) {
+            const animations = BeastLogic.getMovementAnimations(unit, path, destination, animationId);
+            unit.animate(animations, true);
 
-            animation.id = segment.id;
+            return new Promise((resolve) => {
+                const id = Events.listen(event, (actor) => {
+                    if (actor !== unit)
+                        return;
+                    Events.remove(event, id);
+                    resolve();
+                }, true);
+            });
+        } else {
+            const animation = new Object(),
+                  config = BeastLogic.getAnimationConfig(unit, animationId, unit.orientation);
+            
+            animation.id = animationId;
             animation.variation = false;
             animation.mirrored = Boolean(config.mirrored);
             animation.config = (animation.variation && config.variation !== undefined) ? config.variation : config.frames;
@@ -139,81 +177,36 @@ class ActionManager {
             animation.orientation = unit.orientation;
             animation.movement = false;
             animation.events = new Object();
-            animation.events.end = { id: `${segment.id}-complete`, data: unit };
+            animation.events.end = { id: `${animationId}-complete`, data: unit };
             animation.x = animation.ox = ~~config.ox;
             animation.y = animation.oy = ~~config.oy;
 
-        unit.animate(animation, force);
+            unit.animate(animation, true);
 
-        if (segment.wait) {
             return new Promise((resolve) => {
-                const id = Events.listen(segment.wait, (actor) => {
+                const id = Events.listen(event, (actor) => {
                     if (actor !== unit)
                         return;
-                    Events.remove(segment.wait, id);
+                    Events.remove(event, id);
                     resolve();
                 }, true);
             });
         }
+    }
 
+    doEffectSegment(segment, unit, target, selection, range, entities, map, effects) {
         return Promise.resolve();
     }
 
-    
-    /*
+    doSoundSegment(segment, sounds) {
+        return Promise.resolve();
+    }
 
-    [
-        
-        {
-            category: 'effect',
-            target: 'attacker',
-            id: 'crackle'
-        },
-        {
-            category: 'animation',
-            target: 'attacker',
-            id: 'brace',
-            wait: true
-        },
-        {
-            category: 'movement',
-            target: 'attacker',
-            id: 'dash',
-            destination: 'before-target',
-            teleport: false,
-            wait: true,
-            onStep: [{
-                category: 'animation',
-                target: 'adjacent',
-                id: 'hit'
-            },
-            {
-                category: 'damage',
-                target: 'adjacent',
-                percent: 100
-            }]
-        },
-        {
-            category: 'animation',
-            target: 'attacker',
-            id: 'slash',
-            wait: true
-        },
-        {
-            category: 'effect',
-            target: 'defender',
-            id: 'lightning-strike'
-        },
-        {
-            category: 'animation',
-            target: 'defender',
-            id: 'hit'
-        },
-        {
-            category: 'damage',
-            target: 'defender',
-            percent: 100
-        }
-    ]
-    */
+    doCameraSegment(segment, camera) {
+        return Promise.resolve();
+    }
+
+    doWaitSegment(segment) {
+        return Promise.resolve();
+    }
 }

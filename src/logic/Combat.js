@@ -40,6 +40,19 @@ class CombatLogic {
             return (unitY - y > 0) ? CombatLogic.ORIENTATIONS.NORTH : CombatLogic.ORIENTATIONS.EAST;
         }
     }
+    
+    static getKnockbackTile(attacker, defender, map) {
+        switch (CombatLogic.getOrientation(attacker.location, defender.location)) {
+            case CombatLogic.ORIENTATIONS.NORTH:
+                return map.getLocation(defender.location.x - 1, defender.location.y);
+            case CombatLogic.ORIENTATIONS.SOUTH:
+                return map.getLocation(defender.location.x + 1, defender.location.y);
+            case CombatLogic.ORIENTATIONS.EAST:
+                return map.getLocation(defender.location.x, defender.location.y + 1);
+            case CombatLogic.ORIENTATIONS.WEST:
+                return map.getLocation(defender.location.x, defender.location.y - 1);
+        }
+    }
 
     static getOppositeOrientation(orientation) {
         switch(orientation) {

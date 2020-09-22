@@ -335,14 +335,20 @@ class CombatController {
 
         this.state = this.states.ATTACK_REQUEST;
     
-        const attackRange = SkillLogic.getRange(Assets.getSkill('sword'), this.active, this.units, this.map);
+        const attackRange = SkillLogic.getRange('sword', this.active, this.units, this.map);
         this.range = attackRange;
         this.interface.requestAttack();
     }
 
     confirmAttack(location) {
-        Game.actions.useSkill(Assets.getSkill('sword'), this.active, location, this.path, this.selection, this.units, this.map, null, null).then(() => {
+        console.log('starting attack');
+        Game.actions.useSkill('sword', this.active, location, this.units, this.map, Game.camera, Game.effects, Game.sounds).then(() => {
+            this.state = this.states.PLAYER_TURN;
+            this.interface.cancelAttack();
         });
+        this.range = null;
+        this.selection = null;
+        this.focus = null;
     }
 
     cancelAttack() {
@@ -355,7 +361,12 @@ class CombatController {
 
     requestSkillsMenu(entity) {}
 
-    requestSkill(entity) {
+    async requestSkill(entity) {
+        // await Game.actions.useSkill('flicker', this.active, this.map.getLocation(4, 6), this.units, this.map, Game.camera, Game.effects, Game.sounds);
+        // await Game.actions.move(this.active, BeastLogic.getPath(this.map.getLocation(4, 6), BeastLogic.getRange(this.active, this.units, this.map)));
+        // await Game.actions.useSkill('sword', this.active, this.map.getLocation(4, 7), this.units, this.map, Game.camera, Game.effects, Game.sounds);
+        // await Game.actions.move(this.active, BeastLogic.getPath(this.map.getLocation(4, 7), BeastLogic.getRange(this.active, this.units, this.map)));
+        // await Game.actions.useSkill('sword', this.active, this.map.getLocation(4, 8), this.units, this.map, Game.camera, Game.effects, Game.sounds);
         if (this.state === this.states.SKILL_REQUEST)
             return this.cancelSkill();
         
@@ -364,13 +375,15 @@ class CombatController {
 
         this.state = this.states.SKILL_REQUEST;
     
-        const attackRange = SkillLogic.getRange(Assets.getSkill('flicker'), this.active, this.units, this.map);
+        const attackRange = SkillLogic.getRange('flicker', this.active, this.units, this.map);
         this.range = attackRange;
         this.interface.requestSkill();
     }
 
     confirmSkill(location) {
-        Game.actions.useSkill(Assets.getSkill('flicker'), this.active, location, this.path, this.selection, this.units, this.map, null, null).then(() => {
+        console.log('starting skill');
+        Game.actions.useSkill('flicker', this.active, location, this.units, this.map, Game.camera, Game.effects, Game.sounds).then(() => {
+            console.log('skill done');
             this.state = this.states.PLAYER_TURN;
         });
         this.range = null;
@@ -451,7 +464,7 @@ class CombatController {
                 return;
             case this.states.ATTACK_REQUEST:
                 if (BeastLogic.isValidSelection(location, this.range)) {
-                    this.selection = SkillLogic.getTarget(Assets.getSkill('sword'), location, this.units, this.map, this.range);
+                    this.selection = SkillLogic.getSelection('sword', location, this.units, this.map, this.range);
                     Game.actions.changeOrientation(this.active, event.x, event.y);
                 } else {
                     this.selection = null;
@@ -461,7 +474,7 @@ class CombatController {
             case this.states.SKILL_REQUEST:
                 if (BeastLogic.isValidSelection(location, this.range)) {
                     this.path = BeastLogic.getPath(location, this.range);
-                    this.selection = SkillLogic.getTarget(Assets.getSkill('flicker'), location, this.units, this.map, this.range);
+                    this.selection = SkillLogic.getSelection('flicker', location, this.units, this.map, this.range);
                     Game.actions.changeOrientation(this.active, event.x, event.y);
                 } else {
                     this.path = null;

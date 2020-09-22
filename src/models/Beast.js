@@ -82,6 +82,10 @@ class Beast {
 
     }
 
+    // -----------------------
+    // Initializing
+    // -----------------------------
+
     initialize(location) {
         this.location = location;
         this.energy = 0;
@@ -126,10 +130,9 @@ class Beast {
 
     animate(animations, force = false) {
         animations = Array.isArray(animations) ? animations : [animations];
-        if (force)
-            this.animations.current = animations.shift();
-
         this.animations.queue.push(...animations);
+        if (force)
+            this.animations.current.terminate = true;
     }
 
     // -----------------------
