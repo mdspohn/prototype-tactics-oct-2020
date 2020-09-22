@@ -86,7 +86,7 @@ class CombatLogic {
 
         while (turns.length < count) {
             const ready = units.filter(unit => CombatLogic._isReady(unit, loops));
-            ready.sort((a, b) => ((b.energy + (b.speed * loops)) % 100) - ((a.energy + (a.speed * loops)) % 100));
+            ready.sort((a, b) => ((b.energy + (b.stats.current.speed * loops)) % 100) - ((a.energy + (a.stats.current.speed * loops)) % 100));
 
             loops += 1;
             turns.push(...ready);
@@ -100,8 +100,8 @@ class CombatLogic {
 
         while (next === undefined) {
             const ready = units.filter(unit => {
-                if (BeastLogic.isAlive(unit)) {
-                    unit.energy += unit.speed;
+                if (unit.isAlive()) {
+                    unit.energy += unit.stats.current.speed;
                     return unit.energy >= 100;
                 }
                 return false;
@@ -114,12 +114,12 @@ class CombatLogic {
     }
 
     static _isReady(unit, loops) {
-        if (!BeastLogic.isAlive(unit))
+        if (!unit.isAlive())
             return false;
         
-        const energy = unit.energy + (unit.speed * loops),
+        const energy = unit.energy + (unit.stats.current.speed * loops),
               energized = energy >= 100,
-              isNewlyEnergized = Math.floor(energy / 100) > Math.floor((energy - (unit.speed * 1)) / 100);
+              isNewlyEnergized = Math.floor(energy / 100) > Math.floor((energy - (unit.stats.current.speed * 1)) / 100);
 
         return energized && isNewlyEnergized;
     }

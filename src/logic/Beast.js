@@ -1,13 +1,5 @@
 class BeastLogic {
 
-    // --------------------
-    // Status
-    // ---------------------------
-    
-    static isAlive(unit) {
-        return unit.health > 0;
-    }
-
     // ---------------------------
     // Movement
     // -----------------------------------
@@ -37,9 +29,9 @@ class BeastLogic {
               opts = new Object();
 
         opts.previous = undefined;
-        opts.distance = unit.getMovement();
+        opts.distance = unit.getRemainingMovement();
         opts.steps = 0;
-        opts.hazardLeap = Math.floor(unit.jump / 2);
+        opts.hazardLeap = Math.floor(unit.stats.current.jump / 2);
 
         BeastLogic._populateRange(range, unit.location, map, unit, entities, opts);
 
@@ -53,8 +45,8 @@ class BeastLogic {
             
             // check if tile should be considered a hazard to possibly jump over
             let isHazard = false;
-            isHazard |= location.getZ() === 0 && !unit.canFloat() && !unit.canFly();
-            isHazard |= location.isWater() && !unit.canSwim() && !unit.canFly();
+            isHazard |= location.getZ() === 0;
+            isHazard |= location.isWater();
 
             // check if tile can be moved to
             let isSelectable = !isHazard;
@@ -67,7 +59,7 @@ class BeastLogic {
             config.canLeap = opts.hazardLeap >= 1;
             config.isSelectable = Boolean(isSelectable);
             config.occupant = occupant;
-            config.canPass = [CombatLogic.ALLEGIANCES.SELF, CombatLogic.ALLEGIANCES.ALLY].includes(allegiance) || unit.canFly() || unit.canPhase();
+            config.canPass = [CombatLogic.ALLEGIANCES.SELF, CombatLogic.ALLEGIANCES.ALLY].includes(allegiance);
             config.color = 'white';
 
             range.set(location, config);
@@ -88,14 +80,14 @@ class BeastLogic {
                     return;
 
                 const zDiff = next.getZ() - location.getZ();
-                if (zDiff < (-unit.jump - 1) || zDiff > unit.jump)
+                if (zDiff < (-unit.stats.current.jump - 1) || zDiff > unit.stats.current.jump)
                     return;
                 
                 this._populateRange(range, next, map, unit, entities, {
                     previous: location,
                     distance: opts.distance,
                     steps: opts.steps + 1,
-                    hazardLeap: (isHazard) ? (opts.hazardLeap - (1 * isHazard)) : Math.floor(unit.jump / 2)
+                    hazardLeap: (isHazard) ? (opts.hazardLeap - (1 * isHazard)) : Math.floor(unit.stats.current.jump / 2)
                 });
             });
         }
@@ -131,19 +123,19 @@ class BeastLogic {
         return animation;
     }
 
-    static getMovementAnimations(unit, path, destination, customAnimation) {
+    static getMovementAnimations(unit, path, destination, animationId = null) {
         let animations = new Array(),
-            previous = unit.animationQueue[unit.animationQueue.length - 1] || unit.animation;
+            previous = unit.animations.queue[unit.animations.queue.length - 1] || unit.animations.current;
         
-        if (unit.checkpoint.animation === null)
-            unit.checkpoint.animation = previous;
+        if (unit.animations.checkpoint === null)
+            unit.animations.checkpoint = previous;
 
         path.forEach(location => {
             const animation = new Object();
             animation.ms = 0;
             animation.frame = 0;
             animation.destination = location;
-            animation.id = customAnimation;
+            animation.id = animationId;
             BeastLogic._addAnimationProperties(animation, previous.destination, animation.destination);
 
             const config = BeastLogic.getAnimationConfig(unit, animation.id, animation.orientation);

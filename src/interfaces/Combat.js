@@ -149,7 +149,7 @@ class CombatInterface {
         });
     }
 
-    _renderEntity(canvas, ctx, entity, showTile = true, clearCanvas = true, x = 0, mirrored = false, opacity = 1) {
+    _renderEntity(canvas, ctx, unit, showTile = true, clearCanvas = true, x = 0, mirrored = false, opacity = 1) {
         if (clearCanvas === true)
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         if (showTile === true)
@@ -159,7 +159,7 @@ class CombatInterface {
         if (opacity !== 1)
             ctx.globalAlpha = opacity;
         
-        Game.views.getBeastRenderer().renderToCanvas(ctx, entity, 0, mirrored, x, (canvas.height - entity.tileset.th) - (~~showTile * 8), 1);
+        Game.views.getBeastRenderer().renderToCanvas(ctx, unit, 0, mirrored, x, (canvas.height - unit.tileset.th) - (~~showTile * 8), 1);
         ctx.restore();
     }
 
@@ -176,18 +176,18 @@ class CombatInterface {
         this.animations.push({ element, style, current, target, ms, suffix, event });
     }
 
-    _updateUnit(element, entity) {
-        const HP_PAD = '000'.substr(0, (Math.max(3 - String(entity.health).length, 0))),
-              TP_PAD = '000'.substr(0, (Math.max(3 - String(entity.tp).length, 0)));
+    _updateUnit(element, unit) {
+        const HP_PAD = '000'.substr(0, (Math.max(3 - String(unit.stats.current.health).length, 0))),
+              TP_PAD = '000'.substr(0, (Math.max(3 - String(unit.stats.current.tp).length, 0)));
         
-        element.dom.name.innerText = entity.name;
-        element.dom.level.innerText = ('0' + entity.level).slice(-2);
-        element.dom.hp_cur.innerHTML = `<span class="dim">${HP_PAD}</span>${entity.health}`;
-        element.dom.tp_cur.innerHTML = `<span class="dim">${TP_PAD}</span>${entity.tp}`;
-        element.dom.hp_max.innerText = ('00' + entity.health).slice(-3);
+        element.dom.name.innerText = unit.name;
+        element.dom.level.innerText = ('0' + unit.level).slice(-2);
+        element.dom.hp_cur.innerHTML = `<span class="dim">${HP_PAD}</span>${unit.stats.current.health}`;
+        element.dom.tp_cur.innerHTML = `<span class="dim">${TP_PAD}</span>${unit.stats.current.tp}`;
+        element.dom.hp_max.innerText = ('00' + unit.stats.max.health).slice(-3);
         element.dom.tp_max.innerText = '300';
-        element.dom.hp_bar.style.width = Math.ceil((entity.health / entity.health) * 100) + '%';
-        element.dom.tp_bar.style.width = Math.ceil((entity.tp / 300) * 100) + '%';
+        element.dom.hp_bar.style.width = Math.ceil((unit.stats.current.health / unit.stats.max.health) * 100) + '%';
+        element.dom.tp_bar.style.width = Math.ceil((unit.stats.current.tp / unit.stats.max.tp) * 100) + '%';
     }
 
     updateTurns(forecast, active) {

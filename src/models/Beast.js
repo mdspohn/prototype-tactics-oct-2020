@@ -1,145 +1,173 @@
 class Beast {
     constructor(config, tileset) {
-
+        
         // ----------------------
-        // STATS
+        // General
         // ----------------------------
 
         this.id = config.id;
-        this.allegiance = 0;
         this.name = config.name;
         this.level = 1;
         this.experience = 0;
-
-        this.health  = Math.max(~~config.stats.health,  1);
-        this.attack  = Math.max(~~config.stats.attack,  1);
-        this.defense = Math.max(~~config.stats.defense, 0);
-        this.spirit  = Math.max(~~config.stats.spirit,  1);
-        this.resist  = Math.max(~~config.stats.resist,  0);
-
-        this.tp = 0;
-
-        this.block   = Math.max(~~config.stats.block,   0);
-        this.evasion = Math.max(~~config.stats.evasion, 0);
-        this.move    = Math.max(~~config.stats.move,  1);
-        this.jump    = Math.max(~~config.stats.jump,  1);
-        this.speed   = Math.max(~~config.stats.speed, 1);
-
-        this.basic = config.basic;
-        this.skills = config.skills || new Array();
-
-        // --------------------
-        // ACTIONS
-        // -------------------------------
-
-        this.actions = new Object();
-        this.actions.basic = null;
-        this.actions.skills = null;
-
-        // ---------------------
-        // COMBAT STATE
-        // ----------------------
-
-        this.energy = 0;
-
-        this.checkpoint = new Object();
-        this.checkpoint.animation = null;
-        this.checkpoint.last = 0;
-        this.checkpoint.total = 0;
-
-        this.hasAttacked = false;
+        this.allegiance = 0;
 
         // ----------------------
-        // EQUIPMENT
+        // Status
+        // ----------------------------
+
+        this.stats = new Object();
+        this.stats.max = new Object();
+        this.stats.max.health  = Math.max(~~config.stats.health,  1);
+        this.stats.max.attack  = Math.max(~~config.stats.attack,  1);
+        this.stats.max.defense = Math.max(~~config.stats.defense, 0);
+        this.stats.max.spirit  = Math.max(~~config.stats.spirit,  1);
+        this.stats.max.resist  = Math.max(~~config.stats.resist,  0);
+        this.stats.max.block   = Math.max(~~config.stats.block,   0);
+        this.stats.max.evasion = Math.max(~~config.stats.evasion, 0);
+        this.stats.max.move    = Math.max(~~config.stats.move,    1);
+        this.stats.max.jump    = Math.max(~~config.stats.jump,    1);
+        this.stats.max.speed   = Math.max(~~config.stats.speed,   1);
+        this.stats.max.tp      = Math.max(~~config.stats.tp,      300);
+
+        this.stats.current = { ...this.stats.max };
+        this.stats.current.tp = 0;
+
+        this.effects = new Object();
+        this.effects.poison = false;
+        this.effects.haste = false;
+        this.effects.slow = false;
+        this.effects.berserk = false;
+        this.effects.regen = false;
+
+        // ----------------------
+        // Equipment
         // ---------------------------
 
         this.equipment = new EquipmentManager();
 
+        // ---------------------
+        // State
         // ----------------------
-        // POSITION
+
+        this.energy = 0;
+        this.traveled = new Object();
+        this.traveled.last = 0;
+        this.traveled.total = 0;
+        this.usedSkill = false;
+        this.usedAttack = false;
+
+        // ----------------------
+        // Position
         // ---------------------------
         
-        this.location;
-        this.initialX = config.x;
-        this.initialY = config.y;
-        this.x = () => (this.location != null) ? this.location.x : this.initialX;
-        this.y = () => (this.location != null) ? this.location.y : this.initialY;
-
-        // current directional facing
-        this.orientation = config.orientation || CombatLogic.ORIENTATIONS.SOUTH;
+        this.location = new Object();
+        this.location.x = config.x;
+        this.location.y = config.y;
+        this.orientation = config.orientation;
 
         // ----------------------
-        // ANIMATIONS
+        // Animations
         // ---------------------------
 
         this.tileset = tileset;
 
-        // current animation
-        this.animation = null;
-
-        // queued animations and movement
-        this.animationQueue = new Array();
+        this.animations = new Object();
+        this.animations.queue = new Array();
+        this.animations.current = null;
+        this.animations.checkpoint = null;
+        this.animations.modifiers = new Object();
+        this.animations.modifiers.speed = 1;
+        this.animations.modifiers.scaling = 1;
+        this.animations.modifiers.filter = null;
 
     }
-    
+
     initialize(location) {
-        // set location and defaults at beginning of combat
-        this.energy = 0;
         this.location = location;
-        this.animation = BeastLogic.getDefaultAnimation(this, null);
+        this.energy = 0;
+        this.traveled.last = 0;
+        this.traveled.total = 0;
+        this.usedSkill = false;
+        this.usedAttack = false;
+        this.animations.current = BeastLogic.getDefaultAnimation(this);
+        this.animations.queue = new Array();
+        this.animations.checkpoint = null;
+        this.animations.modifiers = new Object();
+        this.animations.modifiers.speed = 1;
+        this.animations.modifiers.scaling = 1;
+        this.animations.modifiers.filter = null;
+
+        this.reset();
     }
 
-    getWeaponSkillId() {
-        return this.equipment.getWeaponSkillId();
+    reset() {
+        this.stats.current = { ...this.stats.max };
+        this.stats.current.tp = 0;
+
+        this.effects.poison = false;
+        this.effects.haste = false;
+        this.effects.slow = false;
+        this.effects.berserk = false;
+        this.effects.regen = false;
     }
 
     resetTurn() {
-        this.checkpoint.animation = null;
-        this.checkpoint.last = 0;
-        this.checkpoint.total = 0;
-        this.hasAttacked = false;
+        this.energy = 0;
+        this.traveled.last = 0;
+        this.traveled.total = 0;
+        this.usedSkill = false;
+        this.usedAttack = false;
+        this.animations.checkpoint = null;
     }
 
-    getMovement() {
-        return this.move - this.checkpoint.total;
+    // -----------------------
+    // Animations
+    // -----------------------------
+
+    animate(animations, force = false) {
+        animations = Array.isArray(animations) ? animations : [animations];
+        if (force)
+            this.animations.current = animations.shift();
+
+        this.animations.queue.push(...animations);
+    }
+
+    // -----------------------
+    // Turn State
+    // -----------------------------
+
+    getRemainingMovement() {
+        return this.stats.current.move - this.traveled.total;
     }
 
     canMove() {
-        // determine whether beast is allowed to move (has moved already, root, etc...)
-        return this.getMovement() > 0;
-    }
-
-    getAttackData() {
-        const data = new Object();
-        data.range = new Object();
-        data.range.distance = 1;
-        data.range.pattern = 'CROSS_EXCLUSIVE';
-        data.range.z = 1;
-        data.selection = new Object();
-        data.selection.pattern = 'POINT';
-        data.selection.distance = 1;
-        data.selection.z = 1;
-
-        return data;
+        return this.getRemainingMovement() > 0;
     }
 
     canAttack() {
-        return !this.hasAttacked;
+        return !this.usedAttack;
     }
 
-    canSwim() {
-        return false;
+    canUseSkill(skill) {
+        const hasTP = skill.tp <= this.stats.current.tp;
+        return !this.usedSkill && hasTP;
     }
 
-    canFloat() {
-        return false;
+    isAlive() {
+        return this.stats.current.health > 0;
     }
 
-    canFly() {
-        return false;
+    // -----------------------
+    // Stat Accessors
+    // -----------------------------
+
+    damage(amount = 0) {
+        this.stats.current.health -= amount;
+        if (this.stats.current.health <= 0)
+            Events.dispatch('death', this);
     }
 
-    canPhase() {
-        return false;
+    heal(amount = 0) {
+        this.stats.current.health = Math.min(this.stats.max.health, this.stats.current.health + amount);
     }
 }

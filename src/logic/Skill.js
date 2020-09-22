@@ -1,7 +1,4 @@
 class SkillLogic {
-    constructor() {
-        
-    }
 
     static getRange(skill, attacker, entities, layout) {
         const range = new WeakMap();

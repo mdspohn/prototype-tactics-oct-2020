@@ -130,8 +130,6 @@
 
     </section>
 
-    <div style="display: none; position: absolute; left: calc(50% - 5px); top: calc(50% - 5px); width: 10px; height: 10px; background-color: red"></div>
-
     <!-------------------------------->
     <!------ SETTINGS INTERFACE ------>
     <!-------------------------------->
@@ -158,15 +156,15 @@
     GAME_DATA.scenes = new Object();
     GAME_DATA.areas = new Object();
     GAME_DATA.beasts = new Object();
-    GAME_DATA.skills = new Object();
     GAME_DATA.equipment = new Object();
+    GAME_DATA.skills = new Object();
 
     GAME_DATA.tilesets = new Object();
     GAME_DATA.tilesets.maps = new Object();
     GAME_DATA.tilesets.decorations = new Object();
     GAME_DATA.tilesets.beasts = new Object();
-    GAME_DATA.tilesets.skills = new Object();
     GAME_DATA.tilesets.equipment = new Object();
+    GAME_DATA.tilesets.effects = new Object();
     
     ASSET_DIR = 'assets';
     OS_FILE_SEPARATOR = '/';
@@ -176,12 +174,13 @@
   <script type="text/javascript" src="data/scenes.js"></script>
   <script type="text/javascript" src="data/areas.js"></script>
   <script type="text/javascript" src="data/beasts.js"></script>
-  <script type="text/javascript" src="data/skills.js"></script>
   <script type="text/javascript" src="data/equipment.js"></script>
+  <script type="text/javascript" src="data/skills.js"></script>
+
+  <!-- GAME ASSETS -->
   <script type="text/javascript" src="data/tilesets/maps.js"></script>
   <script type="text/javascript" src="data/tilesets/decorations.js"></script>
   <script type="text/javascript" src="data/tilesets/beasts.js"></script>
-  <script type="text/javascript" src="data/tilesets/skills.js"></script>
   <script type="text/javascript" src="data/tilesets/equipment.js"></script>
 
 
@@ -208,8 +207,10 @@
   <script type="text/javascript" src="src/logic/Skill.js"></script>
 
   <!-- MANAGERS -->
-  <script type="text/javascript" src="src/managers/Views.js"></script>
-  <script type="text/javascript" src="src/managers/Actions.js"></script>
+  <script type="text/javascript" src="src/managers/View.js"></script>
+  <script type="text/javascript" src="src/managers/Action.js"></script>
+  <script type="text/javascript" src="src/managers/Effect.js"></script>
+  <script type="text/javascript" src="src/managers/Sound.js"></script>
   <script type="text/javascript" src="src/managers/Data.js"></script>
 
   <!-- INTERFACES -->

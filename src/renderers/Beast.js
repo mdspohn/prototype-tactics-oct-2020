@@ -3,35 +3,36 @@ class BeastRenderer extends Renderer {
         super(config);
     }
 
-    reverseLocation(beast, animation) {
-        beast.location = animation.destination;
+    reverseLocation(unit, animation) {
+        unit.location = animation.destination;
         [animation.ix, animation.tx] = [-animation.tx, -animation.ix];
         [animation.iy, animation.ty] = [-animation.ty, -animation.iy];
         [animation.iz, animation.tz] = [-animation.tz, -animation.iz];
     }
 
-    nextAnimation(beast, animation) {
-        let next = beast.animationQueue.shift();
+    nextAnimation(unit, animation) {
+        let next = unit.animations.queue.shift();
 
         // animation end event request
         if (animation.events?.end !== undefined)
             Events.dispatch(animation.events.end.id, animation.events.end.data);
 
         // start rendering at new destination because animation is complete
-        if (animation.destination !== undefined && animation.destination !== beast.location)
-            beast.location = animation.destination;
+        if (animation.destination !== undefined && animation.destination !== unit.location)
+            unit.location = animation.destination;
 
         // default to beast idle animation if nothing is left in the queue
         if (next === undefined)
-            next = BeastLogic.getDefaultAnimation(beast, animation);
+            next = BeastLogic.getDefaultAnimation(unit, animation);
 
-        beast.animation = next;
-        beast.orientation = next.orientation;
+        unit.animations.current = next;
+        unit.orientation = next.orientation;
+
         if (next.events?.start !== undefined)
             Events.dispatch(next.events.start.id, next.events.start.data);
 
         if (next.movement) {
-            switch (next.destination.x - beast.location.x) {
+            switch (next.destination.x - unit.location.x) {
                 case 0:
                     Events.dispatch('sort', 'X');
                     break;
@@ -42,7 +43,7 @@ class BeastRenderer extends Renderer {
             next.sorted = true;
 
             if (next.swap)
-                beast.location = next.destination;
+                unit.location = next.destination;
         }
 
         return next;
@@ -75,7 +76,7 @@ class BeastRenderer extends Renderer {
 
     update(step, beasts, speed = this.speed) {
         beasts.forEach(beast => {
-            let animation = beast.animation;
+            let animation = beast.animations.current;
             animation.ms += (step * speed);
             while (animation.ms > (animation.config[animation.frame].ms * animation.multipliers[animation.frame])) {
                 if (animation.config[animation.frame].event !== undefined)
@@ -86,7 +87,8 @@ class BeastRenderer extends Renderer {
     }
     
     render(delta, ctx, camera, location, beast, scaling = this.scaling, speed = this.speed) {
-        let animation = beast.animation;
+        let animation = beast.animations.current;
+
         while ((animation.ms + (delta * speed)) > (animation.config[animation.frame].ms * animation.multipliers[animation.frame]))
             animation = this.nextFrame(beast, animation);
 

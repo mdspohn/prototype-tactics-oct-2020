@@ -102,7 +102,10 @@ class CombatController {
         this.map = map;
         this.decoration = decoration;
         this.units = units;
-        this.units.forEach(unit => unit.initialize(this.map.getLocation(unit.initialX, unit.initialY)));
+        this.units.forEach(unit => {
+            const location = this.map.getLocation(unit.location.x, unit.location.y);
+            unit.initialize(location);
+        });
     }
 
     async _initialize() {
@@ -133,7 +136,7 @@ class CombatController {
             complete &= this.renderTileIndicators(delta, Game.ctx, Game.camera, locations[i]);
             complete &= this.renderDecorations(delta, Game.ctx, Game.camera, locations[i]);
             complete &= this.renderBeasts(delta, Game.ctx, Game.camera, locations[i]);
-            complete &= this.renderEffects(delta, Game.ctx, Game.camera, locations[i]);
+            complete &= this.renderTileEffects(delta, Game.ctx, Game.camera, locations[i]);
 
             if (!complete) {
                 this.render(delta);
@@ -142,6 +145,7 @@ class CombatController {
         }
         
         this.renderOrientationIndicator(delta, Game.ctx, Game.camera);
+        this.renderScreenEffects(delta, Game.ctx, Game.camera);
         this.renderInterface(delta);
     }
 
@@ -158,7 +162,7 @@ class CombatController {
     }
 
     updateEffects(step) {
-        Game.views.updateEffects(step, this.effects);
+        Game.views.updateEffects(step, Game.effects.getEffects());
     }
 
     updateTileIndicators(step) {
@@ -221,11 +225,11 @@ class CombatController {
     }
 
     renderBeasts(delta, ctx, camera, location) {
-        return Game.views.renderBeasts(delta, ctx, camera, location, this.units);
+        return Game.views.renderBeasts(delta, ctx, camera, location, this.units.filter(beast => beast.location === location));
     }
 
-    renderEffects(delta, ctx, camera, location) {
-        return Game.views.renderEffects(delta, ctx, camera, location, this.effects);
+    renderTileEffects(delta, ctx, camera, location) {
+        return Game.views.renderTileEffects(delta, ctx, camera, location, Game.effects.filter(effect => effect.location === location));
     }
 
     renderOrientationIndicator(delta, ctx, camera) {
@@ -241,6 +245,10 @@ class CombatController {
         ctx.translate(translateX, translateY);
         ctx.drawImage(this.indicators.img, xIndex * 32, (yIndex * 16) + 192, 32, 16, 0, 0, (32 * Game.scaling), (16 * Game.scaling))
         ctx.restore();
+    }
+
+    renderScreenEffects(delta, ctx, camera) {
+        Game.views.renderScreenEffects(delta, ctx, camera, Game.effects.getScreenEffects());
     }
 
     renderInterface(delta) {
@@ -292,7 +300,7 @@ class CombatController {
         Game.actions.move(this.active, BeastLogic.getPath(location, this.range)).then(() => {
             this.active.hasMoved = true;
             this.state = this.states.PLAYER_TURN;
-            this.interface.confirmMove(this.active.getMovement());
+            this.interface.confirmMove(this.active.getRemainingMovement());
             this.interface._updateHeight(this.active.location.getZ());
 
             this.focus = null;
@@ -311,7 +319,7 @@ class CombatController {
     }
 
     resetMove() {
-        if (this.active.checkpoint.last !== 0) {
+        if (this.active.traveled.last !== 0) {
             Game.actions.resetMove(this.active);
             this.interface.resetMove(this.active);
             this.requestMove();

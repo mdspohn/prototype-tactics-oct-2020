@@ -84,11 +84,15 @@ class ViewManager {
         return !this.views.decorations.render(delta, ctx, camera, location, decoration);
     }
 
-    renderBeasts(delta, ctx, camera, location, beasts = []) {
-        return !beasts.filter(beast => beast.location === location).some(beast => this.views.beasts.render(delta, ctx, camera, location, beast));
+    renderBeasts(delta, ctx, camera, location, beasts) {
+        return !beasts.some(beast => this.views.beasts.render(delta, ctx, camera, location, beast));
     }
 
-    renderEffects(delta, ctx, camera, location, effects = []) {
+    renderTileEffects(delta, ctx, camera, location, effects) {
+        return true;
+    }
+
+    renderScreenEffects(delta, ctx, camera, effects) {
         return true;
     }
 }

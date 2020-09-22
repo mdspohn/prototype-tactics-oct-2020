@@ -10,8 +10,10 @@ class GameManager {
         this.input   = new InputManager();
         this.camera  = new Camera({ canvas: this.canvas, ctx: this.ctx, scaling: this.scaling });
         this.tools   = new DevTools();
-        this.actions = new ActionManager();
         this.views   = new ViewManager({ speed: this.speed, scaling: this.scaling });
+        this.effects = new EffectManager({ speed: this.speed, scaling: this.scaling });
+        this.sounds  = new SoundManager();
+        this.actions = new ActionManager({ effects: this.effects, sounds: this.sounds });
 
         // state controllers
         this.controllers = new Array(4);

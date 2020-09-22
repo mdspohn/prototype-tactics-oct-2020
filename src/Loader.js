@@ -9,6 +9,7 @@ class AssetLoader {
         this.data.equipment = GAME_DATA.equipment;
         this.data.skills = GAME_DATA.skills;
 
+        this.sounds = null;
         this.tilesets = GAME_DATA.tilesets;
     }
 
@@ -27,8 +28,12 @@ class AssetLoader {
         return Promise.all([...pending.map(asset => asset._load())]);
     }
 
+    getTileset(category, id) {
+        return this.assets[category][id];
+    }
+
     getBeast(id, opts) {
-        const entity = new Beast(Object.assign(this.data.beasts[id], opts), this.assets.beasts[this.data.beasts[id].tileset]);
+        const entity = new Beast(Object.assign(this.data.beasts[id], opts), this.getTileset('beasts', this.data.beasts[id].tileset));
         if (opts.equipment !== undefined)
             Object.entries(opts.equipment).forEach(([ type, id ]) => entity.equipment.set(type, this.getEquipment(id)));
 
@@ -40,7 +45,7 @@ class AssetLoader {
     }
 
     getEquipment(id) {
-        return new Equipment(this.data.equipment[id], this.assets.equipment[this.data.equipment[id].tileset])
+        return new Equipment(this.data.equipment[id], this.getTileset('equipment', this.data.equipment[id].tileset));
     }
 
     getScene(id) {
@@ -53,8 +58,8 @@ class AssetLoader {
 
         return {
             type: scene.type,
-            map: new Map(area.map, this.assets.maps[area.map.tileset]),
-            decoration: new Decoration(area.decoration, this.assets.decorations[area.decoration.tileset]),
+            map: new Map(area.map, this.getTileset('maps', area.map.tileset)),
+            decoration: new Decoration(area.decoration,  this.getTileset('decorations', area.decoration.tileset)),
             entities: [...scene.entities].map(opts => this.getBeast(opts.id, opts))
         };
     }
