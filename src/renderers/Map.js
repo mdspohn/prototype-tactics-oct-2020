@@ -1,6 +1,6 @@
-class MapRenderer extends Renderer {
-    constructor(settings) {
-        super(settings);
+class MapRenderer {
+    constructor() {
+
     }
 
     nextAnimation(tile, map) {
@@ -40,11 +40,11 @@ class MapRenderer extends Renderer {
         return tile;
     }
 
-    update(step, map) {
-        map.forEach(location => {
+    update(step, map, sorting, speed) {
+        map.getLocations(sorting).forEach(location => {
             location.getTiles().forEach(tile => {
                 if (tile.animation !== null) {
-                    tile.animation.ms += (step * this.speed);
+                    tile.animation.ms += (step * speed);
                     while (tile.animation.ms > map.getTileConfig(tile.id).frames[tile.animation.frame].ms)
                         this.nextFrame(tile, map);
                 }
@@ -52,17 +52,17 @@ class MapRenderer extends Renderer {
         });
     }
 
-    render(delta, ctx, camera, location, map) {
+    render(delta, ctx, camera, location, map, speed, scaling) {
         location.getTiles().forEach((tile, z) => {
-            while (tile.animation !== null && ((tile.animation.ms + (delta * this.speed)) > map.getTileConfig(tile.id).frames[tile.animation.frame].ms))
+            while (tile.animation !== null && ((tile.animation.ms + (delta * speed)) > map.getTileConfig(tile.id).frames[tile.animation.frame].ms))
                 tile = this.nextFrame(tile.clone(), map);
 
             if (tile.idx === -1)
                 return;
             
             const IS_MIRRORED = map.getTileConfig(tile.id).mirrored,
-                  POS_X = camera.getPosX() - (this.scaling * (((location.getX() - location.getY()) * (map.getTileWidth() / 2)) + (map.getTileWidth()  * ~~IS_MIRRORED))),
-                  POS_Y = camera.getPosY() + (this.scaling * (((location.getX() + location.getY()) * (map.getTileDepth() / 2)) - (map.getTileHeight() * z)));
+                  POS_X = camera.getPosX() - (scaling * (((location.getX() - location.getY()) * (map.getTileWidth() / 2)) + (map.getTileWidth()  * ~~IS_MIRRORED))),
+                  POS_Y = camera.getPosY() + (scaling * (((location.getX() + location.getY()) * (map.getTileDepth() / 2)) - (map.getTileHeight() * z)));
           
             ctx.save();
             ctx.translate(POS_X, POS_Y);
@@ -72,10 +72,10 @@ class MapRenderer extends Renderer {
                 Math.floor((tile.idx * map.getTileWidth()) / map.getImageWidth()) * (map.getTileHeight() + map.getTileDepth()),
                 map.getTileWidth(),
                 map.getTileHeight() + map.getTileDepth(),
-                this.scaling * tile.ox,
-                this.scaling * tile.oy,
-                this.scaling * map.getTileWidth(),
-                this.scaling * (map.getTileHeight() + map.getTileDepth())
+                scaling * tile.ox,
+                scaling * tile.oy,
+                scaling * map.getTileWidth(),
+                scaling * (map.getTileHeight() + map.getTileDepth())
             );
             ctx.restore();
         });

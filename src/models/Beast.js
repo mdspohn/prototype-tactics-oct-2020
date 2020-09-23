@@ -43,7 +43,7 @@ class Beast {
         // Equipment
         // ---------------------------
 
-        this.equipment = new EquipmentManager();
+        this.equipment = new BeastEquipment();
 
         // ---------------------
         // State
@@ -158,19 +158,5 @@ class Beast {
 
     isAlive() {
         return this.stats.current.health > 0;
-    }
-
-    // -----------------------
-    // Stat Accessors
-    // -----------------------------
-
-    damage(amount = 0) {
-        this.stats.current.health -= amount;
-        if (this.stats.current.health <= 0)
-            Events.dispatch('death', this);
-    }
-
-    heal(amount = 0) {
-        this.stats.current.health = Math.min(this.stats.max.health, this.stats.current.health + amount);
     }
 }

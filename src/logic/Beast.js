@@ -201,7 +201,7 @@ class BeastLogic {
             }
         }
 
-        const scaling = Game.views.getMapRenderer().getScaling();
+        const scaling = Game.views.scaling;
 
         const w = (start.tw / 2) * scaling,
               d = (start.td / 2) * scaling,

@@ -39,7 +39,7 @@ class Equipment {
     }
 }
 
-class EquipmentManager {
+class BeastEquipment {
     constructor() {
         this.equipment = {
             weapon: null,

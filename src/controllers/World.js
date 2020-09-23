@@ -3,7 +3,7 @@ class WorldController {
 
     }
 
-    async _load() {
+    async load() {
 
     }
     

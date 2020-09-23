@@ -1,74 +1,89 @@
 class GameManager {
     constructor() {
-        this.canvas = document.getElementById('canvas');
-        this.ctx = this.canvas.getContext('2d');
-
         this.speed = 1;
         this.scaling = 4;
+
+        this.canvas = document.getElementById('canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.camera = new Camera(this.canvas, this.ctx, this.scaling);
         
-        // managers
-        this.input   = new InputManager();
-        this.camera  = new Camera({ canvas: this.canvas, ctx: this.ctx, scaling: this.scaling });
-        this.tools   = new DevTools();
-        this.views   = new ViewManager({ speed: this.speed, scaling: this.scaling });
-        this.effects = new EffectManager({ speed: this.speed, scaling: this.scaling });
-        this.sounds  = new SoundManager();
-        this.actions = new ActionManager({ effects: this.effects, sounds: this.sounds });
+        this.input  = new InputManager();
+        this.tools  = new DevTools();
+
+        // managers for retrieving, loading, and saving game object data
+        this.managers = new Object();
+        this.managers.data        = new DataManager();
+        this.managers.scenes      = new SceneManager();
+        this.managers.maps        = new MapManager();
+        this.managers.decorations = new DecorationManager();
+        this.managers.beasts      = new BeastManager();
+        this.managers.equipment   = new EquipmentManager();
+        this.managers.effects     = new EffectManager();
+        this.managers.sounds      = new SoundManager();
+
+        // object renderers
+        this.renderers = new Object();
+        this.renderers.maps        = new MapRenderer();
+        this.renderers.decorations = new DecorationRenderer();
+        this.renderers.beasts      = new BeastRenderer();
+        this.renderers.effects     = new EffectRenderer();
+
+        // mediators 
+        this.views = new Views(this.renderers, this.speed, this.scaling);
+        this.actions = new Actions(this.managers);
 
         // state controllers
         this.controllers = new Array(4);
-        this.controllers[0] = new TitleController();
-        this.controllers[1] = new CombatController();
-        this.controllers[2] = new TownController();
-        this.controllers[3] = new WorldController();
+        this.controllers[0] = new TitleController(this.views, this.actions);
+        this.controllers[1] = new CombatController(this.views, this.actions);
+        this.controllers[2] = new TownController(this.views, this.actions);
+        this.controllers[3] = new WorldController(this.views, this.actions);
 
-        // game states
-        this.state = null; // <0-3>
-        
+
         this.states = new Object();
         this.states['TITLE']  = 0;
         this.states['COMBAT'] = 1;
         this.states['TOWN']   = 2;
         this.states['WORLD']  = 3;
 
+        this.state = null; // <0-3>
+
         // upcoming/active scene
         this.scene = null;
         this.map = null;
         this.decoration = null;
-        this.entities = null;
+        this.beasts = null;
     }
 
     // -------------------
     // Game Initialization / Scene Transition
     // -----------------------------------
 
-    async _load() {
-        await Assets._load();
-        await Promise.all([...this.controllers.map(controller => controller._load())]);
+    async load() {
+        await Promise.all([
+            ...Object.values(this.managers).map(manager => manager.load()),
+            ...this.controllers.map(controller => controller.load())
+        ]);
 
         // --------------
         // XXX - This should be done when transitioning, not on game load
         // -----------------------
-        await this._prepare('test');
-        await this._initialize();
+        await this.prepare('test');
+        await this.initialize();
     }
 
-    async _prepare(id) {
-        this.scene = Assets.getScene(id);
+    async prepare(id) {
+        this.scene = this.managers.scenes.get(id);
+        this.map = this.managers.maps.get(this.scene.map);
+        this.decoration = this.managers.decorations.get(this.scene.decoration);
+        this.beasts = this.scene.beasts.map(beast => this.managers.beasts.get(beast.id, beast));
 
-        if (this.map !== null)
-            this.map._destroy();
-
-        this.map = this.scene.map;
-        this.decoration = this.scene.decoration;
-        this.entities = this.scene.entities;
-
-        await this.controllers[this.states[this.scene.type]]._prepare(this.map, this.decoration, this.entities);
+        await this.controllers[this.states[this.scene.type]].prepare(this.map, this.decoration, this.beasts);
     }
 
-    async _initialize() {
+    async initialize() {
         this.state = this.states[this.scene.type];
-        this.controllers[this.states[this.scene.type]]._initialize();
+        this.controllers[this.states[this.scene.type]].initialize();
     }
     
     update(step) {
@@ -81,7 +96,7 @@ class GameManager {
     render(delta) {
         this.camera.render(delta);
         this.tools.render(delta);
-        this.controllers[this.state].render(delta);
+        this.controllers[this.state].render(delta, this.canvas, this.ctx, this.camera);
     }
 
     // --------------------

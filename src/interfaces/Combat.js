@@ -92,7 +92,7 @@ class CombatInterface {
         });
     }
 
-    async _load() {
+    async load() {
         const loader = resolve => {
             this.img = new Image();
             this.img.onload = resolve;
@@ -159,7 +159,7 @@ class CombatInterface {
         if (opacity !== 1)
             ctx.globalAlpha = opacity;
         
-        Game.views.getBeastRenderer().renderToCanvas(ctx, unit, 0, mirrored, x, (canvas.height - unit.tileset.th) - (~~showTile * 8), 1);
+        Game.views.renderBeastToCanvas(ctx, unit, 0, mirrored, x, (canvas.height - unit.tileset.th) - (~~showTile * 8), 1);
         ctx.restore();
     }
 

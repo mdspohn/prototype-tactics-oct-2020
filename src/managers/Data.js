@@ -2,12 +2,8 @@ class DataManager {
     constructor() {
 
     }
-
-    save() {
-
-    }
-
+    
     load() {
-        
+        return Promise.resolve();
     }
 }

@@ -3,7 +3,7 @@ class TownController {
         
     }
 
-    async _load() {
+    async load() {
 
     }
     

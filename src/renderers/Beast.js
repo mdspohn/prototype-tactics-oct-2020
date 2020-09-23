@@ -1,6 +1,6 @@
-class BeastRenderer extends Renderer {
-    constructor(config) {
-        super(config);
+class BeastRenderer {
+    constructor() {
+        
     }
 
     reverseLocation(unit, animation) {
@@ -74,7 +74,7 @@ class BeastRenderer extends Renderer {
         return animation;
     }
 
-    update(step, beasts, speed = this.speed) {
+    update(step, beasts, speed, scaling) {
         beasts.forEach(beast => {
             let animation = beast.animations.current;
             if (animation.terminate)
@@ -88,7 +88,7 @@ class BeastRenderer extends Renderer {
         });
     }
     
-    render(delta, ctx, camera, location, beast, scaling = this.scaling, speed = this.speed) {
+    render(delta, ctx, camera, location, beast, speed, scaling) {
         let animation = beast.animations.current;
         if (animation.terminate)
             animation = this.nextAnimation(beast, animation);
@@ -137,7 +137,7 @@ class BeastRenderer extends Renderer {
         this.renderToCanvas(ctx, beast, frame.idx, animation.mirrored, translateX, translateY, scaling);
     }
 
-    renderEquipment(ctx, beast, idx, layer, isMirrored, translateX, translateY, scaling = this.scaling) {
+    renderEquipment(ctx, beast, idx, layer, isMirrored, translateX, translateY, scaling) {
         Object.values(beast.equipment.equipment).forEach(item => {
             if (item === null)
                 return;
@@ -167,7 +167,7 @@ class BeastRenderer extends Renderer {
         });
     }
 
-    renderToCanvas(ctx, beast, idx, isMirrored, translateX, translateY, scaling = this.scaling) {
+    renderToCanvas(ctx, beast, idx, isMirrored, translateX, translateY, scaling) {
         this.renderEquipment(ctx, beast, idx, -1, isMirrored, translateX, translateY, scaling);
 
         ctx.save();

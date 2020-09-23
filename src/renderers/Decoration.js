@@ -1,6 +1,6 @@
-class DecorationRenderer extends Renderer {
-    constructor(settings) {
-        super(settings);
+class DecorationRenderer {
+    constructor() {
+
     }
 
     nextAnimation(tile, decorations) {
@@ -37,13 +37,13 @@ class DecorationRenderer extends Renderer {
         return tile;
     }
 
-    update(step, decorations) {
+    update(step, decorations, speed) {
         decorations.tiles.forEach(row => {
             row.forEach(col => {
                 col.forEach(tile => {
                     if (tile.animation === null)
                         return;
-                    tile.animation.ms += (step * this.speed);
+                    tile.animation.ms += (step * speed);
                     while (tile.animation.ms > decorations.getTileConfig(tile.id).frames[tile.animation.frame].ms)
                         this.nextFrame(tile, decorations);
                 });
@@ -51,13 +51,13 @@ class DecorationRenderer extends Renderer {
         });
     }
 
-    render(delta, ctx, camera, location, decorations) {
+    render(delta, ctx, camera, location, decorations, speed, scaling) {
         const tiles = decorations.tiles[location.getX()]?.[location.getY()];
         if (tiles === undefined)
             return;
         
         tiles.forEach((tile, z) => {
-            while (tile.animation !== null && ((tile.animation.ms + (delta * this.speed)) > decorations.getTileConfig(tile.id).frames[tile.animation.frame].ms))
+            while (tile.animation !== null && ((tile.animation.ms + (delta * speed)) > decorations.getTileConfig(tile.id).frames[tile.animation.frame].ms))
                 tile = this.nextFrame(tile, decorations, true);
 
             if (tile.idx === -1)
@@ -68,7 +68,7 @@ class DecorationRenderer extends Renderer {
                   POS_Y = (location.getPosY()) - (decorations.getTileHeight() - location.getTileDepth() - location.getTileHeight()) - (decorations.getTileHeight() * z);
           
             ctx.save();
-            ctx.translate(camera.getPosX() - (POS_X * this.scaling), camera.getPosY() + (POS_Y * this.scaling));
+            ctx.translate(camera.getPosX() - (POS_X * scaling), camera.getPosY() + (POS_Y * scaling));
 
             if (IS_MIRRORED)
                 ctx.scale(-1, 1);
@@ -79,10 +79,10 @@ class DecorationRenderer extends Renderer {
                 Math.floor((tile.idx * decorations.getTileWidth()) / decorations.getImageWidth()) * (decorations.getTileHeight()),
                 decorations.getTileWidth(),
                 decorations.getTileHeight(),
-                this.scaling * tile.ox,
-                this.scaling * tile.oy,
-                this.scaling * decorations.getTileWidth(),
-                this.scaling * decorations.getTileHeight()
+                scaling * tile.ox,
+                scaling * tile.oy,
+                scaling * decorations.getTileWidth(),
+                scaling * decorations.getTileHeight()
             );
             ctx.restore();
         });

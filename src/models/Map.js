@@ -23,13 +23,6 @@ class Map {
         this.sorted = new Object();
         this.sorted['X'] = [].concat(...this.structure).sort((a, b) => (a.x - b.x) ? a.x - b.x : a.y - b.y);
         this.sorted['Y'] = [].concat(...this.structure).sort((a, b) => (a.y - b.y) ? a.y - b.y : a.x - b.x);
-        this.method = 'X';
-
-        this.event = Events.listen('sort', (method) => this.method = method, true);
-    }
-
-    _destroy(events) {
-        events.remove('sort', this.event);
     }
 
     // --------------------
@@ -40,20 +33,20 @@ class Map {
         return this.structure[x]?.[y];
     }
 
-    getLocations() {
-        return this.sorted[this.method];
+    getLocations(order = 'X') {
+        return this.sorted[order];
     }
 
-    forEach(fn) {
-        this.sorted[this.method].forEach(location => fn(location));
+    forEach(fn, order = 'X') {
+        this.sorted[order].forEach(location => fn(location));
     }
 
-    filter(fn) {
-        return this.sorted[this.method].filter(location => fn(location));
+    filter(fn, order = 'X') {
+        return this.sorted[order].filter(location => fn(location));
     }
 
-    find(fn) {
-        return this.sorted[this.method].find(location => fn(location));
+    find(fn, order = 'X') {
+        return this.sorted[order].find(location => fn(location));
     }
 
     // --------------------

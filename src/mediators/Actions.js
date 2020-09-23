@@ -1,20 +1,9 @@
-class ActionManager {
-    constructor({ effects, sounds } = settings) {
-        this.effects = effects;
-        this.sounds = sounds;
-
-        this.cinematicMode = false;
+class Actions {
+    constructor(managers) {
+        this.managers = managers;
     }
 
-    isCinematic() {
-        return this.cinematicMode;
-    }
-
-    // -------------------
-    // Unit Movement
-    // ----------------------------
-
-    async move(unit, path, animation = null) {
+    async move(unit, path, animationId = null) {
         const origin = unit.location,
               destination = path[path.length - 1],
               distance = Math.abs(destination.x - origin.x) + Math.abs(destination.y - origin.y);
@@ -30,12 +19,12 @@ class ActionManager {
 
         unit.traveled.last += distance;
         unit.traveled.total += distance;
-        unit.animate(BeastLogic.getMovementAnimations(unit, path, destination, animation));
+        unit.animate(BeastLogic.getMovementAnimations(unit, path, destination, animationId));
 
         return new Promise(complete);
     }
 
-    resetMove(unit) {
+    async resetMove(unit) {
         if (unit.animations.checkpoint === null)
             return;
         
@@ -48,23 +37,18 @@ class ActionManager {
         unit.traveled.last = 0;
     }
 
-    changeOrientation(unit, x, y) {
+    async changeOrientation(unit, x, y) {
         const orientation = CombatLogic.getOrientationToCoords(unit, x, y);
-        if (unit.orientation === orientation)
-            return;
-        
-        unit.orientation = orientation;
-        const animation = BeastLogic.getDefaultAnimation(unit, unit.animation);
-        animation.frame = unit.animations.current.frame;
-        animation.ms = unit.animations.current.ms;
-        unit.animate(animation, true);
+        if (unit.orientation !== orientation) {
+            unit.orientation = orientation;
+            const animation = BeastLogic.getDefaultAnimation(unit, unit.animation);
+            animation.frame = unit.animations.current.frame;
+            animation.ms = unit.animations.current.ms;
+            unit.animate(animation, true);
+        }
 
-        return orientation;
+        return Promise.resolve(orientation);
     }
-
-    // -------------------------
-    // Attacks / Skills
-    // -----------------------------------
 
     async useSkill(id, unit, target, entities, map, camera, effects, sounds) {
         const skill = Assets.getSkill(id),
@@ -77,19 +61,19 @@ class ActionManager {
         for (let i = 0; i < skill.sequence.length; i++) {
             switch (skill.sequence[i].type) {
                 case 'animation':
-                    await this.doAnimationSegment(skill.sequence[i], unit, target, selection, range, entities, map);
+                    await this.useSkill_animationSegment(skill.sequence[i], unit, target, selection, range, entities, map);
                     break;
                 case 'effect':
-                    await this.doEffectSegment(skill.sequence[i], unit, target, selection, range, entities, map, effects);
+                    await this.useSkill_effectSegment(skill.sequence[i], unit, target, selection, range, entities, map, effects);
                     break;
                 case 'sound':
-                    await this.doSoundSegment(skill.sequence[i], sounds);
+                    await this.useSkill_soundSegment(skill.sequence[i], sounds);
                     break;
                 case 'camera':
-                    await this.doCameraSegment(skill.sequence[i], camera);
+                    await this.useSkill_cameraSegment(skill.sequence[i], camera);
                     break;
                 case 'wait':
-                    await this.doWaitSegment(skill.sequence[i]);
+                    await this.useSkill_waitSegment(skill.sequence[i]);
                     break;
             }
         }
@@ -97,7 +81,7 @@ class ActionManager {
         return Promise.resolve();
     }
 
-    doAnimationSegment(segment, unit, target, selection, range, entities, map) {
+    useSkill_animationSegment(segment, unit, target, selection, range, entities, map) {
         const unitsToAnimate = segment.unit === 'attacker' ? [unit] : entities.filter(entity => selection.has(entity.location)),
               pending = new Array();
 
@@ -142,14 +126,14 @@ class ActionManager {
         }
 
         if (segment.await !== undefined && pending.length !== 0)
-            return Promise.all([...pending.map(opts => this._animateUnit(opts))]);
+            return Promise.all([...pending.map(opts => this.useSkill_animateUnit(opts))]);
 
-        pending.forEach(opts => this._animateUnit(opts));
+        pending.forEach(opts => this.useSkill_animateUnit(opts));
 
         return Promise.resolve();
     }
 
-    _animateUnit({ unit, animationId, destination, path, event } = opts) {
+    useSkill_animateUnit({ unit, animationId, destination, path, event } = opts) {
         if (path.length !== 0) {
             const animations = BeastLogic.getMovementAnimations(unit, path, destination, animationId);
             unit.animate(animations, true);
@@ -194,19 +178,19 @@ class ActionManager {
         }
     }
 
-    doEffectSegment(segment, unit, target, selection, range, entities, map, effects) {
+    useSkill_effectSegment(segment, unit, target, selection, range, entities, map, effects) {
         return Promise.resolve();
     }
 
-    doSoundSegment(segment, sounds) {
+    useSkill_soundSegment(segment, sounds) {
         return Promise.resolve();
     }
 
-    doCameraSegment(segment, camera) {
+    useSkill_cameraSegment(segment, camera) {
         return Promise.resolve();
     }
 
-    doWaitSegment(segment) {
+    useSkill_waitSegment(segment) {
         return Promise.resolve();
     }
 }

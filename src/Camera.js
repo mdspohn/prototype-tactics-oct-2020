@@ -1,5 +1,5 @@
 class Camera {
-    constructor({ canvas, ctx, scaling } = settings) {
+    constructor(canvas, ctx, scaling) {
         this.window = new Object();
         this.window.x = window.innerWidth;
         this.window.y = window.innerHeight;

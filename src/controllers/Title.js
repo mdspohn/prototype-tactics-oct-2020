@@ -3,7 +3,7 @@ class TitleController {
         
     }
 
-    async _load() {
+    async load() {
 
     }
     

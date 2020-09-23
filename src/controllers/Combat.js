@@ -1,21 +1,19 @@
 class CombatController {
-    constructor() {
+    constructor(views, actions) {
+
+        this.views = views;
+        this.actions = actions;
+        this.interface = new CombatInterface();
+
         // -------------------
-        // Scene
+        // State
         // -----------------------
 
         this.map = null;
         this.decoration = null;
-        this.units = null;
         this.effects = null;
-
+        this.units = null;
         this.active = null;
-
-        this.interface = new CombatInterface();
-
-        // -------------------
-        // Combat State
-        // -----------------------
 
         this.states = new Object();
         this.states["NONE"]           = 0;
@@ -32,7 +30,7 @@ class CombatController {
         this.states["WAIT_CONFIRM"]   = 29;
 
         this.state = this.states.NONE;
-        
+
         // -------------------
         // Tile Markers / Indicators
         // -----------------------
@@ -89,16 +87,16 @@ class CombatController {
     // Asset Prep and Loading
     // --------------------------
 
-    async _load() {
+    async load() {
         const markers = resolve => {
             this.indicators.img = new Image();
             this.indicators.img.onload = resolve;
             this.indicators.img.src = `${ASSET_DIR}${OS_FILE_SEPARATOR}miscellaneous${OS_FILE_SEPARATOR}tile-markers.png`;
         };
-        await Promise.all([new Promise(markers), this.interface._load()]);
+        await Promise.all([new Promise(markers), this.interface.load()]);
     }
 
-    async _prepare(map, decoration, units) {
+    async prepare(map, decoration, units) {
         this.map = map;
         this.decoration = decoration;
         this.units = units;
@@ -108,7 +106,7 @@ class CombatController {
         });
     }
 
-    async _initialize() {
+    async initialize() {
         Game.camera.toCenter(Game.canvas, this.map);
         this.nextTurn();
     }
@@ -118,63 +116,38 @@ class CombatController {
     // --------------------------
     
     update(step) {
-        this.updateMap(step);
-        this.updateDecorations(step);
-        this.updateBeasts(step);
-        this.updateEffects(step);
-        this.updateTileIndicators(step);
-        this.updateInterface(step);
+        this.views.updateMap(step, this.map);
+        this.views.updateDecorations(step, this.decoration);
+        this.views.updateBeasts(step, this.units);
+        this.views.updateEffects(step, this.effects);
+        
+        this.interface.update(step);
+        Object.values(this.indicators.configurations).forEach(config => config.ms = (config.ms + step) % config.duration);
     }
 
-    render(delta) {
-        Game.ctx.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
+    render(delta, canvas, ctx, camera) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        const locations = this.map.getLocations();
+        const locations = this.map.getLocations(this.views.sorting);
         for (let i = 0; i < locations.length; i++) {
-            let complete = true;
-            complete &= this.renderLocation(delta, Game.ctx, Game.camera, locations[i]);
-            complete &= this.renderTileIndicators(delta, Game.ctx, Game.camera, locations[i]);
-            complete &= this.renderDecorations(delta, Game.ctx, Game.camera, locations[i]);
-            complete &= this.renderBeasts(delta, Game.ctx, Game.camera, locations[i]);
-            complete &= this.renderTileEffects(delta, Game.ctx, Game.camera, locations[i]);
+            const location = locations[i];
 
-            if (!complete) {
-                this.render(delta);
+            this.views.renderLocation(delta, ctx, camera, location, this.map);
+            this.renderTileIndicators(delta, ctx, camera, location);
+            this.views.renderDecorations(delta, ctx, camera, location, this.decoration);
+            //repeat |= this.views.renderPreEffects(delta, ctx, camera, location, this.effects);
+            const repeat = this.views.renderBeasts(delta, ctx, camera, location, this.units);
+            //repeat |= this.views.renderPostEffects(delta, ctx, camera, location, this.effects);
+
+            if (repeat) {
+                this.render(delta, canvas, ctx, camera)
                 break;
             }
         }
         
-        this.renderOrientationIndicator(delta, Game.ctx, Game.camera);
-        this.renderScreenEffects(delta, Game.ctx, Game.camera);
-        this.renderInterface(delta);
-    }
-
-    updateMap(step) {
-        Game.views.updateMap(step, this.map);
-    }
-
-    updateDecorations(step) {
-        Game.views.updateDecorations(step, this.decoration);
-    }
-
-    updateBeasts(step) {
-        Game.views.updateBeasts(step, this.units);
-    }
-
-    updateEffects(step) {
-        Game.views.updateEffects(step, Game.effects.getEffects());
-    }
-
-    updateTileIndicators(step) {
-        Object.values(this.indicators.configurations).forEach(config => config.ms = (config.ms + step) % config.duration);
-    }
-
-    updateInterface(step) {
-        this.interface.update(step);
-    }
-
-    renderLocation(delta, ctx, camera, location) {
-        return Game.views.renderLocation(delta, ctx, camera, location, this.map);
+        this.renderOrientationIndicator(ctx, camera);
+        //this.views.effects.renderScreenEffects(delta, ctx, camera);
+        this.interface.render(delta);
     }
 
     renderTileIndicators(delta, ctx, camera, location) {
@@ -217,22 +190,10 @@ class CombatController {
         }
 
         ctx.restore();
-        return true;
+        return false;
     }
 
-    renderDecorations(delta, ctx, camera, location) {
-        return Game.views.renderDecorations(delta, ctx, camera, location, this.decoration);
-    }
-
-    renderBeasts(delta, ctx, camera, location) {
-        return Game.views.renderBeasts(delta, ctx, camera, location, this.units.filter(beast => beast.location === location));
-    }
-
-    renderTileEffects(delta, ctx, camera, location) {
-        return Game.views.renderTileEffects(delta, ctx, camera, location, Game.effects.filter(effect => effect.location === location));
-    }
-
-    renderOrientationIndicator(delta, ctx, camera) {
+    renderOrientationIndicator(ctx, camera) {
         if (this.orientation === null)
             return;
 
@@ -245,14 +206,6 @@ class CombatController {
         ctx.translate(translateX, translateY);
         ctx.drawImage(this.indicators.img, xIndex * 32, (yIndex * 16) + 192, 32, 16, 0, 0, (32 * Game.scaling), (16 * Game.scaling))
         ctx.restore();
-    }
-
-    renderScreenEffects(delta, ctx, camera) {
-        Game.views.renderScreenEffects(delta, ctx, camera, Game.effects.getScreenEffects());
-    }
-
-    renderInterface(delta) {
-        this.interface.render(delta);
     }
 
     // -------------------
@@ -483,7 +436,7 @@ class CombatController {
                 }
                 break;
             case this.states.WAIT_REQUEST:
-                this.orientation = Game.actions.changeOrientation(this.active, event.x, event.y) || this.active.orientation;
+                Game.actions.changeOrientation(this.active, event.x, event.y).then(orientation => this.orientation = orientation);
                 break;
             default:
                 break;

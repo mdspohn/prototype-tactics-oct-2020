@@ -1,4 +1,4 @@
-class EffectRenderer {
+class EquipmentRenderer {
     constructor() {
         
     }
