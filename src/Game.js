@@ -68,7 +68,12 @@ class GameManager {
         this.scene = this.managers.scenes.get(id);
         this.map = this.managers.maps.get(this.scene.map);
         this.decoration = this.managers.decorations.get(this.scene.decoration);
-        this.beasts = this.scene.beasts.map(beast => this.managers.beasts.get(beast.id, beast));
+        this.beasts = this.scene.beasts.map(data => {
+            const beast = this.managers.beasts.get(data.id, data);
+            if (data.equipment !== undefined)
+                Object.entries(data.equipment).forEach(([ type, id ]) => beast.equipment.set(type, this.managers.equipment.get(id)));
+            return beast;
+        });
 
         await this.controllers[this.states[this.scene.type]].prepare(this.map, this.decoration, this.beasts);
     }

@@ -6,16 +6,8 @@ class CombatController {
         this.interface = ui;
 
         // -------------------
-        // Scene / State
+        // States
         // -----------------------
-
-        this.map = null;
-        this.decorations = null;
-        this.beasts = null;
-
-        this.active = null;
-        this.effects = new Effects();
-        this.markers = new Markers();
 
         this.states = new Object();
         this.states["NONE"]           = 0;
@@ -31,10 +23,21 @@ class CombatController {
         this.states["WAIT_REQUEST"]   = 28;
         this.states["WAIT_CONFIRM"]   = 29;
 
-        this.state = this.states.NONE;
+        // -------------------
+        // Scene
+        // -----------------------
+
+        this.scene = new Object();
+        this.scene.state = this.states.NONE;
+        this.scene.map = null;
+        this.scene.decorations = null;
+        this.scene.beasts = null;
+        this.scene.active = null;
+        this.scene.effects = new Effects();
+        this.scene.markers = new Markers();
 
         // -------------------
-        // EVENT LISTENERS
+        // Event Listeners
         // -----------------------
 
         Events.listen('MOVE_REQUEST',   (event) => this.requestMove(event),   true);
@@ -42,6 +45,17 @@ class CombatController {
         Events.listen('SKILLS_MENU',    (event) => this.requestSkill(event),  true);
         Events.listen('WAIT_REQUEST',   (event) => this.requestWait(event),   true);
     }
+
+    get map()         { return this.scene.map;         }
+    get decorations() { return this.scene.decorations; }
+    get beasts()      { return this.scene.beasts;      }
+    get effects()     { return this.scene.effects;     }
+    get markers()     { return this.scene.markers;     }
+    get active()      { return this.scene.active;      }
+    get state()       { return this.scene.state;       }
+
+    set active(beast) { this.scene.active = beast;     }
+    set state(state)  { this.scene.state  = state;     }
 
     // -------------------
     // Asset Prep and Loading
@@ -52,9 +66,9 @@ class CombatController {
     }
 
     async prepare(map, decorations, beasts) {
-        this.map = map;
-        this.decorations = decorations;
-        this.beasts = beasts;
+        this.scene.map = map;
+        this.scene.decorations = decorations;
+        this.scene.beasts = beasts;
         this.beasts.forEach(beast => {
             const location = this.map.getLocation(beast.location.x, beast.location.y);
             beast.initialize(location);
@@ -106,6 +120,8 @@ class CombatController {
     // --------------------------
 
     async nextTurn() {
+        // await this.actions.nextTurn(this.scene, this.interface);
+
         this.active = CombatLogic.getNextTurn(this.beasts);
         this.active.resetTurn();
         this.interface.updateTurns(CombatLogic.getTurns(this.beasts), this.active);
@@ -144,13 +160,10 @@ class CombatController {
             this.interface._updateHeight(animation.destination.getZ());
         }, true);
         Game.actions.move(this.active, BeastLogic.getPath(location, this.markers.range)).then(() => {
-            this.active.hasMoved = true;
             this.state = this.states.PLAYER_TURN;
             this.interface.confirmMove(this.active.getRemainingMovement());
             this.interface._updateHeight(this.active.location.getZ());
-
-            this.markers.focus = null;
-            this.markers.path = null;
+            this.markers.clear();
 
             Events.remove('move-step', stepListenerId);
         });
@@ -159,8 +172,7 @@ class CombatController {
 
     cancelMove() {
         this.state = this.states.PLAYER_TURN;
-        this.markers.range = null;
-        this.markers.path = null;
+        this.markers.clear();
         this.interface.cancelMove();
     }
 
@@ -191,27 +203,20 @@ class CombatController {
             this.state = this.states.PLAYER_TURN;
             this.interface.cancelAttack();
         });
-        this.markers.range = null;
-        this.markers.selection = null;
-        this.markers.focus = null;
+        this.markers.clear();
     }
 
     cancelAttack() {
         this.state = this.states.PLAYER_TURN;
-        this.markers.range = null;
-        this.markers.selection = null;
-        this.markers.focus = null;
+        this.markers.clear();
         this.interface.cancelAttack();
     }
 
-    requestSkillsMenu(entity) {}
+    requestSkillsMenu(entity) {
+        // TODO
+    }
 
     async requestSkill(entity) {
-        // await Game.actions.useSkill('flicker', this.active, this.map.getLocation(4, 6), this.units, this.map, Game.camera, Game.effects, Game.sounds);
-        // await Game.actions.move(this.active, BeastLogic.getPath(this.map.getLocation(4, 6), BeastLogic.getRange(this.active, this.units, this.map)));
-        // await Game.actions.useSkill('sword', this.active, this.map.getLocation(4, 7), this.units, this.map, Game.camera, Game.effects, Game.sounds);
-        // await Game.actions.move(this.active, BeastLogic.getPath(this.map.getLocation(4, 7), BeastLogic.getRange(this.active, this.units, this.map)));
-        // await Game.actions.useSkill('sword', this.active, this.map.getLocation(4, 8), this.units, this.map, Game.camera, Game.effects, Game.sounds);
         if (this.state === this.states.SKILL_REQUEST)
             return this.cancelSkill();
         
@@ -226,22 +231,15 @@ class CombatController {
     }
 
     confirmSkill(location) {
-        console.log('starting skill');
         Game.actions.useSkill('flicker', this.active, location, this.beasts, this.map, Game.camera, Game.effects, Game.sounds).then(() => {
-            console.log('skill done');
             this.state = this.states.PLAYER_TURN;
         });
-        this.markers.range = null;
-        this.markers.path = null;
-        this.markers.focus = null;
-        this.markers.selection = null;
+        this.markers.clear();
     }
 
     cancelSkill() {
         this.state = this.states.PLAYER_TURN;
-        this.markers.range = null;
-        this.markers.selection = null;
-        this.markers.focus = null;
+        this.markers.clear();
         this.interface.cancelSkill();
     }
 
@@ -254,13 +252,13 @@ class CombatController {
 
     confirmWait(event) {
         this.state = this.states.WAIT_CONFIRM;
-        this.markers.orientation = null;
+        this.markers.clear();
         this.interface.endTurn().then(() => this.nextTurn());
     }
 
     cancelWait() {
         this.state = this.states.PLAYER_TURN;
-        this.markers.orientation = null;
+        this.markers.clear();
     }
 
     _updateFocus(location) {
@@ -310,7 +308,6 @@ class CombatController {
             case this.states.ATTACK_REQUEST:
                 if (BeastLogic.isValidSelection(location, this.markers.range)) {
                     this.markers.selection = SkillLogic.getSelection('sword', location, this.beasts, this.map, this.markers.range);
-                    Game.actions.changeOrientation(this.active, event.x, event.y);
                 } else {
                     this.markers.selection = null;
                     location = null;
@@ -320,7 +317,6 @@ class CombatController {
                 if (BeastLogic.isValidSelection(location, this.markers.range)) {
                     this.markers.path = BeastLogic.getPath(location, this.markers.range);
                     this.markers.selection = SkillLogic.getSelection('flicker', location, this.beasts, this.map, this.markers.range);
-                    Game.actions.changeOrientation(this.active, event.x, event.y);
                 } else {
                     this.markers.path = null;
                     this.markers.selection = null;

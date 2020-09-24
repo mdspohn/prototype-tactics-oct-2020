@@ -26,11 +26,16 @@ class DecorationRenderer {
             if (tile.idx === -1)
                 return;
             
-            const translateX = decorations.tw * ~~decorations.getTileConfig(tile.id).mirrored - (location.getPosX()) - ((decorations.tw - location.tw) / 2) + tile.ox,
+            const isMirrored = decorations.getTileConfig(tile.id).mirrored,
+                  translateX = decorations.tw * ~~isMirrored - (location.getPosX()) - ((decorations.tw - location.tw) / 2) + tile.ox,
                   translateY = location.getPosY() - (decorations.th - location.td - location.th) - (decorations.th * z) + tile.oy;
           
             Game.ctx.save();
             Game.ctx.translate(Game.camera.getPosX() - translateX * scaling, Game.camera.getPosY() + translateY * scaling);
+            
+            if (isMirrored)
+                Game.ctx.scale(-1, 1);
+
             Game.ctx.drawImage(
                 decorations.img,
                 (tile.idx * decorations.tw) % decorations.width,

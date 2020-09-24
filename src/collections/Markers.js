@@ -70,6 +70,15 @@ class Markers {
         return new Promise(pending);
     }
 
+    clear() {
+        this.range = null;
+        this.selection = null;
+        this.path = null;
+        this.focus = null;
+        this.pointer = null;
+        this.orientation = null;
+    }
+
     hasActive() {
         return this.tiles.range !== null || this.tiles.selection !== null || this.tiles.focus !== null;
     }

@@ -159,7 +159,7 @@ class CombatInterface {
         if (opacity !== 1)
             ctx.globalAlpha = opacity;
         
-        BeastRenderer.renderCustom(ctx, unit, 0, mirrored, x, (canvas.height - unit.tileset.th) - (~~showTile * 8), 1);
+        BeastRenderer.renderCustom(ctx, unit, 0, mirrored, x, (canvas.height - unit.tileset.th) - (~~showTile * 8), { scaling: 1 });
         ctx.restore();
     }
 

@@ -29,7 +29,7 @@ GAME_DATA.tilesets.decorations['woodlands'] = {
         "5": {
             "name": "Waterfall 2-2",
             "oy": 56,
-            "ox": 16,
+            "ox": -16,
             "frames": [
                 { "idx": 10, "ms": 200 },
                 { "idx": 11, "ms": 200 },
@@ -40,7 +40,7 @@ GAME_DATA.tilesets.decorations['woodlands'] = {
         "6": {
             "name": "Waterfall 2-1",
             "oy": 80,
-            "ox": 16,
+            "ox": -16,
             "frames": [
                 { "idx": 4, "ms": 200 },
                 { "idx": 5, "ms": 200 },

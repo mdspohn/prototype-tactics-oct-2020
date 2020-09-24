@@ -20,11 +20,16 @@ class MapRenderer {
             if (tile.idx === -1)
                 return;
             
-            const translateX = ((location.x - location.y) * (map.tw / 2)) + (map.tw * ~~map.getTileConfig(tile.id).mirrored) + tile.ox,
+            const isMirrored = map.getTileConfig(tile.id).mirrored,
+                  translateX = ((location.x - location.y) * (map.tw / 2)) + (map.tw * ~~isMirrored) + tile.ox,
                   translateY = ((location.x + location.y) * (map.td / 2)) - (map.th * z) + tile.oy;
           
             Game.ctx.save();
             Game.ctx.translate(Game.camera.getPosX() - translateX * scaling, Game.camera.getPosY() + translateY * scaling);
+
+            if (isMirrored)
+                Game.ctx.scale(-1, 1);
+
             Game.ctx.drawImage(
                 map.img,
                 (tile.idx * location.tw) % map.width,

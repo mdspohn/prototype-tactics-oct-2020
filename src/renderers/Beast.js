@@ -56,7 +56,7 @@ class BeastRenderer {
               translateX = Game.camera.getPosX() + ((x + ox) * scaling) + ~~animation.cx,
               translateY = Game.camera.getPosY() + ((y + oy) * scaling) + ~~animation.cy + ~~animation.cz;
 
-        BeastRenderer.renderCustom(Game.ctx, beast, frame.idx, animation.mirrored, translateX, translateY, scaling);
+        BeastRenderer.renderCustom(Game.ctx, beast, frame.idx, animation.mirrored, translateX, translateY, { scaling });
     }
 
     static nextFrame(beast, animation) {
@@ -87,15 +87,12 @@ class BeastRenderer {
     static nextAnimation(beast, animation, isForced = false) {
         let next = beast.animations.queue.shift();
 
-        // animation end event request
         if (animation.events?.end !== undefined)
             Events.dispatch(animation.events.end.id, animation.events.end.data);
 
-        // start rendering at new destination because animation is complete
         if (animation.destination !== undefined && animation.destination !== beast.location && !isForced)
             beast.location = animation.destination;
 
-        // default to beast idle animation if nothing is left in the queue
         if (next === undefined)
             next = BeastLogic.getDefaultAnimation(beast, animation);
 
@@ -125,37 +122,8 @@ class BeastRenderer {
         return next;
     }
 
-    static renderEquipment(ctx, beast, idx, layer, isMirrored, translateX, translateY, scaling) {
-        Object.values(beast.equipment.equipment).forEach(item => {
-            if (item === null)
-                return;
-
-            const config = item.tileset.config[idx]?.[~~isMirrored];
-            if (config === undefined || config.layer !== layer)
-                return;
-
-            ctx.save();
-            ctx.translate(translateX + ((~~config.ox + (~~config.mirrored * item.tw)) * scaling), translateY + (~~config.oy * scaling));
-    
-            if (config.mirrored)
-                ctx.scale(-1, 1);
-
-            ctx.drawImage(
-                item.tileset.img,
-                (config.idx * item.tileset.tw) % item.tileset.width,
-                Math.floor((config.idx * item.tileset.tw) / item.tileset.width) * (item.tileset.th),
-                item.tileset.tw,
-                item.tileset.th,
-                0,
-                0,
-                item.tileset.tw * scaling,
-                item.tileset.th * scaling
-            );
-            ctx.restore();
-        });
-    }
-
-    static renderCustom(ctx, beast, index, isMirrored, translateX, translateY, scaling) {
+    static renderCustom(ctx, beast, index, isMirrored, translateX, translateY, { scaling = 1 } = settings) {
+        EquipmentRenderer.render(ctx, beast, -1, translateX, translateY, { scaling });
         ctx.save();
         ctx.translate(translateX + (~~isMirrored * beast.tileset.tw * scaling), translateY);
 
@@ -174,5 +142,6 @@ class BeastRenderer {
             beast.tileset.th * scaling
         );
         ctx.restore();
+        EquipmentRenderer.render(ctx, beast, 1, translateX, translateY, { scaling });
     }
 }
