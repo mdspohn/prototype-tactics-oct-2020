@@ -21,15 +21,8 @@ class GameManager {
         this.managers.effects     = new EffectManager();
         this.managers.sounds      = new SoundManager();
 
-        // object renderers
-        this.renderers = new Object();
-        this.renderers.maps        = new MapRenderer();
-        this.renderers.decorations = new DecorationRenderer();
-        this.renderers.beasts      = new BeastRenderer();
-        this.renderers.effects     = new EffectRenderer();
-
         // mediators 
-        this.views = new Views(this.renderers, this.speed, this.scaling);
+        this.views = new Views(this.speed, this.scaling);
         this.actions = new Actions(this.managers);
 
         // state controllers
@@ -38,7 +31,6 @@ class GameManager {
         this.controllers[1] = new CombatController(this.views, this.actions);
         this.controllers[2] = new TownController(this.views, this.actions);
         this.controllers[3] = new WorldController(this.views, this.actions);
-
 
         this.states = new Object();
         this.states['TITLE']  = 0;
@@ -87,16 +79,17 @@ class GameManager {
     }
     
     update(step) {
+        this.tools.update(step);
         this.input.update(step);
         this.camera.update(step);
-        this.tools.update(step);
         this.controllers[this.state].update(step);
     }
 
     render(delta) {
-        this.camera.render(delta);
         this.tools.render(delta);
-        this.controllers[this.state].render(delta, this.canvas, this.ctx, this.camera);
+        this.camera.render(delta);
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.controllers[this.state].render(delta);
     }
 
     // --------------------

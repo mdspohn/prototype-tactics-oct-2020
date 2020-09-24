@@ -45,15 +45,15 @@ class Camera {
     // ---------------------------------
 
     async toLocation(location, ms = 0, easing = null) {
-        const x = -Math.floor((location.getPosX() * this.scaling) - (Game.canvas.width / 2) + (location.getTileWidth() * this.scaling / 2)),
-              y = -Math.floor((location.getPosY() * this.scaling) - (Game.canvas.height / 2) + (location.getTileDepth() * this.scaling / 2));
+        const x = -Math.floor((location.getPosX() * this.scaling) - (Game.canvas.width / 2)  + (location.tw * this.scaling / 2)),
+              y = -Math.floor((location.getPosY() * this.scaling) - (Game.canvas.height / 2) + (location.td * this.scaling / 2));
         
         return this._toPosition(x, y, ms, easing);
     }
 
     async toCenter(canvas, map, ms = 0, easing = null) {
-        const x = Math.floor((canvas.width - (map.boundaries.x2 + map.boundaries.x1) * this.scaling) / 2) - (map.getTileWidth() * this.scaling / 2),
-              y = Math.floor((canvas.height - map.boundaries.y2 * this.scaling) / 2) - (map.getTileDepth() * this.scaling / 2) - (map.getTileHeight() * this.scaling);
+        const x = Math.floor((canvas.width - (map.boundaries.x2 + map.boundaries.x1) * this.scaling) / 2) - (map.tw * this.scaling / 2),
+              y = Math.floor((canvas.height - map.boundaries.y2 * this.scaling) / 2) - (map.td * this.scaling / 2) - (map.th * this.scaling);
 
         return this._toPosition(x, y, ms, easing);
     }
@@ -227,7 +227,7 @@ class Camera {
             deltaY = Math.max(this.target.y, this.position.y + partialY) - this.position.y;
         }
 
-        return {  x: deltaX, y: deltaY };
+        return { x: deltaX, y: deltaY };
     }
 
     // ------------------------

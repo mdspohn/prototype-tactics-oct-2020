@@ -1,23 +1,48 @@
 class MapRenderer {
-    constructor() {
-
+    static update(map, ms, isDeltaUpdate, { speed = 1, sorting = 'X' } = settings) {
+        const adjustedMs = ms * speed;
+        map.getLocations(sorting).forEach(location => {
+            location.getTiles().forEach(tile => {
+                if (tile.animation === null)
+                    return;
+                
+                tile.animation.ms += ~~!isDeltaUpdate * adjustedMs;
+                tile.animation.delta = ~~isDeltaUpdate * adjustedMs;
+                
+                while ((tile.animation.ms + tile.animation.delta) > map.getTileConfig(tile.id).frames[tile.animation.frame].ms)
+                    MapRenderer.nextFrame(tile, map);
+            });
+        });
     }
 
-    nextAnimation(tile, map) {
-        const config = map.getTileConfig(tile.animation.next);
-        tile.id = tile.animation.next;
-        tile.idx = config.idx;
-        tile.water = Boolean(config.water);
-        tile.slope = Boolean(config.slope);
-        tile.mirror = Boolean(config.mirror);
-        tile.orientation = config.orientation;
-        tile.ox = 0;
-        tile.oy = 0;
+    static render(map, location, { scaling = 1 } = settings) {
+        location.getTiles().forEach((tile, z) => {
+            if (tile.idx === -1)
+                return;
+            
+            const translateX = ((location.x - location.y) * (map.tw / 2)) + (map.tw * ~~map.getTileConfig(tile.id).mirrored) + tile.ox,
+                  translateY = ((location.x + location.y) * (map.td / 2)) - (map.th * z) + tile.oy;
+          
+            Game.ctx.save();
+            Game.ctx.translate(Game.camera.getPosX() - translateX * scaling, Game.camera.getPosY() + translateY * scaling);
+            Game.ctx.drawImage(
+                map.img,
+                (tile.idx * location.tw) % map.width,
+                Math.floor((tile.idx * map.tw) / map.width) * (map.th + map.td),
+                map.tw,
+                map.th + map.td,
+                0,
+                0,
+                (map.tw * scaling),
+                (map.th + map.td) * scaling
+            );
+            Game.ctx.restore();
+        });
     }
 
-    nextFrame(tile, map) {
+    static nextFrame(tile, map) {
         if (tile.animation.next !== null)
-            this.nextAnimation(tile, map);
+            MapRenderer.nextAnimation(tile, map);
 
         const config = map.getTileConfig(tile.id);
 
@@ -36,48 +61,17 @@ class MapRenderer {
 
         tile.ox += ~~config.ox;
         tile.oy += ~~config.oy;
-
-        return tile;
     }
 
-    update(step, map, sorting, speed) {
-        map.getLocations(sorting).forEach(location => {
-            location.getTiles().forEach(tile => {
-                if (tile.animation !== null) {
-                    tile.animation.ms += (step * speed);
-                    while (tile.animation.ms > map.getTileConfig(tile.id).frames[tile.animation.frame].ms)
-                        this.nextFrame(tile, map);
-                }
-            });
-        });
-    }
-
-    render(delta, ctx, camera, location, map, speed, scaling) {
-        location.getTiles().forEach((tile, z) => {
-            while (tile.animation !== null && ((tile.animation.ms + (delta * speed)) > map.getTileConfig(tile.id).frames[tile.animation.frame].ms))
-                tile = this.nextFrame(tile.clone(), map);
-
-            if (tile.idx === -1)
-                return;
-            
-            const IS_MIRRORED = map.getTileConfig(tile.id).mirrored,
-                  POS_X = camera.getPosX() - (scaling * (((location.getX() - location.getY()) * (map.getTileWidth() / 2)) + (map.getTileWidth()  * ~~IS_MIRRORED))),
-                  POS_Y = camera.getPosY() + (scaling * (((location.getX() + location.getY()) * (map.getTileDepth() / 2)) - (map.getTileHeight() * z)));
-          
-            ctx.save();
-            ctx.translate(POS_X, POS_Y);
-            ctx.drawImage(
-                map.getImage(),
-                (tile.idx * map.getTileWidth()) % map.getImageWidth(),
-                Math.floor((tile.idx * map.getTileWidth()) / map.getImageWidth()) * (map.getTileHeight() + map.getTileDepth()),
-                map.getTileWidth(),
-                map.getTileHeight() + map.getTileDepth(),
-                scaling * tile.ox,
-                scaling * tile.oy,
-                scaling * map.getTileWidth(),
-                scaling * (map.getTileHeight() + map.getTileDepth())
-            );
-            ctx.restore();
-        });
+    static nextAnimation(tile, map) {
+        const config = map.getTileConfig(tile.animation.next);
+        tile.id  = tile.animation.next;
+        tile.idx = config.idx;
+        tile.water  = Boolean(config.water);
+        tile.slope  = Boolean(config.slope);
+        tile.mirror = Boolean(config.mirror);
+        tile.orientation = config.orientation;
+        tile.ox = 0;
+        tile.oy = 0;
     }
 }

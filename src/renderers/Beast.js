@@ -1,55 +1,65 @@
 class BeastRenderer {
-    constructor() {
-        
-    }
+    static update(beasts, ms, isDeltaUpdate, { speed = 1, scaling = 1 } = settings) {
+        beasts.forEach(beast => {
+            const adjustedMs = ms * speed;
+            let animation = beast.animations.current;
 
-    reverseLocation(unit, animation) {
-        unit.location = animation.destination;
-        [animation.ix, animation.tx] = [-animation.tx, -animation.ix];
-        [animation.iy, animation.ty] = [-animation.ty, -animation.iy];
-        [animation.iz, animation.tz] = [-animation.tz, -animation.iz];
-    }
+            animation.ms += ~~!isDeltaUpdate * adjustedMs;
+            animation.delta = ~~isDeltaUpdate * adjustedMs;
 
-    nextAnimation(unit, animation) {
-        let next = unit.animations.queue.shift();
+            if (animation.terminate)
+                animation = BeastRenderer.nextAnimation(beast, animation, true);
 
-        // animation end event request
-        if (animation.events?.end !== undefined)
-            Events.dispatch(animation.events.end.id, animation.events.end.data);
+            while ((animation.ms + animation.delta) > (animation.config[animation.frame].ms * animation.multipliers[animation.frame]))
+                animation = BeastRenderer.nextFrame(beast, animation);
 
-        // start rendering at new destination because animation is complete
-        if (animation.destination !== undefined && animation.destination !== unit.location)
-            unit.location = animation.destination;
+            if (isDeltaUpdate && animation.movement) {
+                const frame = animation.config[animation.frame],
+                      p  = (animation.ms + animation.delta) / (frame.ms * animation.multipliers[animation.frame]),
+                      d  = beast.location.getZ() - animation.destination.getZ(),
+                      px = animation.px + (p * (frame.px || 0)),
+                      py = animation.py + (p * (frame.py || 0)),
+                      pz = animation.pz + (p * (frame.pz || 0));
+    
+                // render from new destination
+                if (pz !== 0 && (animation.destination !== beast.location) && !animation.sloped && (pz >= 1 || d > 0)) {
+                    beast.location = animation.destination;
+                    [animation.ix, animation.tx] = [-animation.tx, -animation.ix];
+                    [animation.iy, animation.ty] = [-animation.ty, -animation.iy];
+                    [animation.iz, animation.tz] = [-animation.tz, -animation.iz];
+                }
 
-        // default to beast idle animation if nothing is left in the queue
-        if (next === undefined)
-            next = BeastLogic.getDefaultAnimation(unit, animation);
+                animation.cy = animation.iy + Math.round(py * (animation.ty - animation.iy));
+                animation.cx = animation.ix + Math.round(px * (animation.tx - animation.ix));
 
-        unit.animations.current = next;
-        unit.orientation = next.orientation;
+                if ((px === py) && (Math.abs(animation.ty - animation.iy) * 2) === Math.abs(animation.tx - animation.ix))
+                    animation.cx = Math.sign(animation.cx) * Math.sign(animation.cy) * animation.cy * 2;
 
-        if (next.events?.start !== undefined)
-            Events.dispatch(next.events.start.id, next.events.start.data);
-
-        if (next.movement) {
-            switch (next.destination.x - unit.location.x) {
-                case 0:
-                    Events.dispatch('sort', 'X');
-                    break;
-                default:
-                    Events.dispatch('sort', 'Y');
+                animation.cx += Math.round(p * ~~animation.intx * scaling);
+                animation.cy += Math.round(p * ~~animation.inty * scaling);
+                animation.cz = animation.iz + Math.round(pz * (animation.tz - animation.iz));
             }
+        });
+    }
+    
+    static render(beast, location, { scaling = 1 } = settings) {
+        const animation = beast.animations.current,
+              frame = animation.config[animation.frame];
 
-            next.sorted = true;
+        if (frame.idx === -1)
+            return false;
 
-            if (next.swap)
-                unit.location = next.destination;
-        }
+        const x = location.getPosX() - ((beast.tileset.tw - location.tw) / 2),
+              y = location.getPosY() - ((beast.tileset.th - location.th) - (location.td / 2)) + (~~location.isSloped() * (location.th / 2)),
+              ox = ~~animation.x + ~~frame.ox,
+              oy = ~~animation.y + ~~frame.oy,
+              translateX = Game.camera.getPosX() + ((x + ox) * scaling) + ~~animation.cx,
+              translateY = Game.camera.getPosY() + ((y + oy) * scaling) + ~~animation.cy + ~~animation.cz;
 
-        return next;
+        BeastRenderer.renderCustom(Game.ctx, beast, frame.idx, animation.mirrored, translateX, translateY, scaling);
     }
 
-    nextFrame(beast, animation) {
+    static nextFrame(beast, animation) {
         if (animation.config[animation.frame].event)
             Events.dispatch(animation.config[animation.frame].event, beast);
 
@@ -65,7 +75,7 @@ class BeastRenderer {
         animation.frame += 1;
 
         if (animation.frame >= animation.config.length) {
-            return this.nextAnimation(beast, animation);
+            return BeastRenderer.nextAnimation(beast, animation);
         } else {
             animation.intx = (~~animation.ox + ~~animation.config[animation.frame].intx) - animation.x;
             animation.inty = (~~animation.oy + ~~animation.config[animation.frame].inty) - animation.y;
@@ -74,70 +84,48 @@ class BeastRenderer {
         return animation;
     }
 
-    update(step, beasts, speed, scaling) {
-        beasts.forEach(beast => {
-            let animation = beast.animations.current;
-            if (animation.terminate)
-                animation = this.nextAnimation(beast, animation);
-            animation.ms += (step * speed);
-            while (animation.ms > (animation.config[animation.frame].ms * animation.multipliers[animation.frame])) {
-                if (animation.config[animation.frame].event !== undefined)
-                    Events.dispatch(animation.config[animation.frame].event, beast);
-                animation = this.nextFrame(beast, animation);
+    static nextAnimation(beast, animation, isForced = false) {
+        let next = beast.animations.queue.shift();
+
+        // animation end event request
+        if (animation.events?.end !== undefined)
+            Events.dispatch(animation.events.end.id, animation.events.end.data);
+
+        // start rendering at new destination because animation is complete
+        if (animation.destination !== undefined && animation.destination !== beast.location && !isForced)
+            beast.location = animation.destination;
+
+        // default to beast idle animation if nothing is left in the queue
+        if (next === undefined)
+            next = BeastLogic.getDefaultAnimation(beast, animation);
+
+        Object.assign(next, { ms: animation.ms * ~~!isForced, delta: animation.delta * ~~!isForced })
+
+        beast.animations.current = next;
+        beast.orientation = next.orientation;
+
+        if (next.events?.start !== undefined)
+            Events.dispatch(next.events.start.id, next.events.start.data);
+
+        if (next.movement) {
+            switch (next.destination.x - beast.location.x) {
+                case 0:
+                    Events.dispatch('sort', 'X');
+                    break;
+                default:
+                    Events.dispatch('sort', 'Y');
             }
-        });
-    }
-    
-    render(delta, ctx, camera, location, beast, speed, scaling) {
-        let animation = beast.animations.current;
-        if (animation.terminate)
-            animation = this.nextAnimation(beast, animation);
 
-        while ((animation.ms + (delta * speed)) > (animation.config[animation.frame].ms * animation.multipliers[animation.frame]))
-            animation = this.nextFrame(beast, animation);
+            next.sorted = true;
 
-        const frame = animation.config[animation.frame];
-
-        let cx = 0,
-            cy = 0,
-            cz = 0;
-
-        if (animation.movement) {
-            const p  = Math.max(0, Math.min(1, (animation.ms + (delta * speed)) / (frame.ms * animation.multipliers[animation.frame]))),
-                  d  = beast.location.getZ() - animation.destination.getZ(),
-                  px = animation.px + (p * (frame.px || 0)),
-                  py = animation.py + (p * (frame.py || 0)),
-                  pz = animation.pz + (p * (frame.pz || 0));
-
-            // render from new destination
-            if (pz !== 0 && (animation.destination !== beast.location) && !animation.sloped && (pz >= 1 || d > 0))
-                this.reverseLocation(beast, animation);
-
-            cx = animation.ix + Math.round(px * (animation.tx - animation.ix)) + Math.round(p * ~~animation.intx * scaling);
-            cy = animation.iy + Math.round(py * (animation.ty - animation.iy)) + Math.round(p * ~~animation.inty * scaling);
-            cz = animation.iz + Math.round(pz * (animation.tz - animation.iz));
+            if (next.swap)
+                beast.location = next.destination;
         }
 
-        // does delta change require rerender?
-        if (location !== beast.location || animation.sorted) {
-            animation.sorted = false;
-            return true;
-        }
-
-        if (frame.idx === -1)
-            return false;
-
-        const x = location.getPosX() - ((beast.tileset.tw - location.tw) / 2),
-              y = location.getPosY() - ((beast.tileset.th - location.th) - (location.td / 2)) + (~~location.isSloped() * (location.th / 2)),
-              ox = ~~animation.x + ~~frame.ox,
-              oy = ~~animation.y + ~~frame.oy,
-              translateX = camera.getPosX() + ((x + ox) * scaling) + ~~cx,
-              translateY = camera.getPosY() + ((y + oy) * scaling) + ~~cy + ~~cz;
-
-        this.renderToCanvas(ctx, beast, frame.idx, animation.mirrored, translateX, translateY, scaling);
+        return next;
     }
 
-    renderEquipment(ctx, beast, idx, layer, isMirrored, translateX, translateY, scaling) {
+    static renderEquipment(ctx, beast, idx, layer, isMirrored, translateX, translateY, scaling) {
         Object.values(beast.equipment.equipment).forEach(item => {
             if (item === null)
                 return;
@@ -167,9 +155,7 @@ class BeastRenderer {
         });
     }
 
-    renderToCanvas(ctx, beast, idx, isMirrored, translateX, translateY, scaling) {
-        this.renderEquipment(ctx, beast, idx, -1, isMirrored, translateX, translateY, scaling);
-
+    static renderCustom(ctx, beast, index, isMirrored, translateX, translateY, scaling) {
         ctx.save();
         ctx.translate(translateX + (~~isMirrored * beast.tileset.tw * scaling), translateY);
 
@@ -178,8 +164,8 @@ class BeastRenderer {
         
         ctx.drawImage(
             beast.tileset.img,
-            (idx * beast.tileset.tw) % beast.tileset.width,
-            Math.floor((idx * beast.tileset.tw) / beast.tileset.width) * beast.tileset.th,
+            (index * beast.tileset.tw) % beast.tileset.width,
+            Math.floor((index * beast.tileset.tw) / beast.tileset.width) * beast.tileset.th,
             beast.tileset.tw,
             beast.tileset.th,
             0,
@@ -188,7 +174,5 @@ class BeastRenderer {
             beast.tileset.th * scaling
         );
         ctx.restore();
-
-        this.renderEquipment(ctx, beast, idx, 1, isMirrored, translateX, translateY, scaling);
     }
 }

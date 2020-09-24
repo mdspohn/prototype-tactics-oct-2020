@@ -15,7 +15,7 @@ class Map {
                 this.boundaries.x1 = Math.min(this.boundaries.x1, locale.getPosX());
                 this.boundaries.x2 = Math.max(this.boundaries.x2, locale.getPosX());
                 this.boundaries.y1 = 0;
-                this.boundaries.y2 = Math.max(this.boundaries.y2, locale.getPosY() - this.getTileDepth());
+                this.boundaries.y2 = Math.max(this.boundaries.y2, locale.getPosY() - this.td);
                 return locale;
             });
         });
@@ -24,6 +24,13 @@ class Map {
         this.sorted['X'] = [].concat(...this.structure).sort((a, b) => (a.x - b.x) ? a.x - b.x : a.y - b.y);
         this.sorted['Y'] = [].concat(...this.structure).sort((a, b) => (a.y - b.y) ? a.y - b.y : a.x - b.x);
     }
+
+    get tw()     { return this.tileset.tw;         }
+    get th()     { return this.tileset.th;         }
+    get td()     { return this.tileset.td;         }
+    get img()    { return this.tileset.img;        }
+    get width()  { return this.tileset.img.width;  }
+    get height() { return this.tileset.img.height; }
 
     // --------------------
     // Layout Searching
@@ -50,22 +57,6 @@ class Map {
     }
 
     // --------------------
-    // Tileset Image
-    // -----------------------
-
-    getImage() {
-        return this.tileset.img;
-    }
-
-    getImageWidth() {
-        return this.tileset.img.width;
-    }
-
-    getImageHeight() {
-        return this.tileset.img.height;
-    }
-
-    // --------------------
     // Tileset Animations / Dimensions
     // -----------------------
 
@@ -75,17 +66,5 @@ class Map {
 
     getTileConfig(id) {
         return this.tileset.config[id];
-    }
-
-    getTileWidth() {
-        return this.tileset.tw;
-    }
-
-    getTileHeight() {
-        return this.tileset.th;
-    }
-
-    getTileDepth() {
-        return this.tileset.td;
     }
 }

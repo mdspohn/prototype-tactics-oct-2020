@@ -12,21 +12,12 @@ class Decoration {
         });
     }
 
-    // --------------------
-    // Tileset Image
-    // -----------------------
-
-    getImage() {
-        return this.tileset.img;
-    }
-
-    getImageWidth() {
-        return this.tileset.img.width;
-    }
-
-    getImageHeight() {
-        return this.tileset.img.height;
-    }
+    get tw()     { return this.tileset.tw;         }
+    get th()     { return this.tileset.th;         }
+    get td()     { return this.tileset.td;         }
+    get img()    { return this.tileset.img;        }
+    get width()  { return this.tileset.img.width;  }
+    get height() { return this.tileset.img.height; }
 
     // --------------------
     // Tileset Animations / Dimensions
@@ -38,17 +29,5 @@ class Decoration {
 
     getTileConfig(id) {
         return this.tileset.config[id];
-    }
-
-    getTileWidth() {
-        return this.tileset.tw;
-    }
-
-    getTileHeight() {
-        return this.tileset.th;
-    }
-
-    getTileDepth() {
-        return this.tileset.td;
     }
 }

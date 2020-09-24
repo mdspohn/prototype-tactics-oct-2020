@@ -14,6 +14,7 @@ class Tile {
         if (config.frames !== undefined) {
             this.animation = new Object();
             this.animation.ms = 0;
+            this.animation.delta = 0;
             this.animation.frame = 0;
             this.animation.next = config.frames[0].next !== undefined ? config.frames[0].next : null;
             this.idx = config.frames[0].idx;

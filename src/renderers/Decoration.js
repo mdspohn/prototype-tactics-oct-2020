@@ -1,9 +1,52 @@
 class DecorationRenderer {
-    constructor() {
-
+    static update(decorations, ms, isDeltaUpdate, { speed = 1 } = settings) {
+        const adjustedMs = ms * speed;
+        decorations.tiles.forEach(row => {
+            row.forEach(col => {
+                col.forEach(tile => {
+                    if (tile.animation === null)
+                        return;
+                
+                    tile.animation.ms += ~~!isDeltaUpdate * adjustedMs;
+                    tile.animation.delta = ~~isDeltaUpdate * adjustedMs;
+                    
+                    while ((tile.animation.ms + tile.animation.delta) > decorations.getTileConfig(tile.id).frames[tile.animation.frame].ms)
+                        DecorationRenderer.nextFrame(tile, decorations);
+                });
+            });
+        });
     }
 
-    nextAnimation(tile, decorations) {
+    static render(decorations, location, { scaling = 1 } = settings) {
+        const tiles = decorations.tiles[location.x]?.[location.y];
+        if (tiles === undefined)
+            return;
+        
+        tiles.forEach((tile, z) => {
+            if (tile.idx === -1)
+                return;
+            
+            const translateX = decorations.tw * ~~decorations.getTileConfig(tile.id).mirrored - (location.getPosX()) - ((decorations.tw - location.tw) / 2) + tile.ox,
+                  translateY = location.getPosY() - (decorations.th - location.td - location.th) - (decorations.th * z) + tile.oy;
+          
+            Game.ctx.save();
+            Game.ctx.translate(Game.camera.getPosX() - translateX * scaling, Game.camera.getPosY() + translateY * scaling);
+            Game.ctx.drawImage(
+                decorations.img,
+                (tile.idx * decorations.tw) % decorations.width,
+                Math.floor((tile.idx * decorations.tw) / decorations.width) * (decorations.th),
+                decorations.tw,
+                decorations.th,
+                0,
+                0,
+                decorations.tw * scaling,
+                decorations.th * scaling
+            );
+            Game.ctx.restore();
+        });
+    }
+
+    static nextAnimation(tile, decorations) {
         const config = decorations.getTileConfig(tile.animation.next);
         tile.id = tile.animation.next;
         tile.idx = config.idx;
@@ -12,7 +55,7 @@ class DecorationRenderer {
         tile.oy = 0;
     }
 
-    nextFrame(tile, decorations) {
+    static nextFrame(tile, decorations) {
         if (tile.animation.next !== null)
             this.nextAnimation(tile, decorations);
 
@@ -33,58 +76,5 @@ class DecorationRenderer {
 
         tile.ox += ~~config.ox;
         tile.oy += ~~config.oy;
-
-        return tile;
-    }
-
-    update(step, decorations, speed) {
-        decorations.tiles.forEach(row => {
-            row.forEach(col => {
-                col.forEach(tile => {
-                    if (tile.animation === null)
-                        return;
-                    tile.animation.ms += (step * speed);
-                    while (tile.animation.ms > decorations.getTileConfig(tile.id).frames[tile.animation.frame].ms)
-                        this.nextFrame(tile, decorations);
-                });
-            });
-        });
-    }
-
-    render(delta, ctx, camera, location, decorations, speed, scaling) {
-        const tiles = decorations.tiles[location.getX()]?.[location.getY()];
-        if (tiles === undefined)
-            return;
-        
-        tiles.forEach((tile, z) => {
-            while (tile.animation !== null && ((tile.animation.ms + (delta * speed)) > decorations.getTileConfig(tile.id).frames[tile.animation.frame].ms))
-                tile = this.nextFrame(tile, decorations, true);
-
-            if (tile.idx === -1)
-                return;
-
-            const IS_MIRRORED = decorations.getTileConfig(tile.id).mirrored,
-                  POS_X = (~~IS_MIRRORED * decorations.getTileWidth()) - (location.getPosX()) - ((decorations.getTileWidth() - location.getTileWidth()) / 2),
-                  POS_Y = (location.getPosY()) - (decorations.getTileHeight() - location.getTileDepth() - location.getTileHeight()) - (decorations.getTileHeight() * z);
-          
-            ctx.save();
-            ctx.translate(camera.getPosX() - (POS_X * scaling), camera.getPosY() + (POS_Y * scaling));
-
-            if (IS_MIRRORED)
-                ctx.scale(-1, 1);
-
-            ctx.drawImage(
-                decorations.getImage(),
-                (tile.idx * decorations.getTileWidth()) % decorations.getImageWidth(),
-                Math.floor((tile.idx * decorations.getTileWidth()) / decorations.getImageWidth()) * (decorations.getTileHeight()),
-                decorations.getTileWidth(),
-                decorations.getTileHeight(),
-                scaling * tile.ox,
-                scaling * tile.oy,
-                scaling * decorations.getTileWidth(),
-                scaling * decorations.getTileHeight()
-            );
-            ctx.restore();
-        });
     }
 }

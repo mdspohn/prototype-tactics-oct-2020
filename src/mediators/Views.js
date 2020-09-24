@@ -1,68 +1,68 @@
 class Views {
-    constructor(renderers, speed, scaling) {
-        this.maps        = renderers.maps;
-        this.decorations = renderers.decorations;
-        this.beasts      = renderers.beasts;
-        this.equipment   = renderers.equipment;
-        this.effects     = renderers.effects;
-
-        this.speed = speed;
-        this.scaling = scaling;
+    constructor(speed, scaling) {
+        this.settings = new Object();
+        this.settings.speed = speed;
+        this.settings.scaling = scaling;
+        this.settings.sorting = 'X';
         
-        this.sorting = 'X';
         Events.listen('sort', (direction) => {
-            this.sorting = direction;
+            this.settings.sorting = direction;
         }, true);
     }
 
-    // -----------------------
-    // Update
-    // -------------------------
-
-    updateMap(step, map) {
-        this.maps.update(step, map, this.sorting, this.speed);
+    updateMap(map, ms, isDeltaUpdate = false) {
+        MapRenderer.update(map, ms, isDeltaUpdate, this.settings);
     }
 
-    updateDecorations(step, decorations) {
-        this.decorations.update(step, decorations, this.speed);
+    updateDecorations(decorations, ms, isDeltaUpdate = false) {
+        DecorationRenderer.update(decorations, ms, isDeltaUpdate, this.settings);
     }
 
-    updateBeasts(step, beasts) {
-        this.beasts.update(step, beasts, this.speed);
+    updateBeasts(beasts, ms, isDeltaUpdate = false) {
+        BeastRenderer.update(beasts, ms, isDeltaUpdate, this.settings);
     }
 
-    updateEffects(step, effects) {
-        this.effects.update(step, effects, this.speed);
+    updateEffects(effects, ms, isDeltaUpdate = false) {
+        EffectRenderer.update(effects, ms, isDeltaUpdate, this.settings);
+    }
+
+    updateMarkers(markers, ms, isDeltaUpdate = false) {
+        MarkerRenderer.update(markers, ms, isDeltaUpdate, this.settings);
     }
 
     // ----------------------
     // Render
     // ----------------------------
 
-    renderLocation(delta, ctx, camera, location, map) {
-        this.maps.render(delta, ctx, camera, location, map, this.speed, this.scaling);
-        return false;
+    renderMap(map, location) {
+        MapRenderer.render(map, location, this.settings);
     }
 
-    renderDecorations(delta, ctx, camera, location, decoration) {
-        this.decorations.render(delta, ctx, camera, location, decoration, this.speed, this.scaling);
-        return false;
+    renderMarkers(markers, location) {
+        MarkerRenderer.render(markers, location, this.settings);
     }
 
-    renderBeasts(delta, ctx, camera, location, beasts) {
-        return beasts.filter(beast => beast.location === location).some(beast => this.beasts.render(delta, ctx, camera, location, beast, this.speed, this.scaling));
+    renderDecorations(decorations, location) {
+        DecorationRenderer.render(decorations, location, this.settings);
     }
 
-    renderBeastToCanvas(ctx, beast, idx, isMirrored, translateX, translateY, scaling) {
-        this.beasts.renderToCanvas(ctx, beast, idx, isMirrored, translateX, translateY, scaling);
-        return false;
+    renderBackgroundEffects(effects, location) {
+        EffectRenderer.render(effects, location, this.settings);
     }
 
-    renderTileEffects(delta, ctx, camera, location, effects) {
-        return false;
+    renderBeasts(beasts, location) {
+        beasts.filter(beast => beast.location === location).forEach(beast => BeastRenderer.render(beast, location, this.settings));
     }
 
-    renderScreenEffects(delta, ctx, camera, effects) {
-        return false;
+    renderForegroundEffects(effects, location) {
+        EffectRenderer.render(effects, location, this.settings);
+    }
+
+    renderIndicators(markers, beast) {
+        MarkerRenderer.renderGlobal(markers, beast, this.settings);
+    }
+
+    renderScreenEffects(effects) {
+        EffectRenderer.renderGlobal(effects, location, this.settings);
     }
 }

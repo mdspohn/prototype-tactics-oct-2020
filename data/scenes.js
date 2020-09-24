@@ -1,12 +1,12 @@
 GAME_DATA.scenes['test'] = {
     type: 'COMBAT',
-    map: 'test',
-    decoration: 'test',
+    map: 'woodlands',
+    decoration: 'woodlands',
     beasts: [
         {
             id: 'player',
-            x: 4,
-            y: 0,
+            x: 5,
+            y: 2,
             orientation: 'east',
             equipment: {
                 weapon: 'knife',
@@ -19,8 +19,8 @@ GAME_DATA.scenes['test'] = {
         },
         {
             id: 'slime',
-            x: 4,
-            y: 6,
+            x: 5,
+            y: 3,
             orientation: 'south',
             basic: 'bow'
         },

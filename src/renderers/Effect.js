@@ -1,13 +1,13 @@
 class EffectRenderer {
-    constructor() {
+    static update() {
+
+    }
+
+    static render() {
         
     }
 
-    update(step, effects) {
-
-    }
-
-    render(delta, ctx, camera, location, effect) {
+    static renderGlobal() {
         
     }
 }
