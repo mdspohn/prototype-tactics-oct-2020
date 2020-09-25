@@ -1,23 +1,22 @@
 class Tileset {
     constructor(category, data) {
-        this.img = new Image();
-        this.src = `${ASSET_DIR}${OS_FILE_SEPARATOR}${category}${OS_FILE_SEPARATOR}${data.src}`;
-        
-        this.config = data.config;
-
-        this.tw = ~~data.measurements.sprite.width;
-        this.th = ~~data.measurements.sprite.height;
-        this.td = ~~data.measurements.sprite.depth;
+        this.category = category;
+        this.data = data;
     }
 
+    get config() { return this.data.config; }
+    get width()  { return this.img.width;   }
+    get height() { return this.img.height;  }
+    get tw()     { return this.data.measurements.sprite.width;  }
+    get th()     { return this.data.measurements.sprite.height; }
+    get td()     { return this.data.measurements.sprite.depth;  }
+
     async load() {
-        const loader = (resolve) => {
+        const pending = resolve => {
+            this.img = new Image();
             this.img.onload = resolve;
-            this.img.src = this.src;
+            this.img.src = `${ASSET_DIR}${OS_FILE_SEPARATOR}${this.category}${OS_FILE_SEPARATOR}${this.data.src}`;
         };
-        await new Promise(loader);
-        
-        this.width = this.img.width;
-        this.height = this.img.height;
+        await new Promise(pending);
     }
 }

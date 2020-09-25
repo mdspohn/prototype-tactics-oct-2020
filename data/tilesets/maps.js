@@ -7,6 +7,18 @@ GAME_DATA.tilesets.maps['woodlands'] = {
             "depth": 16
         }
     },
+    // "config2": {
+    //     "tiles": {
+    //         0: {
+    //             name: 'Empty',
+    //             idx: -1,
+    //             unreachable: true,
+    //             water: false,
+    //             slope: false,
+    //             orientation: null
+    //         }
+    //     }
+    // },
     "config": {
         0: {
             "name": "Empty",

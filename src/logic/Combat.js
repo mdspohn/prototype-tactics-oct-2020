@@ -7,14 +7,6 @@ class CombatLogic {
         WEST: 'west'
     };
 
-    static ALLEGIANCES = {
-        SELF: 'self',
-        ALLY: 'ally',
-        NEUTRAL: 'neutral',
-        FOE: 'foe'
-    };
-
-
     // ------------------------
     // ORIENTATIONS
     // ------------------------------------------
@@ -65,28 +57,6 @@ class CombatLogic {
                 return CombatLogic.ORIENTATIONS.WEST;
             case CombatLogic.ORIENTATIONS.WEST:
                 return CombatLogic.ORIENTATIONS.EAST;
-        }
-    }
-
-    // -------------------------
-    // ALLEGIANCES
-    // ------------------------------------
-    
-    static getAllegiance(from, to) {
-        if (from === to)
-            return CombatLogic.ALLEGIANCES.SELF;
-        
-        const a1 = ~~from?.allegiance,
-              a2 = ~~to?.allegiance,
-              difference = Math.abs(a1 - a2);
-
-        switch(difference) {
-            case 0:
-                return CombatLogic.ALLEGIANCES.ALLY;
-            case 1:
-                return CombatLogic.ALLEGIANCES.NEUTRAL;
-            case 2:
-                return CombatLogic.ALLEGIANCES.FOE;
         }
     }
 

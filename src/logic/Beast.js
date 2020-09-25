@@ -1,28 +1,37 @@
 class BeastLogic {
 
+    // -------------------------
+    // ALLEGIANCES
+    // ------------------------------------
+
+    static ALLEGIANCES = {
+        SELF: 'self',
+        ALLY: 'ally',
+        NEUTRAL: 'neutral',
+        FOE: 'foe'
+    };
+    
+    static getAllegiance(from, to) {
+        if (from === to)
+            return BeastLogic.ALLEGIANCES.SELF;
+        
+        const a1 = ~~from?.allegiance,
+              a2 = ~~to?.allegiance,
+              difference = Math.abs(a1 - a2);
+
+        switch(difference) {
+            case 0:
+                return BeastLogic.ALLEGIANCES.ALLY;
+            case 1:
+                return BeastLogic.ALLEGIANCES.NEUTRAL;
+            case 2:
+                return BeastLogic.ALLEGIANCES.FOE;
+        }
+    }
+
     // ---------------------------
     // Movement
     // -----------------------------------
-
-    static isInRange(location, range) {
-        return !!range && range.has(location);
-     }
-
-    static isValidSelection(location, range) {
-        return BeastLogic.isInRange(location, range) && range.get(location).isSelectable;
-    }
-
-    static getPath(location, range) {
-        let path = new Array(),
-            next = location;
-
-        while (range.get(next) !== undefined && range.get(next).previous instanceof Location) {
-            path.unshift(next);
-            next = range.get(next).previous;
-        }
-
-        return path;
-    }
 
     static getRange(unit, entities, map) {
         const range = new WeakMap(),
@@ -38,10 +47,30 @@ class BeastLogic {
         return range;
     }
 
+    static getPath(location, range) {
+        let path = new Array(),
+            next = location;
+
+        while (range.get(next) !== undefined && range.get(next).previous instanceof Location) {
+            path.unshift(next);
+            next = range.get(next).previous;
+        }
+
+        return path;
+    }
+
+    static isInRange(location, range) {
+        return !!range && range.has(location);
+     }
+
+    static isValidSelection(location, range) {
+        return BeastLogic.isInRange(location, range) && range.get(location).isSelectable;
+    }
+
     static _populateRange(range, location, map, unit, entities, opts) {
         if (!range.has(location) || range.get(location).steps > opts.steps) {
             const occupant = entities.find(entity => entity.location === location),
-                  allegiance = CombatLogic.getAllegiance(unit, occupant);
+                  allegiance = BeastLogic.getAllegiance(unit, occupant);
             
             // check if tile should be considered a hazard to possibly jump over
             let isHazard = false;
@@ -59,7 +88,7 @@ class BeastLogic {
             config.canLeap = opts.hazardLeap >= 1;
             config.isSelectable = Boolean(isSelectable);
             config.occupant = occupant;
-            config.canPass = [CombatLogic.ALLEGIANCES.SELF, CombatLogic.ALLEGIANCES.ALLY].includes(allegiance);
+            config.canPass = [BeastLogic.ALLEGIANCES.SELF, BeastLogic.ALLEGIANCES.ALLY].includes(allegiance);
             config.color = 'white';
 
             range.set(location, config);

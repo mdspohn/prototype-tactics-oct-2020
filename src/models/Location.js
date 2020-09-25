@@ -23,26 +23,6 @@ class Location {
         return this.tiles.slice(-1)[0];
     }
 
-    getTileWidth() {
-        return this.tw;
-    }
-
-    getTileHeight() {
-        return this.th;
-    }
-
-    getTileDepth() {
-        return this.td;
-    }
-
-    getX() {
-        return this.x;
-    }
-
-    getY() {
-        return this.y;
-    }
-
     getZ() {
         return this.tiles.length;
     }
@@ -56,11 +36,11 @@ class Location {
     }
 
     getPosX() {
-        return this.getY() * (this.tw / 2) - this.getX() * (this.tw / 2) + this.getOffsetX();
+        return this.y * (this.tw / 2) - this.x * (this.tw / 2) + this.getOffsetX();
     }
 
     getPosY() {
-        return this.getY() * (this.td / 2) + this.getX() * (this.td / 2) - (this.getZ() - 1) * this.th + this.getOffsetY();
+        return  this.y * (this.td / 2) + this.x * (this.td / 2) - (this.getZ() - 1) * this.th + this.getOffsetY();
     }
     
     isWater() {
