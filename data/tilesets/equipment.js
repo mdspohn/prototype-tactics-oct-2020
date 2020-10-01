@@ -6,7 +6,7 @@ GAME_DATA.tilesets.equipment['one-handed'] = {
             "width": 32
         }
     },
-    "config": {
+    "configuration": {
         20: {
             0: { "layer": -1,  "idx": 0, "ox": -14, "oy": 3 },
             1: { "layer": -1,  "idx": 0, "ox": 14, "oy": 3, "mirrored": true }
@@ -30,7 +30,7 @@ GAME_DATA.tilesets.equipment['shields'] = {
             "width": 32
         }
     },
-    "config": {
+    "configuration": {
         0: {
             0: { "layer": -1, "idx": 1, "ox": 6, "oy": 10 },
             1: { "layer": 1,  "idx": 0, "ox": 5, "oy": 12 }
@@ -110,7 +110,7 @@ GAME_DATA.tilesets.equipment['armor'] = {
             "width": 32
         }
     },
-    "config": {
+    "configuration": {
         0: {
             0: { "layer": 1,  "idx": 0, "oy": 16 },
             1: { "layer": 1,  "idx": 0, "oy": 16, "mirrored": true }
@@ -179,7 +179,7 @@ GAME_DATA.tilesets.equipment['hair-pins'] = {
             "width": 32
         }
     },
-    "config": {
+    "configuration": {
         0: {
             0: { "layer": 1,  "idx": 0, "ox": -3, "oy": -5 },
             1: { "layer": -1, "idx": 0, "ox": 0,  "oy": -9 }

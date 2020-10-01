@@ -6,7 +6,7 @@ GAME_DATA.tilesets.effects['tile'] = {
             "width": 32
         }
     },
-    "config": {
+    "configuration": {
         "crackle": {
             "east": {
                 "frames": [

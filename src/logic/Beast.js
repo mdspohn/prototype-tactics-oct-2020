@@ -74,8 +74,8 @@ class BeastLogic {
             
             // check if tile should be considered a hazard to possibly jump over
             let isHazard = false;
-            isHazard |= location.getZ() === 0;
-            isHazard |= location.isWater();
+            isHazard |= location.z === 0;
+            isHazard |= location.isWater;
 
             // check if tile can be moved to
             let isSelectable = !isHazard;
@@ -108,7 +108,7 @@ class BeastLogic {
                 if (config.isHazard && ((CombatLogic.getOrientation(location, next) != CombatLogic.getOrientation(opts.previous, location)) || !config.canLeap))
                     return;
 
-                const zDiff = next.getZ() - location.getZ();
+                const zDiff = next.z - location.z;
                 if (zDiff < (-unit.stats.current.jump - 1) || zDiff > unit.stats.current.jump)
                     return;
                 
@@ -128,7 +128,7 @@ class BeastLogic {
 
     static getAnimationConfig(unit, base, orientation) {
         orientation = orientation || unit.orientation;
-        return unit.tileset.config[base][orientation];
+        return unit.tileset.configuration[base][orientation];
     }
 
     static getDefaultAnimation(unit, previous = null) {
@@ -178,7 +178,7 @@ class BeastLogic {
             animation.multipliers = new Array();
             animation.config.forEach(frame => {
                 let multiplier = 0;
-                multiplier += ~~frame.zmult * Math.abs(location.getZ() - previous.destination.getZ());
+                multiplier += ~~frame.zmult * Math.abs(location.z - previous.destination.z);
                 multiplier += ~~frame.xmult * Math.abs(location.x - previous.destination.x);
                 multiplier += ~~frame.ymult * Math.abs(location.y - location.y);
                 animation.multipliers.push(Math.max(multiplier, 1));
@@ -198,12 +198,12 @@ class BeastLogic {
 
     static _addAnimationProperties(animation, start, end) {
         const o = CombatLogic.getOrientation(start, end),
-              so = start.getOrientation(),
-              eo = end.getOrientation(),
+              so = start.orientation,
+              eo = end.orientation,
               oso = so ? CombatLogic.getOppositeOrientation(so) : undefined,
               oeo = eo ? CombatLogic.getOppositeOrientation(eo) : undefined,
               diff = Math.abs(end.x - start.x) + Math.abs(end.y - start.y),
-              diff_z = end.getZ() - start.getZ();
+              diff_z = end.z - start.z;
     
         if (Math.abs(diff_z) <= 1 && (so !== undefined || eo !== undefined)) {
             animation.sloped |= (so === eo        && ((diff_z < 0 && oso == o) || (diff_z >  0 && so  == o)));
@@ -237,8 +237,8 @@ class BeastLogic {
               h = (start.th / 2) * scaling,
               x = (end.x - start.x),
               y = (end.y - start.y),
-              z = (end.getZ() - start.getZ()),
-              s = (~~end.isSloped()) - (~~start.isSloped());
+              z = (end.z - start.z),
+              s = (~~end.isSloped) - (~~start.isSloped);
 
         const swap = (end.x > start.x || end.y > start.y) && ((z === 0 && s >= 0) || animation.sloped);
 
@@ -246,13 +246,13 @@ class BeastLogic {
         animation.swap = swap;
 
         // derived initial and current offset
-        animation.ix = animation.cx = ~~swap * ((x  - y) * w + (start.getOffsetX() - end.getOffsetX()));
-        animation.iy = animation.cy = ~~swap * ((-x - y) * d + (start.getOffsetY() - end.getOffsetY()));
+        animation.ix = animation.cx = ~~swap * ((x  - y) * w + (start.ox - end.ox));
+        animation.iy = animation.cy = ~~swap * ((-x - y) * d + (start.oy - end.oy));
         animation.iz = animation.cz = ~~swap * (-(s * h) + (z * start.th * scaling));
 
         // derived target offset
-        animation.tx = ~~!swap * ((y - x) * w - (start.getOffsetX() - end.getOffsetX()));
-        animation.ty = ~~!swap * ((x + y) * d - (start.getOffsetY() - end.getOffsetY()));
+        animation.tx = ~~!swap * ((y - x) * w - (start.ox - end.ox));
+        animation.ty = ~~!swap * ((x + y) * d - (start.oy - end.oy));
         animation.tz = ~~!swap * ((s * h) - (z * start.th * scaling));
 
         // current movement progress

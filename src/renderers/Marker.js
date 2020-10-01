@@ -19,11 +19,11 @@ class MarkerRenderer {
         const range      = markers.range.get(location),
               onPath     = markers.path.includes(location),
               selection  = markers.selection.get(location),
-              isMirrored = location.isSloped() && [CombatLogic.ORIENTATIONS.WEST, CombatLogic.ORIENTATIONS.EAST].includes(location.getOrientation()),
-              translateX = Game.camera.getPosX() + (location.getPosX() * scaling) + (~~isMirrored * 32 * scaling),
-              translateY = Game.camera.getPosY() + (location.getPosY() * scaling),
+              isMirrored = location.isSloped && [CombatLogic.ORIENTATIONS.WEST, CombatLogic.ORIENTATIONS.EAST].includes(location.orientation),
+              translateX = Game.camera.getPosX() + (location.posX * scaling) + (~~isMirrored * 32 * scaling),
+              translateY = Game.camera.getPosY() + ((location.posY + 8) * scaling),
               color      = (!!selection && selection.isSelectable) ? selection.color : (!!range && range.isSelectable) ? range.color : null,
-              x          = (!location.isSloped()) ? 0 : [CombatLogic.ORIENTATIONS.WEST, CombatLogic.ORIENTATIONS.NORTH].includes(location.getOrientation()) ? 1 : 2;
+              x          = (!location.isSloped) ? 0 : [CombatLogic.ORIENTATIONS.WEST, CombatLogic.ORIENTATIONS.NORTH].includes(location.orientation) ? 1 : 2;
 
         Game.ctx.save();
         Game.ctx.translate(translateX, translateY);
@@ -58,8 +58,8 @@ class MarkerRenderer {
             return;
 
         const config     = markers.configurations.orientation[beast.orientation],
-              translateX = Game.camera.getPosX() + (beast.location.getPosX() * scaling),
-              translateY = Game.camera.getPosY() + (beast.location.getPosY() - beast.tileset.th + beast.location.td + 3) * scaling;
+              translateX = Game.camera.getPosX() + (beast.location.posX * scaling),
+              translateY = Game.camera.getPosY() + (beast.location.posY - beast.tileset.th + beast.location.td + 3) * scaling;
 
         Game.ctx.save();
         Game.ctx.translate(translateX, translateY);

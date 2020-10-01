@@ -15,7 +15,6 @@ class GameManager {
         this.managers.data        = new DataManager();
         this.managers.scenes      = new SceneManager();
         this.managers.maps        = new MapManager();
-        this.managers.decorations = new DecorationManager();
         this.managers.beasts      = new BeastManager();
         this.managers.equipment   = new EquipmentManager();
         this.managers.effects     = new EffectManager();
@@ -67,7 +66,6 @@ class GameManager {
     async prepare(id) {
         this.scene = this.managers.scenes.get(id);
         this.map = this.managers.maps.get(this.scene.map);
-        this.decoration = this.managers.decorations.get(this.scene.decoration);
         this.beasts = this.scene.beasts.map(data => {
             const beast = this.managers.beasts.get(data.id, data);
             if (data.equipment !== undefined)

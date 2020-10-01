@@ -210,7 +210,7 @@ class CombatInterface {
 
     async nextTurn(entity) {
         this._updateUnit(this.active, entity);
-        this._updateHeight(entity.location.getZ());
+        this._updateHeight(entity.location.z);
         this._setElement(this.active.dom.wrapper, 'left', 10, 'px');
         this._animateElement(this.active.dom.wrapper, 'left',   30, 500, 'px', 'active-show');
         this._animateElement(this.active.dom.wrapper, 'opacity', 1, 500);
@@ -251,7 +251,7 @@ class CombatInterface {
 
     async resetMove(unit) {
         this.menu.dom.actions_move.classList.toggle('dim', false);
-        this._updateHeight(unit.location.getZ());
+        this._updateHeight(unit.location.z);
     }
 
     async requestAttack() {

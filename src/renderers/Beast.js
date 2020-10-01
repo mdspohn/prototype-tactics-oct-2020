@@ -16,7 +16,7 @@ class BeastRenderer {
             if (isDeltaUpdate && animation.movement) {
                 const frame = animation.config[animation.frame],
                       p  = (animation.ms + animation.delta) / (frame.ms * animation.multipliers[animation.frame]),
-                      d  = beast.location.getZ() - animation.destination.getZ(),
+                      d  = beast.location.z - animation.destination.z,
                       px = animation.px + (p * (frame.px || 0)),
                       py = animation.py + (p * (frame.py || 0)),
                       pz = animation.pz + (p * (frame.pz || 0));
@@ -49,8 +49,8 @@ class BeastRenderer {
         if (frame.idx === -1)
             return false;
 
-        const x = location.getPosX() - ((beast.tileset.tw - location.tw) / 2),
-              y = location.getPosY() - ((beast.tileset.th - location.th) - (location.td / 2)) + (~~location.isSloped() * (location.th / 2)),
+        const x = location.posX - ((beast.tileset.sw - location.tw) / 2),
+              y = location.posY - (beast.tileset.sh - location.th - location.td) + (~~location.isSloped * (location.th / 2)),
               ox = ~~animation.x + ~~frame.ox,
               oy = ~~animation.y + ~~frame.oy,
               translateX = Game.camera.getPosX() + ((x + ox) * scaling) + ~~animation.cx,
@@ -125,21 +125,21 @@ class BeastRenderer {
     static renderCustom(ctx, beast, index, isMirrored, translateX, translateY, { scaling = 1 } = settings) {
         EquipmentRenderer.render(ctx, beast, -1, translateX, translateY, { scaling });
         ctx.save();
-        ctx.translate(translateX + (~~isMirrored * beast.tileset.tw * scaling), translateY);
+        ctx.translate(translateX + (~~isMirrored * beast.tileset.sw * scaling), translateY);
 
         if (isMirrored)
             ctx.scale(-1, 1);
         
         ctx.drawImage(
             beast.tileset.img,
-            (index * beast.tileset.tw) % beast.tileset.width,
-            Math.floor((index * beast.tileset.tw) / beast.tileset.width) * beast.tileset.th,
-            beast.tileset.tw,
-            beast.tileset.th,
+            (index * beast.tileset.sw) % beast.tileset.width,
+            Math.floor((index * beast.tileset.sw) / beast.tileset.width) * beast.tileset.sh,
+            beast.tileset.sw,
+            beast.tileset.sh,
             0,
             0,
-            beast.tileset.tw * scaling,
-            beast.tileset.th * scaling
+            beast.tileset.sw * scaling,
+            beast.tileset.sh * scaling
         );
         ctx.restore();
         EquipmentRenderer.render(ctx, beast, 1, translateX, translateY, { scaling });

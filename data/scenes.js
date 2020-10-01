@@ -1,7 +1,6 @@
 GAME_DATA.scenes['test'] = {
     type: 'COMBAT',
     map: 'woodlands',
-    decoration: 'woodlands',
     beasts: [
         {
             id: 'player',
@@ -36,7 +35,6 @@ GAME_DATA.scenes['test'] = {
 GAME_DATA.scenes['arena'] = {
     type: 'COMBAT',
     map: 'arena',
-    decoration: 'arena',
     beasts: [
         {
             id: 'player',

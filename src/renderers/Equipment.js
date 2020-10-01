@@ -8,7 +8,7 @@ class EquipmentRenderer {
             if (item === null)
                 return;
 
-            const config = item.tileset.config[beastIndex]?.[~~isMirrored];
+            const config = item.tileset.configuration[beastIndex]?.[~~isMirrored];
             if (config === undefined || config.layer !== layer)
                 return;
 

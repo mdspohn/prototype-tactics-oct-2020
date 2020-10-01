@@ -45,8 +45,8 @@ class Camera {
     // ---------------------------------
 
     async toLocation(location, ms = 0, easing = null) {
-        const x = -Math.floor((location.getPosX() * this.scaling) - (Game.canvas.width / 2)  + (location.tw * this.scaling / 2)),
-              y = -Math.floor((location.getPosY() * this.scaling) - (Game.canvas.height / 2) + (location.td * this.scaling / 2));
+        const x = -Math.floor((location.posX * this.scaling) - (Game.canvas.width / 2)  + (location.tw * this.scaling / 2)),
+              y = -Math.floor((location.posY * this.scaling) - (Game.canvas.height / 2) + (location.td * this.scaling / 2));
         
         return this._toPosition(x, y, ms, easing);
     }
@@ -101,19 +101,19 @@ class Camera {
         let match;
 
         map.filter(location => {
-            const TILE_LEFT = location.getPosX() * this.scaling,
-                  TILE_TOP  = location.getPosY() * this.scaling;
+            const TILE_LEFT = location.posX * this.scaling,
+                  TILE_TOP  = location.posY * this.scaling;
 
-            return x >= TILE_LEFT && x < (TILE_LEFT + location.tw * this.scaling) && y >= TILE_TOP && y < (TILE_TOP + location.td * this.scaling + ((location.getZ() - 1) * location.th * this.scaling));
+            return x >= TILE_LEFT && x < (TILE_LEFT + location.tw * this.scaling) && y >= TILE_TOP && y < (TILE_TOP + location.td * this.scaling + ((location.z - 1) * location.th * this.scaling));
         }).forEach(location => {
-            const TILE_X = x - location.getPosX() * this.scaling,
-                  TILE_Y = y - location.getPosY() * this.scaling;
+            const TILE_X = x - location.posX * this.scaling,
+                  TILE_Y = y - location.posY * this.scaling;
             
             
             let p1, p2, p3, p4;
 
-            if (location.isSloped()) {
-                switch(location.getOrientation()) {
+            if (location.isSloped) {
+                switch(location.orientation) {
                     case 'north':
                         p1 = [0,  63], p2 = [63, 0], p3 = [127,  31], p4 = [63, 95];
                         break;

@@ -14,10 +14,6 @@ class Views {
         MapRenderer.update(map, ms, isDeltaUpdate, this.settings);
     }
 
-    updateDecorations(decorations, ms, isDeltaUpdate = false) {
-        DecorationRenderer.update(decorations, ms, isDeltaUpdate, this.settings);
-    }
-
     updateBeasts(beasts, ms, isDeltaUpdate = false) {
         BeastRenderer.update(beasts, ms, isDeltaUpdate, this.settings);
     }
@@ -34,16 +30,16 @@ class Views {
     // Render
     // ----------------------------
 
-    renderMap(map, location) {
-        MapRenderer.render(map, location, this.settings);
+    renderTiles(map, location) {
+        MapRenderer.renderTiles(map, location, this.settings);
     }
 
     renderMarkers(markers, location) {
         MarkerRenderer.render(markers, location, this.settings);
     }
 
-    renderDecorations(decorations, location) {
-        DecorationRenderer.render(decorations, location, this.settings);
+    renderDecorations(map, location) {
+        MapRenderer.renderDecorations(map, location, this.settings);
     }
 
     renderBackgroundEffects(effects, location) {

@@ -27,7 +27,7 @@ GAME_DATA.tilesets.beasts['player'] = {
             "width": 32
         }
     },
-    "config": {
+    "configuration": {
         "idle": {
             "east": {
                 "frames": [
@@ -453,7 +453,7 @@ GAME_DATA.tilesets.beasts['slime'] = {
             "width": 32
         }
     },
-    "config": {
+    "configuration": {
         "idle": {
             "east": {
                 "frames": [
@@ -797,7 +797,7 @@ GAME_DATA.tilesets.beasts['mimic'] = {
             "width": 32
         }
     },
-    "config": {
+    "configuration": {
         "idle": {
             "east": {
                 "frames": [

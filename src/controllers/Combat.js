@@ -86,7 +86,6 @@ class CombatController {
     
     update(step) {
         this.views.updateMap(this.map, step);
-        this.views.updateDecorations(this.decorations, step);
         this.views.updateBeasts(this.beasts, step);
         this.views.updateEffects(this.effects, step);
         this.views.updateMarkers(this.markers, step);
@@ -96,15 +95,14 @@ class CombatController {
 
     render(delta) {
         this.views.updateMap(this.map, delta, true);
-        this.views.updateDecorations(this.decorations, delta, true);
         this.views.updateBeasts(this.beasts, delta, true);
         this.views.updateEffects(this.effects, delta, true);
         this.views.updateMarkers(this.markers, delta, true);
 
-        this.map.getLocations(this.views.settings.sorting).forEach(location => {
-            this.views.renderMap(this.map, location);
+        this.map.getSorted(this.views.settings.sorting).forEach(location => {
+            this.views.renderTiles(this.map, location);
             this.views.renderMarkers(this.markers, location);
-            this.views.renderDecorations(this.decorations, location);
+            this.views.renderDecorations(this.map, location);
             this.views.renderBackgroundEffects(this.effects, location);
             this.views.renderBeasts(this.beasts, location);
             this.views.renderForegroundEffects(this.effects, location);
@@ -157,12 +155,12 @@ class CombatController {
         this.state = this.states.MOVE_CONFIRM;
 
         const stepListenerId = Events.listen('move-step', (animation) => {
-            this.interface._updateHeight(animation.destination.getZ());
+            this.interface._updateHeight(animation.destination.z);
         }, true);
         Game.actions.move(this.active, BeastLogic.getPath(location, this.markers.range)).then(() => {
             this.state = this.states.PLAYER_TURN;
             this.interface.confirmMove(this.active.getRemainingMovement());
-            this.interface._updateHeight(this.active.location.getZ());
+            this.interface._updateHeight(this.active.location.z);
             this.markers.clear();
 
             Events.remove('move-step', stepListenerId);

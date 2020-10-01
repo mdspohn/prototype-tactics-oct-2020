@@ -10,7 +10,7 @@ class Location {
         this.tiles = new Array();
         tiles = Array.isArray(tiles) ? tiles : [tiles];
         tiles.forEach(id => {
-            const tile = new Tile(id, tileset.config[id]);
+            const tile = new Tile(id, tileset.configuration[id]);
             this.tiles.push(tile);
         });
     }
