@@ -73,7 +73,7 @@ class SkillLogic {
                 return;
             
             // z-axis restrictions
-            if (opts.previous != null && opts.z != null && Math.abs(opts.location.getZ() - opts.previous.getZ()) > opts.z)
+            if (opts.previous != null && opts.z != null && Math.abs(opts.location.z - opts.previous.z) > opts.z)
                 return;
             
             // add location and details to range
@@ -131,7 +131,7 @@ class SkillLogic {
                 return false;
             if (opts.restrictions != null && !opts.restrictions.has(next))
                 return false;
-            if (opts.z != null && Math.abs(next.getZ() - previous.getZ()) > opts.z)
+            if (opts.z != null && Math.abs(next.z - previous.z) > opts.z)
                 return false;
             return true;
         }
@@ -193,7 +193,7 @@ class SkillLogic {
                 return;
             
             // z-axis restrictions
-            if (opts.previous != null && opts.z != null && Math.abs(opts.location.getZ() - opts.previous.getZ()) > opts.z)
+            if (opts.previous != null && opts.z != null && Math.abs(opts.location.z - opts.previous.z) > opts.z)
                 return;
             
             // add location and details to range

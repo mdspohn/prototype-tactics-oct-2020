@@ -24,8 +24,8 @@ class CombatLogic {
     }
 
     static getOrientationToCoords(unit, x, y) {
-        const unitX = Game.camera.getPosX() + ((unit.location.getPosX() + (unit.location.tw / 2)) * Game.scaling),
-              unitY = Game.camera.getPosY() + ((unit.location.getPosY() + (unit.location.td / 2)) * Game.scaling);
+        const unitX = Game.camera.getPosX() + ((unit.location.posX + (unit.location.tw / 2)) * Game.scaling),
+              unitY = Game.camera.getPosY() + ((unit.location.posY + (unit.location.td / 2)) * Game.scaling);
 
         if (unitX - x > 0) {
             return (unitY - y > 0) ? CombatLogic.ORIENTATIONS.WEST : CombatLogic.ORIENTATIONS.SOUTH;

@@ -21,7 +21,7 @@ class MarkerRenderer {
               selection  = markers.selection.get(location),
               isMirrored = location.isSloped && [CombatLogic.ORIENTATIONS.WEST, CombatLogic.ORIENTATIONS.EAST].includes(location.orientation),
               translateX = Game.camera.getPosX() + (location.posX * scaling) + (~~isMirrored * 32 * scaling),
-              translateY = Game.camera.getPosY() + ((location.posY + 8) * scaling),
+              translateY = Game.camera.getPosY() + (location.posY * scaling),
               color      = (!!selection && selection.isSelectable) ? selection.color : (!!range && range.isSelectable) ? range.color : null,
               x          = (!location.isSloped) ? 0 : [CombatLogic.ORIENTATIONS.WEST, CombatLogic.ORIENTATIONS.NORTH].includes(location.orientation) ? 1 : 2;
 

@@ -50,7 +50,7 @@ class BeastRenderer {
             return false;
 
         const x = location.posX - ((beast.tileset.sw - location.tw) / 2),
-              y = location.posY - (beast.tileset.sh - location.th - location.td) + (~~location.isSloped * (location.th / 2)),
+              y = location.posY - (beast.tileset.sh - location.td) + (~~location.isSloped * (location.th / 2)),
               ox = ~~animation.x + ~~frame.ox,
               oy = ~~animation.y + ~~frame.oy,
               translateX = Game.camera.getPosX() + ((x + ox) * scaling) + ~~animation.cx,

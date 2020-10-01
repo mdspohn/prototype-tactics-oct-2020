@@ -106,7 +106,7 @@ class Actions {
                         break;
                     case 'knockback':
                         const location = CombatLogic.getKnockbackTile(unit, actor, map);
-                        if (location !== undefined && !entities.some(entity => entity.location === location) && location.getZ() <= actor.location.getZ()) {
+                        if (location !== undefined && !entities.some(entity => entity.location === location) && location.z <= actor.location.z) {
                             destination = location;
                             path = [destination];
                         } else {
