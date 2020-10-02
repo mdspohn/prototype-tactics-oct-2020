@@ -101,6 +101,7 @@ GAME_DATA.tilesets.maps['woodlands'] = {
             21: {
                 name: "Water",
                 idx: 20,
+                oy: 2,
                 water: true
             }
         },
@@ -127,7 +128,7 @@ GAME_DATA.tilesets.maps['woodlands'] = {
             },
             10: {
                 name: "Waterfall",
-                oy: 27,
+                oy: 16,
                 ox: 16,
                 frames: [
                     { "idx": 30, "ms": 200 },
@@ -142,7 +143,7 @@ GAME_DATA.tilesets.maps['woodlands'] = {
             },
             12: {
                 name: "Waterfall Extension",
-                oy: 91,
+                oy: 80,
                 ox: 16,
                 frames: [
                     { "idx": 34, "ms": 200 },

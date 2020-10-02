@@ -30,12 +30,12 @@ class MapRenderer {
                 map.img,
                 (tile.index * map.sw) % map.imgWidth,
                 Math.floor((tile.index * map.sw) / map.imgWidth) * map.sh,
-                map.sw,
-                map.sh,
+                map.tw,
+                (map.th + map.td),
                 0,
                 0,
-                map.sw * scaling,
-                map.sh * scaling
+                map.tw * scaling,
+                (map.th + map.td) * scaling
             );
             Game.ctx.restore();
         });

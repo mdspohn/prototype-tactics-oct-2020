@@ -59,7 +59,7 @@ class MarkerRenderer {
 
         const config     = markers.configurations.orientation[beast.orientation],
               translateX = Game.camera.getPosX() + (beast.location.posX * scaling),
-              translateY = Game.camera.getPosY() + (beast.location.posY - beast.tileset.th + beast.location.td + 3) * scaling;
+              translateY = Game.camera.getPosY() + (beast.location.posY - (beast.tileset.sh - beast.location.td)) * scaling;
 
         Game.ctx.save();
         Game.ctx.translate(translateX, translateY);

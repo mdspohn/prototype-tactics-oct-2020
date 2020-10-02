@@ -1,5 +1,5 @@
 class Tile {
-    constructor(id, type, configuration, ...{ speed = 1, delay = 0 }) {
+    constructor(id, type, configuration, { speed, delay } = { speed: 1, delay: 0 }) {
         this.id = id;
         this.type = type;
         this.name = configuration.name;
@@ -9,9 +9,9 @@ class Tile {
 
         this.frames = configuration.frames || null;
         this.idx = ~~configuration.idx;
-        this.ms = 0 - delay;
+        this.ms = -delay || (-configuration.delay | 0);
         this.delta = 0;
-        this.speed = speed;
+        this.speed = speed || (configuration.speed | 1);
 
         // this.reactions = configuration.reactions;
     }
@@ -64,7 +64,7 @@ class Location {
     get oy()   { return this.tile.oy;                      }
 
     get posX() { return (this.y * (this.tw / 2)) - (this.x * (this.tw / 2)) + this.ox; }
-    get posY() { return (this.y * (this.td / 2)) + (this.x * (this.td / 2)) + this.oy - ((this.z - 1) * this.th) + (this.sh - this.th - this.td); }
+    get posY() { return (this.y * (this.td / 2)) + (this.x * (this.td / 2)) + this.oy - ((this.z - 1) * this.th); }
 
     get isWater()     { return this.tile.water;       }
     get isSloped()    { return this.tile.slope;       }
