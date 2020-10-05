@@ -1,12 +1,11 @@
 class Tile {
     constructor(id, type, configuration, { speed, delay } = { speed: 1, delay: 0 }) {
-        console.log(id)
         this.id = id;
         this.type = type;
         this.name = configuration.name;
 
-        this.ox = ~~configuration.ox;
-        this.oy = ~~configuration.oy;
+        this.iox = ~~configuration.ox;
+        this.ioy = ~~configuration.oy;
 
         this.frames = configuration.frames || null;
         this.idx = ~~configuration.idx;
@@ -17,7 +16,9 @@ class Tile {
         // this.reactions = configuration.reactions;
     }
 
-    get index() { return (this.frames !== null) ? this.frames[this.idx].idx : this.idx; }
+    get index() { return (this.frames !== null) ? this.frames[this.idx].idx : this.idx;      }
+    get ox()    { return this.iox + ((this.frames !== null) ? ~~this.frames[this.idx].ox : 0); }
+    get oy()    { return this.ioy + ((this.frames !== null) ? ~~this.frames[this.idx].oy : 0); }
 }
 
 class WalkableTile extends Tile {

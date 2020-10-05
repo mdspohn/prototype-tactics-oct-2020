@@ -110,17 +110,29 @@ GAME_DATA.tilesets.maps['woodlands'] = {
                 slope: true,
                 orientation: "east"
             },
+            16: {
+                name: "Dirt Ledge: North",
+                idx: 15
+            },
+            17: {
+                name: "Dirt Ledge: West",
+                idx: 16
+            },
+            18: {
+                name: "Dirt Ledge: Northwest",
+                idx: 17
+            },
             21: {
                 name: "Water",
-                idx: 20,
                 oy: 2,
-                water: true
+                water: true,
+                idx: 20
             },
             22: {
                 name: "Water: North Contact",
-                idx: 21,
                 oy: 2,
-                water: true
+                water: true,
+                idx: 21
             },
             23: {
                 name: "Water: West Contact",
@@ -168,6 +180,16 @@ GAME_DATA.tilesets.maps['woodlands'] = {
                 slope: true,
                 orientation: "east"
             },
+            41: {
+                name: "Dock",
+                idx: 50
+            },
+            44: {
+                name: "Dock Slope: East",
+                idx: 53,
+                slope: true,
+                orientation: "east"
+            },
         },
         decorations: {
             0: {
@@ -176,19 +198,24 @@ GAME_DATA.tilesets.maps['woodlands'] = {
             },
             1: {
                 name: "Light Grass",
-                idx: 21
+                idx: 40
             },
             2: {
-                name: "Heavy Grass",
-                idx: 22
+                name: "Light Grass 2",
+                idx: 41
             },
             3: {
-                name: "Mushroom",
-                idx: 23
+                name: "Flowers",
+                idx: 42
             },
             4: {
-                name: "Boulder",
-                idx: 24
+                name: "Post",
+                idx: 52
+            },
+            5: {
+                name: "Shadow",
+                idx: 53,
+                oy: 16
             },
             10: {
                 name: "Waterfall",

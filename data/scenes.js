@@ -4,13 +4,20 @@ GAME_DATA.scenes['temple'] = {
     beasts: [
         {
             id: 'player',
-            x: 2,
-            y: 8,
-            orientation: 'east',
+            x: 4,
+            y: 7,
+            orientation: 'south',
             equipment: {
                 weapon: 'knife',
                 accessory_1: 'buckler',
-            }
+            },
+        },
+        {
+            id: 'slime',
+            x: 1,
+            y: 14,
+            orientation: 'south',
+            basic: 'bow'
         }
     ]
 };
