@@ -9,11 +9,11 @@ class Actions {
               distance = Math.abs(destination.x - origin.x) + Math.abs(destination.y - origin.y);
 
         const complete = (resolve) => {
-            const id = Events.listen('move-complete', (actor) => {
-                if (actor !== unit)
+            const id = Events.listen('move-complete', (data) => {
+                if (data.unit !== unit)
                     return;
                 Events.remove('move-complete', id);
-                resolve();
+                resolve(data);
             }, true);
         };
 

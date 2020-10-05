@@ -52,6 +52,13 @@ class Location {
         
         this.decorations = GeneralLogic.toArray(configuration.decorations[x]?.[y]);
         this.decorations = this.decorations.map(id => new Tile(id, 'decorations', tileset.configuration.decorations[id]));
+
+        this.obstructs = configuration?.obstructions[x]?.[y] || null;
+        this.fade = false;
+        this.ms = 0;
+        this.delta = 0;
+        this.duration = 500;
+        this.opacity = 100;
     }
 
     get sw() { return this.spriteHeight; }
@@ -68,9 +75,10 @@ class Location {
     get posX() { return (this.y * (this.tw / 2)) - (this.x * (this.tw / 2)) + this.ox; }
     get posY() { return (this.y * (this.td / 2)) + (this.x * (this.td / 2)) + this.oy - ((this.z - 1) * this.th); }
 
-    get isWater()     { return this.tile.water;       }
-    get isSloped()    { return this.tile.slope;       }
-    get orientation() { return this.tile.orientation; }
+    get isReachable() { return this.tile.unreachable !== true; }
+    get isWater()     { return this.tile.water;        }
+    get isSloped()    { return this.tile.slope;        }
+    get orientation() { return this.tile.orientation;  }
 }
 
 class Map {
@@ -95,6 +103,9 @@ class Map {
                 this.layout[x].push(point);
             }
         }
+
+        this.pointOfFocus = null;
+        this.pointsOfInterest = new Array();
 
         this.sorted = new Object();
         this.sorted.X = [].concat(...this.layout).sort((a, b) => (a.x - b.x) ? a.x - b.x : a.y - b.y);
@@ -128,5 +139,56 @@ class Map {
 
     forEach(fn, order = 'X') {
         this.getSorted(order).forEach(location => fn(location));
+    }
+
+    changePointOfFocus(location = null) {
+        if (this.pointOfFocus === location)
+            return;
+
+        if (this.pointOfFocus !== null && !this.pointsOfInterest.includes(this.pointOfFocus)) {
+            this.getSorted().filter(loc => loc.obstructs !== null && loc.obstructs.includes(`${this.pointOfFocus.x}-${this.pointOfFocus.y}`)).forEach(obstructor => {
+                if (this.pointsOfInterest.some(poi => obstructor.obstructs.includes(`${poi.x}-${poi.y}`)))
+                    return;
+                obstructor.ms = (obstructor.ms !== 0) ? obstructor.duration - obstructor.ms : 0;
+                obstructor.fade = false;
+            });
+        }
+
+        if (location !== null) {
+            this.getSorted().filter(loc => loc.obstructs !== null && loc.obstructs.includes(`${location.x}-${location.y}`)).forEach(obstructor => {
+                obstructor.ms = (obstructor.ms !== 0) ? obstructor.duration - obstructor.ms : 0;
+                obstructor.fade = true;
+            });
+
+        }
+
+        this.pointOfFocus = location;
+    }
+
+    addPointOfInterest(location = null) {
+        if (location === null || this.pointsOfInterest.includes(location))
+            return;
+        
+        this.pointsOfInterest.push(location);
+        this.getSorted().filter(loc => loc.obstructs !== null && loc.obstructs.includes(`${location.x}-${location.y}`)).forEach(obstructor => {
+            obstructor.ms = (obstructor.ms !== 0) ? obstructor.duration - obstructor.ms : 0;
+            obstructor.fade = true;
+        });
+    }
+
+    removePointOfInterest(location = null) {
+        if (location === null)
+            return;
+
+        const index = this.pointsOfInterest.indexOf(location);
+        if (index !== -1) {
+            this.pointsOfInterest.splice(index, 1);
+            this.getSorted().filter(loc => loc.obstructs !== null && loc.obstructs.includes(`${location.x}-${location.y}`)).forEach(obstructor => {
+                if (obstructor === this.pointOfFocus || this.pointsOfInterest.some(poi => obstructor.obstructs.includes(`${poi.x}-${poi.y}`)))
+                    return;
+                obstructor.ms = (obstructor.ms !== 0) ? obstructor.duration - obstructor.ms : 0;
+                obstructor.fade = false;
+            });
+        }
     }
 }

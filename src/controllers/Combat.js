@@ -72,6 +72,7 @@ class CombatController {
         this.beasts.forEach(beast => {
             const location = this.map.getLocation(beast.location.x, beast.location.y);
             beast.initialize(location);
+            this.map.addPointOfInterest(location);
         });
     }
 
@@ -154,15 +155,18 @@ class CombatController {
 
         this.state = this.states.MOVE_CONFIRM;
 
-        const stepListenerId = Events.listen('move-step', (animation) => {
-            this.interface._updateHeight(animation.destination.z);
+        const stepListenerId = Events.listen('move-step', (data) => {
+            this.interface._updateHeight(data.animation.destination.z);
+            this.map.removePointOfInterest(data.previous);
+            this.map.addPointOfInterest(data.animation.destination);
         }, true);
-        Game.actions.move(this.active, BeastLogic.getPath(location, this.markers.range)).then(() => {
+        Game.actions.move(this.active, BeastLogic.getPath(location, this.markers.range)).then((data) => {
             this.state = this.states.PLAYER_TURN;
             this.interface.confirmMove(this.active.getRemainingMovement());
             this.interface._updateHeight(this.active.location.z);
             this.markers.clear();
-
+            this.map.removePointOfInterest(data.previous);
+            this.map.addPointOfInterest(data.animation.destination);
             Events.remove('move-step', stepListenerId);
         });
         this.markers.range = null;
@@ -176,7 +180,9 @@ class CombatController {
 
     resetMove() {
         if (this.active.traveled.last !== 0) {
-            Game.actions.resetMove(this.active);
+            this.map.removePointOfInterest(this.active.location);
+            Game.actions.resetMove(this.active).then(() => this.map.addPointOfInterest(this.active.location));
+            this.map.addPointOfInterest(this.active.location)
             this.interface.resetMove(this.active);
             this.requestMove();
         }
@@ -260,9 +266,10 @@ class CombatController {
     }
 
     _updateFocus(location) {
-        if (this.focus === location)
+        if (this.markers.focus === location)
             return;
         
+
         switch(this.state) {
             case this.states.MOVE_REQUEST:
                 if (BeastLogic.isValidSelection(location, this.markers.range)) {
@@ -292,6 +299,8 @@ class CombatController {
             default:
                 this.markers.focus = null;
         }
+
+        this.map.changePointOfFocus(this.markers.focus);
     }
 
     // -------------------

@@ -102,7 +102,7 @@ class BeastLogic {
                 map.getLocation(location.x + 1, location.y),
                 map.getLocation(location.x - 1, location.y)
             ).forEach(next => {
-                if (next === undefined)
+                if (next === undefined || !next.isReachable)
                     return;
 
                 if (config.isHazard && ((CombatLogic.getOrientation(location, next) != CombatLogic.getOrientation(opts.previous, location)) || !config.canLeap))
@@ -185,9 +185,14 @@ class BeastLogic {
             });
 
             animation.events = new Object();
-            animation.events.end = { id: 'move-step', data: animation };
-            if (location === destination)
-                animation.events.end = { id: 'move-complete', data: unit };
+            animation.events.end = {
+                id: (location === destination) ? 'move-complete' : 'move-step', 
+                data: {
+                    unit,
+                    animation,
+                    previous: previous.destination
+                }
+            };
 
             animations.push(animation);
             previous = animation;

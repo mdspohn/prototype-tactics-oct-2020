@@ -12,6 +12,22 @@ class MapRenderer {
                 while ((tile.ms + tile.delta) > tile.frames[tile.idx].ms)
                     MapRenderer.nextFrame(tile, map);
             });
+
+            // fading for obstructions
+            if (location.obstructs === null)
+                return;
+                
+            if (location.fade && location.opacity !== 50) {
+                location.ms += ~~!isDeltaUpdate * adjustedMs;
+                location.opacity = 100 - Math.min(((location.ms + (~~isDeltaUpdate * adjustedMs)) / location.duration) * 50, 50);
+                if (location.opacity === 50)
+                    location.ms = 0;
+            } else if (!location.fade && location.opacity !== 100) {
+                location.ms += ~~!isDeltaUpdate * adjustedMs;
+                location.opacity = 50 + Math.min(((location.ms + (~~isDeltaUpdate * adjustedMs)) / location.duration) * 50, 50);
+                if (location.opacity === 100)
+                    location.ms = 0;
+            }
         });
     }
 
@@ -51,6 +67,8 @@ class MapRenderer {
           
             Game.ctx.save();
             Game.ctx.translate(Game.camera.getPosX() + (translateX * scaling), Game.camera.getPosY() + (translateY * scaling));
+
+            Game.ctx.filter = `opacity(${location.opacity}%)`;
 
             Game.ctx.drawImage(
                 map.img,

@@ -28,7 +28,7 @@ GAME_DATA.beasts['player'] = {
     "species": "humanoid",
     "tileset": "player",
     "stats": {
-        "move": 5,
+        "move": 20,
         "jump": 2,
         "speed": 50,
         "health": 35

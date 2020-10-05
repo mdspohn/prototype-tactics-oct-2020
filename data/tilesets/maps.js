@@ -32,9 +32,10 @@ GAME_DATA.tilesets.maps['woodlands'] = {
             //        slashing: 55
             //     }
             // },
-            00: {
+            "-1": {
                 name: "Empty, Unreachable",
                 idx: -1,
+                oy: 8,
                 unreachable: true
             },
             0: {
@@ -209,43 +210,12 @@ GAME_DATA.tilesets.maps['woodlands'] = {
                 idx: 42
             },
             4: {
-                name: "Post",
-                idx: 52
+                name: "Stone Column Bottom",
+                idx: 43
             },
             5: {
-                name: "Shadow",
-                idx: 53,
-                oy: 16
-            },
-            10: {
-                name: "Waterfall",
-                oy: 16,
-                ox: 16,
-                frames: [
-                    { "idx": 30, "ms": 200 },
-                    { "idx": 31, "ms": 200 },
-                    { "idx": 32, "ms": 200 },
-                    { "idx": 33, "ms": 200, "next": 10 }
-                ]
-            },
-            11: {
-                name: "Frozen Waterfall",
-                idx: -1
-            },
-            12: {
-                name: "Waterfall Extension",
-                oy: 80,
-                ox: 16,
-                frames: [
-                    { "idx": 34, "ms": 200 },
-                    { "idx": 35, "ms": 200 },
-                    { "idx": 36, "ms": 200 },
-                    { "idx": 37, "ms": 200, "next": 12 }
-                ]
-            },
-            13: {
-                name: "Frozen Waterfall Extension",
-                idx: -1
+                name: "Stone Column Top",
+                idx: 44
             }
         }
     }
