@@ -1,3 +1,20 @@
+GAME_DATA.scenes['temple'] = {
+    type: 'COMBAT',
+    map: 'temple',
+    beasts: [
+        {
+            id: 'player',
+            x: 2,
+            y: 8,
+            orientation: 'east',
+            equipment: {
+                weapon: 'knife',
+                accessory_1: 'buckler',
+            }
+        }
+    ]
+};
+
 GAME_DATA.scenes['test'] = {
     type: 'COMBAT',
     map: 'woodlands',

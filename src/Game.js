@@ -59,7 +59,7 @@ class GameManager {
         // --------------
         // XXX - This should be done when transitioning, not on game load
         // -----------------------
-        await this.prepare('test');
+        await this.prepare('temple');
         await this.initialize();
     }
 

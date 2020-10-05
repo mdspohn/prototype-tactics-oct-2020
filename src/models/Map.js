@@ -1,5 +1,6 @@
 class Tile {
     constructor(id, type, configuration, { speed, delay } = { speed: 1, delay: 0 }) {
+        console.log(id)
         this.id = id;
         this.type = type;
         this.name = configuration.name;
