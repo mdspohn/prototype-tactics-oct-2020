@@ -79,6 +79,11 @@ class CombatController {
     async initialize() {
         Game.camera.toCenter(Game.canvas, this.map);
         this.nextTurn();
+        
+        // setTimeout(() => {
+        // Game.actions.move(this.active, BeastLogic.getPath(this.map.getLocation(5,8), BeastLogic.getRange(this.active, this.beasts, this.map))).then((data) => {
+        // });
+        // }, 2000)
     }
 
     // -------------------

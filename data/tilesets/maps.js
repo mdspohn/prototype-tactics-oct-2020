@@ -197,11 +197,20 @@ GAME_DATA.tilesets.maps['woodlands'] = {
                 name: "Dock",
                 idx: 50
             },
+            42: {
+                name: "Hay Bale",
+                idx: 51,
+                oy: -1
+            },
+            43: {
+                name: "Crate Bottom",
+                idx: 52,
+                oy: -1
+            },
             44: {
-                name: "Dock Slope: East",
+                name: "Crate Top",
                 idx: 53,
-                slope: true,
-                orientation: "east"
+                oy: -1
             },
         },
         decorations: {
@@ -228,6 +237,30 @@ GAME_DATA.tilesets.maps['woodlands'] = {
             5: {
                 name: "Stone Column Top",
                 idx: 44
+            },
+            6: {
+                name: "Dock Tie",
+                idx: 45
+            },
+            7: {
+                name: "Barrel",
+                idx: 46,
+                oy: -10
+            },
+            8: {
+                name: "Barrel",
+                idx: 57,
+                oy: -10
+            },
+            9: {
+                name: "Barrel",
+                idx: 47,
+                oy: -14
+            },
+            10: {
+                name: "Crate",
+                idx: 52,
+                oy: -9
             },
             100: {
                 name: "Tree 1",
