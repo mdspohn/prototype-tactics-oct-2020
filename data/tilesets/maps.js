@@ -181,6 +181,18 @@ GAME_DATA.tilesets.maps['woodlands'] = {
                 slope: true,
                 orientation: "east"
             },
+            36: {
+                name: "Stone Ledge: North",
+                idx: 35
+            },
+            37: {
+                name: "Stone Ledge: West",
+                idx: 36
+            },
+            38: {
+                name: "Stone Ledge: Northwest",
+                idx: 37
+            },
             41: {
                 name: "Dock",
                 idx: 50
@@ -216,6 +228,78 @@ GAME_DATA.tilesets.maps['woodlands'] = {
             5: {
                 name: "Stone Column Top",
                 idx: 44
+            },
+            100: {
+                name: "Tree 1",
+                idx: 80,
+                oy: -20,
+                ox: 16
+            },
+            101: {
+                name: "Tree 2",
+                idx: 70,
+                oy: -20,
+                ox: 16
+            },
+            102: {
+                name: "Tree 3",
+                idx: 60,
+                oy: -20,
+                ox: 16
+            },
+            103: {
+                name: "Tree 4",
+                oy: -20,
+                ox: 16,
+                frames: [
+                    {idx: 81, ms: 1500},
+                    {idx: 83, ms: 250},
+                    {idx: 84, ms: 200},
+                    {idx: 85, ms: 100},
+                    {idx: 81, ms: 8850}
+                ]
+            },
+            104: {
+                name: "Tree 5",
+                idx: 71,
+                oy: -20,
+                ox: 16
+            },
+            105: {
+                name: "Tree 6",
+                oy: -20,
+                ox: 16,
+                idx: 61
+            },
+            106: {
+                name: "Tree 7",
+                oy: -20,
+                ox: 16,
+                frames: [
+                    {idx: 82, ms: 900},
+                    {idx: 73, ms: 250},
+                    {idx: 74, ms: 150},
+                    {idx: 75, ms: 200},
+                    {idx: 82, ms: 9400}
+                ]
+            },
+            107: {
+                name: "Tree 8",
+                oy: -20,
+                ox: 16,
+                frames: [
+                    {idx: 63, ms: 250},
+                    {idx: 64, ms: 150},
+                    {idx: 65, ms: 150},
+                    {idx: 66, ms: 350},
+                    {idx: 72, ms: 10000}
+                ]
+            },
+            108: {
+                name: "Tree 9",
+                oy: -20,
+                ox: 16,
+                idx: 62
             }
         }
     }
