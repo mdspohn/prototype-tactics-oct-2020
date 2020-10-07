@@ -59,7 +59,47 @@ GAME_DATA.skills['sword'] = {
         {
             type: 'animation',
             unit: 'attacker',
-            id: 'punch',
+            id: 'slash',
+            await: 'hit'
+        },
+        {
+            type: 'animation',
+            unit: 'defender',
+            id: 'hit'
+        },
+        {
+            type: 'damage',
+            unit: 'defender',
+            amount: 22,
+            fontSize: 30
+        },
+        {
+            type: 'filter',
+            unit: 'defender',
+            filters: [
+                {
+                    type: 'brightness',
+                    initial: 100,
+                    target: 0,
+                    suffix: '%',
+                    duration: 150,
+                    reverse: true
+                },
+                {
+                    type: 'invert',
+                    initial: 0,
+                    target: 100,
+                    suffix: '%',
+                    duration: 150,
+                    reverse: true
+                }
+            ],
+            await: 'brightness-filter-complete'
+        },
+        {
+            type: 'animation',
+            unit: 'attacker',
+            id: 'slash-reverse',
             await: 'hit'
         },
         {
@@ -69,6 +109,35 @@ GAME_DATA.skills['sword'] = {
             location: 'knockback',
             id: 'hit'
         },
+        {
+            type: 'damage',
+            unit: 'defender',
+            amount: 33,
+            fontSize: 40
+        },
+        {
+            type: 'filter',
+            unit: 'defender',
+            filters: [
+                {
+                    type: 'brightness',
+                    initial: 100,
+                    target: 0,
+                    suffix: '%',
+                    duration: 200,
+                    reverse: true
+                },
+                {
+                    type: 'invert',
+                    initial: 0,
+                    target: 100,
+                    suffix: '%',
+                    duration: 200,
+                    reverse: true
+                }
+            ],
+            await: 'brightness-filter-complete'
+        }
         // {
         //     type: 'damage',
         //     actor: 'defender',

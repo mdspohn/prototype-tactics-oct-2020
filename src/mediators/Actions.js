@@ -66,6 +66,12 @@ class Actions {
                 case 'effect':
                     await this.useSkill_effectSegment(skill.sequence[i], unit, target, selection, range, entities, map, effects);
                     break;
+                case 'filter':
+                    await this.useSkill_filterSegment(skill.sequence[i], unit, selection, entities);
+                    break;
+                case 'damage':
+                    await this.useSkill_damageSegment(skill.sequence[i], unit, selection, entities);
+                    break;
                 case 'sound':
                     await this.useSkill_soundSegment(skill.sequence[i], sounds);
                     break;
@@ -139,8 +145,8 @@ class Actions {
             unit.animate(animations, true);
 
             return new Promise((resolve) => {
-                const id = Events.listen(event, (actor) => {
-                    if (actor !== unit)
+                const id = Events.listen(event, (data) => {
+                    if (data.unit !== unit)
                         return;
                     Events.remove(event, id);
                     resolve();
@@ -169,13 +175,55 @@ class Actions {
 
             return new Promise((resolve) => {
                 const id = Events.listen(event, (actor) => {
-                    if (actor !== unit)
-                        return;
                     Events.remove(event, id);
                     resolve();
                 }, true);
             });
         }
+    }
+
+    useSkill_filterSegment(segment, unit, selection, entities) {
+        const unitsToFilter = segment.unit === 'attacker' ? [unit] : entities.filter(entity => selection.has(entity.location)),
+              promises = [Promise.resolve()];
+
+        unitsToFilter.forEach(target => {
+            segment.filters.forEach(filter => {
+                target.filters.push({
+                    type: filter.type,
+                    suffix: filter.suffix || '',
+                    initial: filter.initial,
+                    value: filter.initial,
+                    target: filter.target,
+                    ms: 0,
+                    duration: filter.duration,
+                    reverse: filter.reverse || false
+                });
+            });
+
+            if (segment.await !== undefined) {
+                const complete = new Promise((resolve) => {
+                    const id = Events.listen(segment.await, (data) => {
+                        if (data.unit !== target)
+                            return;
+                        Events.remove(segment.await, id);
+                        resolve();
+                    }, true);
+                });
+                promises.push(complete);
+            }
+        });
+
+        return Promise.all(promises);
+    }
+
+    useSkill_damageSegment(segment, unit, selection, entities) {
+        const unitsToDamage = segment.unit === 'attacker' ? [unit] : entities.filter(entity => selection.has(entity.location));
+
+        unitsToDamage.forEach(target => {
+            target.doDamage(segment.amount, segment.fontSize);
+        });
+
+        return Promise.resolve();
     }
 
     useSkill_effectSegment(segment, unit, target, selection, range, entities, map, effects) {

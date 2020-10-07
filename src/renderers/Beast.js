@@ -39,6 +39,43 @@ class BeastRenderer {
                 animation.cy += Math.round(p * ~~animation.inty * scaling);
                 animation.cz = animation.iz + Math.round(pz * (animation.tz - animation.iz));
             }
+
+            if (beast.filters.length > 0) {
+                const completed = new Array();
+                beast.filters.forEach((filter, index) => {
+                    filter.ms += ~~!isDeltaUpdate * adjustedMs;
+                    filter.value = Math.min(filter.target * (Math.max(filter.ms + (~~isDeltaUpdate * adjustedMs), 0) / filter.duration), filter.target);
+                    if (filter.value === filter.target) {
+                        if (filter.reverse) {
+                            [filter.target, filter.initial] = [filter.initial, filter.target];
+                            filter.reverse = false;
+                            filter.ms -= filter.duration;
+                            filter.value = Math.min(filter.target * (Math.max(filter.ms + (~~isDeltaUpdate * adjustedMs), 0) / filter.duration), filter.target);
+                        } else {
+                            Events.dispatch(`${filter.type}-filter-complete`, { unit: beast, animation });
+                            completed.push(index);
+                        }
+                    }
+                });
+                completed.sort((a, b) => b - a);
+                completed.forEach(index => beast.filters.splice(index, 1));
+            }
+
+            if (beast.text.length > 0) {
+                const completed = new Array();
+                beast.text.forEach((blurb, index) => {
+                    blurb.ms += ~~!isDeltaUpdate * adjustedMs;
+                    const percentage = Math.min(Math.max(blurb.ms + (~~isDeltaUpdate * adjustedMs), 0) / blurb.duration, 1);
+                    blurb.ox = blurb.initial.x + ((blurb.target.x - blurb.initial.x) * percentage);
+                    blurb.oy = blurb.initial.y + ((blurb.target.y - blurb.initial.y) * percentage);
+
+                    if (blurb.ox === blurb.target.x && blurb.oy === blurb.target.y) {
+                        completed.push(index);
+                    }
+                });
+                completed.sort((a, b) => b - a);
+                completed.forEach(index => beast.text.splice(index, 1));
+            }
         });
     }
     
@@ -126,6 +163,27 @@ class BeastRenderer {
         EquipmentRenderer.render(ctx, beast, -1, translateX, translateY, { scaling });
         ctx.save();
         ctx.translate(translateX + (~~isMirrored * beast.tileset.sw * scaling), translateY);
+
+        if (beast.filters.length > 0) {
+            let filters = new String();
+            beast.filters.forEach(effect => filters += `${effect.type}(${effect.value}${effect.suffix}) `);
+            ctx.filter = filters;
+        }
+
+        if (beast.text.length > 0) {
+            const animation = beast.animations.current,
+                  frame = animation.config[animation.frame];
+            ctx.fillStyle = 'white';
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 4;
+            beast.text.forEach(blurb => {
+                ctx.font = `${blurb.fontSize}px Equipment`;
+                const ox = blurb.ox + ((beast.tileset.sw / 2) - (~~isMirrored * beast.tileset.sw) - (~~animation.x + ~~frame.ox)) * scaling - (5 * (blurb.fontSize / 10)),
+                      oy = blurb.oy - (~~animation.y + ~~frame.oy) * scaling;
+                ctx.strokeText(blurb.text, ox, oy);
+                ctx.fillText(blurb.text, ox, oy);
+            });
+        }
 
         if (isMirrored)
             ctx.scale(-1, 1);

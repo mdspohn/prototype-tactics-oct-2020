@@ -392,6 +392,88 @@ GAME_DATA.tilesets.beasts['player'] = {
                 ]
             }
         },
+        "slash": {
+            "east": {
+                "mirrored": true,
+                "frames": [
+                    //{ "idx": 20, "ms": 150 },
+                    { "idx": 33, "ms": 1000, intx: 8, inty: -4, "event": "hit" },
+                    { "idx": 34, "ms": 1000, intx: 16, inty: -8,  },
+                    { "idx": 35, "ms": 1000, intx: 0, inty: 0 },
+                    // { "idx": 22, "ms": 200,                       "px": 0, "py": 0 },
+                    // { "idx": 21, "ms": 100 },
+                    // { "idx": 22, "ms": 200,                       "px": 0, "py": 0 },
+                    // { "idx": 21, "ms": 100 },
+                    // { "idx": 22, "ms": 200,                       "px": 0, "py": 0 },
+                    // { "idx": 21, "ms": 100 },
+                    // { "idx": 3,  "ms": 250 }
+                ]
+            },
+            "south": {
+                "frames": [
+                    { "idx": 33, "ms": 20, ox: 2, oy: -1 },
+                    { "idx": 33, "ms": 20, ox: 3, oy: -1 },
+                    { "idx": 33, "ms": 20, ox: 4, oy: -2 },
+                    { "idx": 34, "ms": 50, ox: 5, oy: -2,  },
+                    { "idx": 34, "ms": 50, ox: 6, oy: -3,  },
+                    { "idx": 34, "ms": 50, ox: 7, oy: -3,  },
+                    { "idx": 34, "ms": 300, ox: 8, oy: -4,  },
+                    { "idx": 33, "ms": 15, ox: 7, oy: -4 },
+                    { "idx": 33, "ms": 15, ox: 6, oy: -3 },
+                    { "idx": 33, "ms": 15, ox: 5, oy: -3 },
+                    { "idx": 33, "ms": 20, ox: 4, oy: -2 },
+                    { "idx": 33, "ms": 20, ox: 3, oy: -2 },
+                    { "idx": 33, "ms": 20, ox: 2, oy: -1, "event": "hit" },
+                    { "idx": 35, "ms": 50, ox: 2, oy: -1, },
+                    { "idx": 36, "ms": 50, ox: 2, oy: -1, },
+                    { "idx": 37, "ms": 500, ox: 2, oy: -1, }
+                ]
+            },
+            "west": {
+                "frames": [
+
+                ]
+            },
+            "north": {
+                "mirrored": true,
+                "frames": [
+
+                ]
+            }
+        },
+        "slash-reverse": {
+            "east": {
+                "mirrored": true,
+                "frames": [
+                ]
+            },
+            "south": {
+                "frames": [
+                    { "idx": 37, "ms": 500, ox: 2, oy: -1, },
+                    { "idx": 35, "ms": 25, ox: 1, oy: -1, "event": "hit" },
+                    { "idx": 35, "ms": 25, ox: 0, oy: 0 },
+                    { "idx": 33, "ms": 20,  },
+                    { "idx": 33, "ms": 20,  },
+                    { "idx": 33, "ms": 20,  },
+                    { "idx": 33, "ms": 15 },
+                    { "idx": 33, "ms": 15,  },
+                    { "idx": 33, "ms": 15,  },
+                    { "idx": 34, "ms": 300,   },
+                    { "idx": 34, "ms": 50,  },
+                    { "idx": 34, "ms": 50,  },
+                    { "idx": 34, "ms": 50,  },
+                ]
+            },
+            "west": {
+                "frames": [
+                ]
+            },
+            "north": {
+                "mirrored": true,
+                "frames": [
+                ]
+            }
+        },
         "dash": {
             "east": {
                 "frames": [

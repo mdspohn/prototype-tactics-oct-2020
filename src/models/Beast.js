@@ -80,6 +80,8 @@ class Beast {
         this.animations.modifiers.scaling = 1;
         this.animations.modifiers.filter = null;
 
+        this.text = new Array();
+        this.filters = new Array();
     }
 
     // -----------------------
@@ -158,5 +160,24 @@ class Beast {
 
     isAlive() {
         return this.stats.current.health > 0;
+    }
+
+    doDamage(amount, fontSize = 30) {
+        this.text.push({
+            text: amount,
+            fontSize: fontSize,
+            duration: 750,
+            ms: 0,
+            ox: 0,
+            oy: 0,
+            initial: {
+                x: 0,
+                y: 0
+            },
+            target: {
+                x: 0,
+                y: -20
+            }
+        });
     }
 }
