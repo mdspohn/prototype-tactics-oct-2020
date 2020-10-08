@@ -17,6 +17,7 @@ class GameManager {
         this.managers.maps      = new MapManager();
         this.managers.beasts    = new BeastManager();
         this.managers.equipment = new EquipmentManager();
+        this.managers.skills    = new SkillManager();
         this.managers.effects   = new EffectManager();
         this.managers.sounds    = new SoundManager();
 
@@ -70,6 +71,8 @@ class GameManager {
             const beast = this.managers.beasts.get(data.id, data);
             if (data.equipment !== undefined)
                 Object.entries(data.equipment).forEach(([ type, id ]) => beast.equipment.set(type, this.managers.equipment.get(id)));
+            
+            console.log(beast)
             return beast;
         });
 

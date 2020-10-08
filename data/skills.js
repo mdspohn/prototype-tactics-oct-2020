@@ -39,8 +39,66 @@ GAME_DATA.skills['bow'] = {
 // -----------------------
 // TP-COST SKILLS
 // ---------------------------
+GAME_DATA.skills['slash'] = {
+    name: 'Melee Attack',
+    description: '...',
+    range: {
+        min: 1,
+        max: 1,
+        pattern: 'POINT',
+        z: 2
+    },
+    selection: {
+        min: 0,
+        max: 0,
+        pattern: 'POINT',
+        z: 2
+    },
+    sequence: [
+        {
+            type: 'animation',
+            unit: 'attacker',
+            id: 'slash',
+            await: 'hit'
+        },
+        {
+            type: 'animation',
+            unit: 'defender',
+            id: 'hit'
+        },
+        {
+            type: 'damage',
+            unit: 'defender',
+            amount: 22,
+            fontSize: 30
+        },
+        {
+            type: 'filter',
+            unit: 'defender',
+            filters: [
+                {
+                    type: 'brightness',
+                    initial: 100,
+                    target: 0,
+                    suffix: '%',
+                    duration: 150,
+                    reverse: true
+                },
+                {
+                    type: 'invert',
+                    initial: 0,
+                    target: 100,
+                    suffix: '%',
+                    duration: 150,
+                    reverse: true
+                }
+            ],
+            await: 'brightness-filter-complete'
+        }
+    ]
+};
 
-GAME_DATA.skills['sword'] = {
+GAME_DATA.skills['double-slash'] = {
     name: 'Melee Attack',
     description: '...',
     range: {

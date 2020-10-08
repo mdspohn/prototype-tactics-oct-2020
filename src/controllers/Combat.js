@@ -161,7 +161,7 @@ class CombatController {
         if (this.state === this.states.ATTACK_REQUEST) {
             return this.cancelRequestAttack();
         } else if (this.state === this.states.PLAYER_TURN && this.active.canAttack()) {
-            this.state = await this.actions.requestAttack(this.scene, this.states);
+            this.state = await this.actions.requestAttack(this.scene, this.states, 'double-slash');
         }
     }
 
@@ -176,7 +176,7 @@ class CombatController {
         if (this.state !== this.states.ATTACK_REQUEST)
             return;
 
-        this.state = await this.actions.confirmAttack(this.scene, this.states, location);
+        this.state = await this.actions.confirmAttack(this.scene, this.states, 'double-slash', location);
     }
 
     // ------------------
@@ -285,7 +285,7 @@ class CombatController {
                 return;
             case this.states.ATTACK_REQUEST:
                 if (BeastLogic.isValidSelection(location, this.markers.range)) {
-                    this.markers.selection = SkillLogic.getSelection('sword', location, this.beasts, this.map, this.markers.range);
+                    this.markers.selection = SkillLogic.getSelection(this.actions.managers.skills.get('slash'), location, this.beasts, this.map, this.markers.range);
                 } else {
                     this.markers.selection = null;
                     location = null;

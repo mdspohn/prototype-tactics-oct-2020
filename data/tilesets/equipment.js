@@ -18,6 +18,21 @@ GAME_DATA.tilesets.equipment['one-handed'] = {
         22: {
             0: { "layer": -1, "idx": 1, "ox": 15, "oy": 13 },
             1: { "layer": -1, "idx": 1, "ox": -15, "oy": 13, "mirrored": true }
+        },
+        30: {
+            0: { "layer": -1,  "idx": 1, "ox": 5, "oy": -8 }
+        },
+        31: {
+            0: { "layer": -1, "idx": 1, "ox": 5, "oy": -5 }
+        },
+        32: {
+            0: { "layer": 1, "idx": -1, "ox": -11, "oy": 15 }
+        },
+        33: {
+            0: { "layer": 1, "idx": 3, "ox": 5, "oy": 14 }
+        },
+        34: {
+            0: { "layer": 1, "idx": 3, "ox": 6, "oy": 8 }
         }
     }
 };
@@ -98,6 +113,21 @@ GAME_DATA.tilesets.equipment['shields'] = {
         22: {
             0: { "layer": -1, "idx": 1, "ox": -4, "oy": 11 },
             1: { "layer": -1, "idx": 1, "ox": 4, "oy": 11 }
+        },
+        30: {
+            0: { "layer": 1, "idx": 0, "ox": -6, "oy": 10 }
+        },
+        31: {
+            0: { "layer": 1, "idx": 0, "ox": -6, "oy": 7 }
+        },
+        32: {
+            0: { "layer": -1, "idx": 1, "ox": 12, "oy": 7 }
+        },
+        33: {
+            0: { "layer": -1, "idx": 1, "ox": 10, "oy": 5 }
+        },
+        34: {
+            0: { "layer": -1, "idx": 1, "ox": 10, "oy": 5 }
         }
     }
 };

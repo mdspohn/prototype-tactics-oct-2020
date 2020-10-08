@@ -31,7 +31,7 @@ class Actions {
         return Promise.resolve(states.PLAYER_TURN);
     }
 
-    async confirmMove(scene, states, location) {
+    async confirmMove(scene, states, target) {
         scene.state = states.MOVE_CONFIRM;
 
         const listenerID = Events.listen('move-step', (data, id) => {
@@ -40,7 +40,7 @@ class Actions {
             scene.map.addPointOfInterest(data.animation.destination);
         }, true);
 
-        const path = BeastLogic.getPath(location, scene.markers.range);
+        const path = BeastLogic.getPath(target, scene.markers.range);
         scene.markers.range = null;
 
         return this.move(scene.active, path).then(data => {
@@ -72,8 +72,8 @@ class Actions {
         return this.requestMove(scene, states);
     }
 
-    async requestAttack(scene, states) {
-        scene.markers.range = SkillLogic.getRange('sword', scene.active, scene.beasts, scene.map);
+    async requestAttack(scene, states, id) {
+        scene.markers.range = SkillLogic.getRange(this.managers.skills.get(id), scene.active, scene.beasts, scene.map);
         scene.ui.requestAttack();
 
         return Promise.resolve(states.ATTACK_REQUEST);
@@ -86,18 +86,19 @@ class Actions {
         return Promise.resolve(states.PLAYER_TURN);
     }
 
-    async confirmAttack(scene, states, location) {
+    async confirmAttack(scene, states, id, target) {
         scene.state = states.ATTACK_CONFIRM;
 
         scene.markers.clear();
-        return this.useSkill('sword', scene.active, location, scene.beasts, scene.map, scene.camera).then(() => {
-            scene.ui.cancelAttack();
-            return states.PLAYER_TURN;
-        });
+        await this.skill(id, scene.active, target, scene);
+        scene.ui.cancelAttack();
+
+        return Promise.resolve(states.PLAYER_TURN);
     }
 
     async requestWait(scene, states) {
         scene.markers.orientation = scene.active.orientation;
+
         return Promise.resolve(states.WAIT_REQUEST);
     }
 
@@ -110,6 +111,7 @@ class Actions {
         scene.state = states.WAIT_CONFIRM;
         scene.markers.clear();
         await scene.ui.endTurn();
+
         return this.nextTurn(scene, states);
     }
 
@@ -138,6 +140,25 @@ class Actions {
         return new Promise(complete);
     }
 
+    async skill(id, attacker, target, scene) {
+        const config = this.managers.skills.get(id),
+              range = SkillLogic.getRange(config, attacker, scene.beasts, scene.map),
+              selection = SkillLogic.getSelection(config, target, scene.beasts, scene.map, range/* range restriction */);
+
+        // -----------------
+        // Calculate Damage / Crit
+        // ----------------------
+
+        // -------------------
+        // Animation Sequence
+        // -------------------------------
+
+        for (let i = 0; i < config.sequence.length; i++)
+            await this._doSegment(config.sequence[i], attacker, target, selection, range, scene);
+
+        return Promise.resolve();
+    }
+
     async changeOrientation(unit, x, y) {
         const orientation = CombatLogic.getOrientationToCoords(unit, x, y);
         if (unit.orientation !== orientation) {
@@ -151,57 +172,27 @@ class Actions {
         return Promise.resolve(orientation);
     }
 
-    async orient(unit, orientation) {
-        if (unit.orientation !== orientation) {
-            unit.orientation = orientation;
-            const animation = BeastLogic.getDefaultAnimation(unit, unit.animation);
-            animation.frame = unit.animations.current.frame;
-            animation.ms = unit.animations.current.ms;
-            unit.animate(animation, true);
+    // ----------------------------
+    // Helper Functions
+    // ---------------------------------
+
+    async _doSegment(segment, attacker, target, selection, range, scene) {
+        switch (segment.type) {
+            case 'animation':
+                return this.useSkill_animationSegment(segment, attacker, target, selection, range, scene.beasts, scene.map);
+            case 'effect':
+                return this.useSkill_effectSegment(segment, attacker, target, selection, range, scene.beasts, scene.map, this.managers.effects);
+            case 'filter':
+                return this.useSkill_filterSegment(segment, attacker, selection, scene.beasts);
+            case 'damage':
+                return this.useSkill_damageSegment(segment, attacker, selection, scene.beasts);
+            case 'sound':
+                return this.useSkill_soundSegment(segment, this.managers.sounds);
+            case 'camera':
+                return this.useSkill_cameraSegment(segment, scene.camera);
+            case 'wait':
+                return this.useSkill_waitSegment(segment);
         }
-
-        return Promise.resolve(orientation);
-    }
-
-    // async skill(id, attacker, target, scene) {
-
-    // }
-
-    async useSkill(id, unit, target, entities, map, camera) {
-        const skill = Assets.getSkill(id),
-              range = SkillLogic.getRange(id, unit, entities, map),
-              selection = SkillLogic.getSelection(id, target, entities, map, range);
-
-        // TODO: damage/crit calculations
-        // - if melee crit, consider adding knockback movement to animation segment of defenders
-
-        for (let i = 0; i < skill.sequence.length; i++) {
-            switch (skill.sequence[i].type) {
-                case 'animation':
-                    await this.useSkill_animationSegment(skill.sequence[i], unit, target, selection, range, entities, map);
-                    break;
-                case 'effect':
-                    await this.useSkill_effectSegment(skill.sequence[i], unit, target, selection, range, entities, map, this.managers.effects);
-                    break;
-                case 'filter':
-                    await this.useSkill_filterSegment(skill.sequence[i], unit, selection, entities);
-                    break;
-                case 'damage':
-                    await this.useSkill_damageSegment(skill.sequence[i], unit, selection, entities);
-                    break;
-                case 'sound':
-                    await this.useSkill_soundSegment(skill.sequence[i], this.managers.sounds);
-                    break;
-                case 'camera':
-                    await this.useSkill_cameraSegment(skill.sequence[i], camera);
-                    break;
-                case 'wait':
-                    await this.useSkill_waitSegment(skill.sequence[i]);
-                    break;
-            }
-        }
-
-        return Promise.resolve();
     }
 
     useSkill_animationSegment(segment, unit, target, selection, range, entities, map) {

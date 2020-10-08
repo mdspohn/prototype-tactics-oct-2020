@@ -160,7 +160,7 @@ class BeastRenderer {
     }
 
     static renderCustom(ctx, beast, index, isMirrored, translateX, translateY, { scaling = 1 } = settings) {
-        EquipmentRenderer.render(ctx, beast, -1, translateX, translateY, { scaling });
+        EquipmentRenderer.render(ctx, beast, index, isMirrored, -1, translateX, translateY, { scaling });
         ctx.save();
         ctx.translate(translateX + (~~isMirrored * beast.tileset.sw * scaling), translateY);
 
@@ -200,6 +200,6 @@ class BeastRenderer {
             beast.tileset.sh * scaling
         );
         ctx.restore();
-        EquipmentRenderer.render(ctx, beast, 1, translateX, translateY, { scaling });
+        EquipmentRenderer.render(ctx, beast, index, isMirrored, 1, translateX, translateY, { scaling });
     }
 }

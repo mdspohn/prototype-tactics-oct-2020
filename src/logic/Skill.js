@@ -1,8 +1,7 @@
 class SkillLogic {
 
-    static getRange(id, attacker, entities, layout) {
-        const skill = Assets.getSkill(id),
-              range = new WeakMap();
+    static getRange(skill, attacker, entities, layout) {
+        const range = new WeakMap();
         SkillLogic._addPattern(skill.range.pattern, range, {
             location: attacker.location,
             orientation: null,
@@ -21,11 +20,10 @@ class SkillLogic {
         return range;
     }
 
-    static getSelection(id, location, entities, layout, range = null) {
-        const skill = Assets.getSkill(id),
-              selection = new WeakMap();
+    static getSelection(skill, target, entities, layout, range = null) {
+        const selection = new WeakMap();
         SkillLogic._addPattern(skill.selection.pattern, selection, {
-            location: location,
+            location: target,
             orientation: null,
             entities: entities,
             layout: layout,
