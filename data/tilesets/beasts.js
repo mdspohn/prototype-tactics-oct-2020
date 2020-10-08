@@ -417,7 +417,7 @@ GAME_DATA.tilesets.beasts['player'] = {
                     { "idx": 34, "ms": 50, ox: 5, oy: -2,  },
                     { "idx": 34, "ms": 50, ox: 6, oy: -3,  },
                     { "idx": 34, "ms": 50, ox: 7, oy: -3,  },
-                    { "idx": 34, "ms": 300, ox: 8, oy: -4,  },
+                    { "idx": 34, "ms": 400, ox: 8, oy: -4,  },
                     { "idx": 33, "ms": 15, ox: 7, oy: -4 },
                     { "idx": 33, "ms": 15, ox: 6, oy: -3 },
                     { "idx": 33, "ms": 15, ox: 5, oy: -3 },

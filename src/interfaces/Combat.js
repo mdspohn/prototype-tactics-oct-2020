@@ -1,4 +1,4 @@
-class CombatInterface {
+class CombatUI {
     constructor() {
         this.animations = new Array();
 
@@ -233,7 +233,7 @@ class CombatInterface {
         this._updateSuggestion('Click on a tile to move. Right-click to cancel.');
     }
 
-    async cancelMove() {
+    async cancelRequestMove() {
         this._animateElement(this.active.dom.wrapper, 'left',   30, 500, 'px', 'active-show');
         this._animateElement(this.active.dom.wrapper, 'opacity', 1, 500);
         this._updateSuggestion('Select an action. The mouse wheel can be used to navigate menus.');

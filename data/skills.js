@@ -105,7 +105,7 @@ GAME_DATA.skills['sword'] = {
         {
             type: 'animation',
             unit: 'defender',
-            movement: true,
+            //movement: true,
             location: 'knockback',
             id: 'hit'
         },

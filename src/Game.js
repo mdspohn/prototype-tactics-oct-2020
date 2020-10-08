@@ -12,13 +12,13 @@ class GameManager {
 
         // managers for retrieving, loading, and saving game object data
         this.managers = new Object();
-        this.managers.data        = new DataManager();
-        this.managers.scenes      = new SceneManager();
-        this.managers.maps        = new MapManager();
-        this.managers.beasts      = new BeastManager();
-        this.managers.equipment   = new EquipmentManager();
-        this.managers.effects     = new EffectManager();
-        this.managers.sounds      = new SoundManager();
+        this.managers.data      = new DataManager();
+        this.managers.scenes    = new SceneManager();
+        this.managers.maps      = new MapManager();
+        this.managers.beasts    = new BeastManager();
+        this.managers.equipment = new EquipmentManager();
+        this.managers.effects   = new EffectManager();
+        this.managers.sounds    = new SoundManager();
 
         // mediators 
         this.views = new Views(this.speed, this.scaling);
@@ -73,7 +73,7 @@ class GameManager {
             return beast;
         });
 
-        await this.controllers[this.states[this.scene.type]].prepare(this.map, this.decoration, this.beasts);
+        await this.controllers[this.states[this.scene.type]].prepare({ map: this.map, decorations: this.decoration, beasts: this.beasts, camera: this.camera });
     }
 
     async initialize() {

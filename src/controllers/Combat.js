@@ -1,9 +1,8 @@
 class CombatController {
-    constructor(views, actions, ui = new CombatInterface()) {
+    constructor(views, actions) {
 
         this.views = views;
         this.actions = actions;
-        this.interface = ui;
 
         // -------------------
         // States
@@ -29,10 +28,8 @@ class CombatController {
 
         this.scene = new Object();
         this.scene.state = this.states.NONE;
-        this.scene.map = null;
-        this.scene.decorations = null;
-        this.scene.beasts = null;
         this.scene.active = null;
+        this.scene.ui = new CombatUI();
         this.scene.effects = new Effects();
         this.scene.markers = new Markers();
 
@@ -61,29 +58,25 @@ class CombatController {
     // Asset Prep and Loading
     // --------------------------
 
-    async load() {
-        await Promise.all([this.markers.load(), this.interface.load()]);
+    load() {
+        const pending = new Array();
+        pending.push(this.scene.markers.load());
+        pending.push(this.scene.ui.load());
+        return Promise.all(pending);
     }
 
-    async prepare(map, decorations, beasts) {
-        this.scene.map = map;
-        this.scene.decorations = decorations;
-        this.scene.beasts = beasts;
-        this.beasts.forEach(beast => {
-            const location = this.map.getLocation(beast.location.x, beast.location.y);
+    prepare(scene) {
+        scene.beasts.forEach(beast => {
+            const location = scene.map.getLocation(beast.location.x, beast.location.y);
             beast.initialize(location);
-            this.map.addPointOfInterest(location);
+            scene.map.addPointOfInterest(location);
         });
+        Object.assign(this.scene, scene);
     }
 
-    async initialize() {
-        Game.camera.toCenter(Game.canvas, this.map);
+    initialize() {
+        this.scene.camera.toCenter(Game.canvas, this.scene.map);
         this.nextTurn();
-        
-        // setTimeout(() => {
-        // Game.actions.move(this.active, BeastLogic.getPath(this.map.getLocation(5,8), BeastLogic.getRange(this.active, this.beasts, this.map))).then((data) => {
-        // });
-        // }, 2000)
     }
 
     // -------------------
@@ -96,7 +89,7 @@ class CombatController {
         this.views.updateEffects(this.effects, step);
         this.views.updateMarkers(this.markers, step);
 
-        this.interface.update(step);
+        this.scene.ui.update(step);
     }
 
     render(delta) {
@@ -116,7 +109,7 @@ class CombatController {
         this.views.renderIndicators(this.markers, this.active);
         this.views.renderScreenEffects(this.effects);
 
-        this.interface.render(delta);
+        this.scene.ui.render(delta);
     }
 
     // -------------------
@@ -124,108 +117,99 @@ class CombatController {
     // --------------------------
 
     async nextTurn() {
-        // await this.actions.nextTurn(this.scene, this.interface);
-
-        this.active = CombatLogic.getNextTurn(this.beasts);
-        this.active.resetTurn();
-        this.interface.updateTurns(CombatLogic.getTurns(this.beasts), this.active);
-
-        // pan camera to entity
-        Game.camera.toLocation(this.active.location, 750, 'ease-out');
-
-        // enable interface and new state
-        await this.interface.nextTurn(this.active);
-        this.state = this.states.PLAYER_TURN;
+        this.scene.state = await this.actions.nextTurn(this.scene, this.states);
     }
 
     // -------------------
-    // COMBAT ACTIONS
-    // --------------------------
+    // Player Move
+    // -------------------------
 
-    requestMove(event) {
-        if (this.state === this.states.MOVE_REQUEST)
-            return this.cancelMove();
-        
-        if (this.state !== this.states.PLAYER_TURN || !this.active.canMove())
-            return;
-
-        this.state = this.states.MOVE_REQUEST;
-        this.markers.range = BeastLogic.getRange(this.active, this.beasts, this.map);
-        this.interface.requestMove();
-    }
-
-    confirmMove(location) {
-        if (location === undefined || !BeastLogic.isValidSelection(location, this.markers.range))
-            return;
-
-        this.state = this.states.MOVE_CONFIRM;
-
-        const stepListenerId = Events.listen('move-step', (data) => {
-            this.interface._updateHeight(data.animation.destination.z);
-            this.map.removePointOfInterest(data.previous);
-            this.map.addPointOfInterest(data.animation.destination);
-        }, true);
-        Game.actions.move(this.active, BeastLogic.getPath(location, this.markers.range)).then((data) => {
-            this.state = this.states.PLAYER_TURN;
-            this.interface.confirmMove(this.active.getRemainingMovement());
-            this.interface._updateHeight(this.active.location.z);
-            this.markers.clear();
-            this.map.removePointOfInterest(data.previous);
-            this.map.addPointOfInterest(data.animation.destination);
-            Events.remove('move-step', stepListenerId);
-        });
-        this.markers.range = null;
-    }
-
-    cancelMove() {
-        this.state = this.states.PLAYER_TURN;
-        this.markers.clear();
-        this.interface.cancelMove();
-    }
-
-    resetMove() {
-        if (this.active.traveled.last !== 0) {
-            this.map.removePointOfInterest(this.active.location);
-            Game.actions.resetMove(this.active).then(() => this.map.addPointOfInterest(this.active.location));
-            this.map.addPointOfInterest(this.active.location)
-            this.interface.resetMove(this.active);
-            this.requestMove();
+    async requestMove() {
+        if (this.state === this.states.MOVE_REQUEST) {
+            return this.cancelRequestMove();
+        } else if (this.state === this.states.PLAYER_TURN && this.active.canMove()) {
+            this.state = await this.actions.requestMove(this.scene, this.states);
         }
     }
 
-    requestAttack(event) {
-        if (this.state === this.states.ATTACK_REQUEST)
-            return this.cancelAttack();
-        
-        if (this.state !== this.states.PLAYER_TURN || !this.active.canAttack())
+    async cancelRequestMove() {
+        this.state = await this.actions.cancelRequestMove(this.scene, this.states);
+    }
+
+    async resetMove() {
+        if (this.active.traveled.last === 0 || this.active.animations.checkpoint === null)
             return;
 
-        this.state = this.states.ATTACK_REQUEST;
-    
-        const attackRange = SkillLogic.getRange('sword', this.active, this.beasts, this.map);
-        this.markers.range = attackRange;
-        this.interface.requestAttack();
+        this.state = await this.actions.resetMove(this.scene, this.states);
     }
 
-    confirmAttack(location) {
-        Game.actions.useSkill('sword', this.active, location, this.beasts, this.map, Game.camera, Game.effects, Game.sounds).then(() => {
-            this.state = this.states.PLAYER_TURN;
-            this.interface.cancelAttack();
-        });
-        this.markers.clear();
+    async confirmMove(location = null) {
+        if (location === null || !BeastLogic.isValidSelection(location, this.markers.range))
+            return;
+
+        if (this.state !== this.states.MOVE_REQUEST)
+            return;
+
+        this.state = await this.actions.confirmMove(this.scene, this.states, location);
     }
 
-    cancelAttack() {
-        this.state = this.states.PLAYER_TURN;
-        this.markers.clear();
-        this.interface.cancelAttack();
+    // -------------------
+    // Player Attack
+    // -------------------------
+
+    async requestAttack() {
+        if (this.state === this.states.ATTACK_REQUEST) {
+            return this.cancelRequestAttack();
+        } else if (this.state === this.states.PLAYER_TURN && this.active.canAttack()) {
+            this.state = await this.actions.requestAttack(this.scene, this.states);
+        }
     }
+
+    async cancelRequestAttack() {
+        this.state = await this.actions.cancelRequestAttack(this.scene, this.states);
+    }
+
+    async confirmAttack(location = null) {
+        if (location === null)
+            return;
+
+        if (this.state !== this.states.ATTACK_REQUEST)
+            return;
+
+        this.state = await this.actions.confirmAttack(this.scene, this.states, location);
+    }
+
+    // ------------------
+    // Player End Turn
+    // -----------------------
+
+    async requestWait() {
+        if (this.state !== this.states.PLAYER_TURN)
+            return;
+
+        this.state = await this.actions.requestWait(this.scene, this.states);
+    }
+
+    async cancelRequestWait() {
+        this.state = await this.actions.cancelRequestWait(this.scene, this.states);
+    }
+
+    async confirmWait() {
+        if (this.state !== this.states.WAIT_REQUEST)
+            return;
+
+        this.state = await this.actions.confirmWait(this.scene, this.states);
+    }
+
+    // -------------------
+    // Player Skills
+    // -------------------------
 
     requestSkillsMenu(entity) {
         // TODO
     }
 
-    async requestSkill(entity) {
+    requestSkill(entity) {
         if (this.state === this.states.SKILL_REQUEST)
             return this.cancelSkill();
         
@@ -246,28 +230,10 @@ class CombatController {
         this.markers.clear();
     }
 
-    cancelSkill() {
+    cancelRequestSkill() {
         this.state = this.states.PLAYER_TURN;
         this.markers.clear();
         this.interface.cancelSkill();
-    }
-
-    requestWait(event) {
-        if (this.state !== this.states.PLAYER_TURN)
-            return;
-        this.markers.orientation = this.active.orientation;
-        this.state = this.states.WAIT_REQUEST;
-    }
-
-    confirmWait(event) {
-        this.state = this.states.WAIT_CONFIRM;
-        this.markers.clear();
-        this.interface.endTurn().then(() => this.nextTurn());
-    }
-
-    cancelWait() {
-        this.state = this.states.PLAYER_TURN;
-        this.markers.clear();
     }
 
     _updateFocus(location) {
@@ -372,19 +338,19 @@ class CombatController {
     onRightClick(event) {
         switch(this.state) {
             case this.states.MOVE_REQUEST:
-                this.cancelMove();
+                this.cancelRequestMove();
                 break;
             case this.states.ATTACK_REQUEST:
-                this.cancelAttack();
+                this.cancelRequestAttack();
                 break;
             case this.states.SKILL_REQUEST:
-                this.cancelSkill(location);
+                this.cancelRequestSkill(location);
                 break;
             case this.states.PLAYER_TURN:
                 this.resetMove();
                 break;
             case this.states.WAIT_REQUEST:
-                this.cancelWait();
+                this.cancelRequestWait();
                 break;
         }
     }

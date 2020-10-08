@@ -3,13 +3,127 @@ class Actions {
         this.managers = managers;
     }
 
+    // -------------------------
+    // Turn Management
+    // -------------------------------
+
+    async nextTurn(scene, states) {
+        scene.active = CombatLogic.getNextTurn(scene.beasts);
+        scene.active.resetTurn();
+        scene.ui.updateTurns(CombatLogic.getTurns(scene.beasts), scene.active);
+        scene.camera.toLocation(scene.active.location, 750, 'ease-out');
+        await scene.ui.nextTurn(scene.active);
+
+        return Promise.resolve((scene.active.ai) ? states.AI_TURN : states.PLAYER_TURN);
+    }
+
+    async requestMove(scene, states) {
+        scene.markers.range = BeastLogic.getRange(scene.active, scene.beasts, scene.map);
+        scene.ui.requestMove();
+
+        return Promise.resolve(states.MOVE_REQUEST);
+    }
+
+    async cancelRequestMove(scene, states) {
+        scene.markers.clear();
+        scene.ui.cancelRequestMove();
+
+        return Promise.resolve(states.PLAYER_TURN);
+    }
+
+    async confirmMove(scene, states, location) {
+        scene.state = states.MOVE_CONFIRM;
+
+        const listenerID = Events.listen('move-step', (data, id) => {
+            scene.ui._updateHeight(data.animation.destination.z);
+            scene.map.removePointOfInterest(data.previous);
+            scene.map.addPointOfInterest(data.animation.destination);
+        }, true);
+
+        const path = BeastLogic.getPath(location, scene.markers.range);
+        scene.markers.range = null;
+
+        return this.move(scene.active, path).then(data => {
+            scene.markers.clear();
+
+            scene.ui.confirmMove(scene.active.getRemainingMovement());
+            scene.ui._updateHeight(scene.active.location.z);
+            scene.map.removePointOfInterest(data.previous);
+            scene.map.addPointOfInterest(data.animation.destination);
+
+            Events.remove('move-step', listenerID);
+            return states.PLAYER_TURN;
+        });
+    }
+
+    async resetMove(scene, states) {
+        scene.map.removePointOfInterest(scene.active.location);
+
+        scene.active.animate(Object.assign(scene.active.animations.checkpoint, { ms: 0, frame: 0 }), true);
+        scene.active.location = scene.active.animations.checkpoint.destination;
+        scene.active.orientation = scene.active.animations.checkpoint.orientation;
+        scene.active.animations.checkpoint = null;
+        scene.active.traveled.total -= scene.active.traveled.last;
+        scene.active.traveled.last = 0;
+
+        scene.map.addPointOfInterest(scene.active.location)
+        scene.ui.resetMove(scene.active);
+
+        return this.requestMove(scene, states);
+    }
+
+    async requestAttack(scene, states) {
+        scene.markers.range = SkillLogic.getRange('sword', scene.active, scene.beasts, scene.map);
+        scene.ui.requestAttack();
+
+        return Promise.resolve(states.ATTACK_REQUEST);
+    }
+
+    async cancelRequestAttack(scene, states) {
+        scene.markers.clear();
+        scene.ui.cancelAttack();
+
+        return Promise.resolve(states.PLAYER_TURN);
+    }
+
+    async confirmAttack(scene, states, location) {
+        scene.state = states.ATTACK_CONFIRM;
+
+        scene.markers.clear();
+        return this.useSkill('sword', scene.active, location, scene.beasts, scene.map, scene.camera).then(() => {
+            scene.ui.cancelAttack();
+            return states.PLAYER_TURN;
+        });
+    }
+
+    async requestWait(scene, states) {
+        scene.markers.orientation = scene.active.orientation;
+        return Promise.resolve(states.WAIT_REQUEST);
+    }
+
+    async cancelRequestWait(scene, states) {
+        scene.markers.clear();
+        return Promise.resolve(states.PLAYER_TURN);
+    }
+
+    async confirmWait(scene, states) {
+        scene.state = states.WAIT_CONFIRM;
+        scene.markers.clear();
+        await scene.ui.endTurn();
+        return this.nextTurn(scene, states);
+    }
+
+    // ----------------------------
+    // Unit Actions
+    // ---------------------------------
+
     async move(unit, path, animationId = null) {
         const origin = unit.location,
               destination = path[path.length - 1],
               distance = Math.abs(destination.x - origin.x) + Math.abs(destination.y - origin.y);
 
         const complete = (resolve) => {
-            const id = Events.listen('move-complete', (data) => {
+            Events.listen('move-complete', (data, id) => {
                 if (data.unit !== unit)
                     return;
                 Events.remove('move-complete', id);
@@ -22,19 +136,6 @@ class Actions {
         unit.animate(BeastLogic.getMovementAnimations(unit, path, destination, animationId));
 
         return new Promise(complete);
-    }
-
-    async resetMove(unit) {
-        if (unit.animations.checkpoint === null)
-            return;
-        
-        unit.animate(Object.assign(unit.animations.checkpoint, { ms: 0, frame: 0 }), true);
-        unit.location = unit.animations.checkpoint.destination;
-        unit.orientation = unit.animations.checkpoint.orientation;
-
-        unit.animations.checkpoint = null;
-        unit.traveled.total -= unit.traveled.last;
-        unit.traveled.last = 0;
     }
 
     async changeOrientation(unit, x, y) {
@@ -50,7 +151,23 @@ class Actions {
         return Promise.resolve(orientation);
     }
 
-    async useSkill(id, unit, target, entities, map, camera, effects, sounds) {
+    async orient(unit, orientation) {
+        if (unit.orientation !== orientation) {
+            unit.orientation = orientation;
+            const animation = BeastLogic.getDefaultAnimation(unit, unit.animation);
+            animation.frame = unit.animations.current.frame;
+            animation.ms = unit.animations.current.ms;
+            unit.animate(animation, true);
+        }
+
+        return Promise.resolve(orientation);
+    }
+
+    // async skill(id, attacker, target, scene) {
+
+    // }
+
+    async useSkill(id, unit, target, entities, map, camera) {
         const skill = Assets.getSkill(id),
               range = SkillLogic.getRange(id, unit, entities, map),
               selection = SkillLogic.getSelection(id, target, entities, map, range);
@@ -64,7 +181,7 @@ class Actions {
                     await this.useSkill_animationSegment(skill.sequence[i], unit, target, selection, range, entities, map);
                     break;
                 case 'effect':
-                    await this.useSkill_effectSegment(skill.sequence[i], unit, target, selection, range, entities, map, effects);
+                    await this.useSkill_effectSegment(skill.sequence[i], unit, target, selection, range, entities, map, this.managers.effects);
                     break;
                 case 'filter':
                     await this.useSkill_filterSegment(skill.sequence[i], unit, selection, entities);
@@ -73,7 +190,7 @@ class Actions {
                     await this.useSkill_damageSegment(skill.sequence[i], unit, selection, entities);
                     break;
                 case 'sound':
-                    await this.useSkill_soundSegment(skill.sequence[i], sounds);
+                    await this.useSkill_soundSegment(skill.sequence[i], this.managers.sounds);
                     break;
                 case 'camera':
                     await this.useSkill_cameraSegment(skill.sequence[i], camera);
@@ -145,7 +262,7 @@ class Actions {
             unit.animate(animations, true);
 
             return new Promise((resolve) => {
-                const id = Events.listen(event, (data) => {
+                Events.listen(event, (data, id) => {
                     if (data.unit !== unit)
                         return;
                     Events.remove(event, id);
@@ -174,7 +291,7 @@ class Actions {
             unit.animate(animation, true);
 
             return new Promise((resolve) => {
-                const id = Events.listen(event, (actor) => {
+                Events.listen(event, (data, id) => {
                     Events.remove(event, id);
                     resolve();
                 }, true);
@@ -202,7 +319,7 @@ class Actions {
 
             if (segment.await !== undefined) {
                 const complete = new Promise((resolve) => {
-                    const id = Events.listen(segment.await, (data) => {
+                    Events.listen(segment.await, (data, id) => {
                         if (data.unit !== target)
                             return;
                         Events.remove(segment.await, id);

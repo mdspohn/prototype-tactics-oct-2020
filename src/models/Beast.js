@@ -7,6 +7,7 @@ class Beast {
 
         this.id = config.id;
         this.name = config.name;
+        this.ai = false;
         this.level = 1;
         this.experience = 0;
         this.allegiance = 0;
@@ -78,7 +79,6 @@ class Beast {
         this.animations.modifiers = new Object();
         this.animations.modifiers.speed = 1;
         this.animations.modifiers.scaling = 1;
-        this.animations.modifiers.filter = null;
 
         this.text = new Array();
         this.filters = new Array();
@@ -101,7 +101,6 @@ class Beast {
         this.animations.modifiers = new Object();
         this.animations.modifiers.speed = 1;
         this.animations.modifiers.scaling = 1;
-        this.animations.modifiers.filter = null;
 
         this.reset();
     }
