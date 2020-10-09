@@ -72,7 +72,6 @@ class GameManager {
             if (data.equipment !== undefined)
                 Object.entries(data.equipment).forEach(([ type, id ]) => beast.equipment.set(type, this.managers.equipment.get(id)));
             
-            console.log(beast)
             return beast;
         });
 

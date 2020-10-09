@@ -23,16 +23,16 @@ GAME_DATA.tilesets.equipment['one-handed'] = {
             0: { "layer": -1,  "idx": 1, "ox": 5, "oy": -8 }
         },
         31: {
-            0: { "layer": -1, "idx": 1, "ox": 5, "oy": -5 }
+            0: { "layer": -1, "idx": 1, "ox": 6, "oy": -4 }
         },
         32: {
             0: { "layer": 1, "idx": -1, "ox": -11, "oy": 15 }
         },
         33: {
-            0: { "layer": 1, "idx": 3, "ox": 5, "oy": 14 }
+            0: { "layer": 1, "idx": 3, "ox": 3, "oy": 13 }
         },
         34: {
-            0: { "layer": 1, "idx": 3, "ox": 6, "oy": 8 }
+            0: { "layer": 1, "idx": -1, "ox": 4, "oy": 14 }
         }
     }
 };
@@ -68,7 +68,7 @@ GAME_DATA.tilesets.equipment['shields'] = {
         },
         5: {
             0: { "layer": 1,  "idx": 0, "ox": -6, "oy": 14, "mirrored": true },
-            1: { "layer": -1, "idx": 1, "ox": -4, "oy": 11 }
+            1: { "layer": -1, "idx": 1, "ox": -4, "oy": 10 }
         },
         6: {
             0: {"layer": 1,  "idx": 0, "ox": -6, "oy": 14, "mirrored": true },
@@ -80,11 +80,11 @@ GAME_DATA.tilesets.equipment['shields'] = {
         },
         8: {
             0: { "layer": 1,  "idx": 0, "ox": -5, "oy": 13, "mirrored": true },
-            1: { "layer": -1, "idx": 1, "ox": -4, "oy": 11 }
+            1: { "layer": -1, "idx": 1, "ox": -4, "oy": 10 }
         },
         9: {
             0: { "layer": 1,  "idx": 0, "ox": -5, "oy": 14, "mirrored": true },
-            1: { "layer": -1, "idx": 1, "ox": -4, "oy": 12 }
+            1: { "layer": -1, "idx": 1, "ox": -4, "oy": 11 }
         },
         10: {
             0: { "layer": -1, "idx": 1, "ox": 6, "oy": 13 },
@@ -124,10 +124,10 @@ GAME_DATA.tilesets.equipment['shields'] = {
             0: { "layer": -1, "idx": 1, "ox": 12, "oy": 7 }
         },
         33: {
-            0: { "layer": -1, "idx": 1, "ox": 10, "oy": 5 }
+            0: { "layer": -1, "idx": 1, "ox": 7, "oy": 5 }
         },
         34: {
-            0: { "layer": -1, "idx": 1, "ox": 10, "oy": 5 }
+            0: { "layer": -1, "idx": -1, "ox": 10, "oy": 5 }
         }
     }
 };

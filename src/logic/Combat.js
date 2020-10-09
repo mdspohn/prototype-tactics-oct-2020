@@ -1,5 +1,4 @@
 class CombatLogic {
-
     static ORIENTATIONS = {
         NORTH: 'north',
         EAST: 'east',
@@ -10,6 +9,19 @@ class CombatLogic {
     // ------------------------
     // ORIENTATIONS
     // ------------------------------------------
+
+    static getNextLocation(map, location, orientation) {
+        switch (orientation) {
+            case CombatLogic.ORIENTATIONS.NORTH:
+                return map.getLocation(location.x - 1, location.y);
+            case CombatLogic.ORIENTATIONS.SOUTH:
+                return map.getLocation(location.x + 1, location.y);
+            case CombatLogic.ORIENTATIONS.EAST:
+                return map.getLocation(location.x, location.y + 1);
+            case CombatLogic.ORIENTATIONS.WEST:
+                return map.getLocation(location.x, location.y - 1);
+        }
+    }
 
     static getOrientation(from, to) {
         const DX = to.x - from.x,
@@ -58,53 +70,5 @@ class CombatLogic {
             case CombatLogic.ORIENTATIONS.WEST:
                 return CombatLogic.ORIENTATIONS.EAST;
         }
-    }
-
-    // --------------------------
-    // TURNS
-    // ---------------------------------------
-
-    static getTurns(units, count = 7) {
-        let loops = 0,
-            turns = new Array();
-
-        while (turns.length < count) {
-            const ready = units.filter(unit => CombatLogic._isReady(unit, loops));
-            ready.sort((a, b) => ((b.energy + (b.stats.current.speed * loops)) % 100) - ((a.energy + (a.stats.current.speed * loops)) % 100));
-
-            loops += 1;
-            turns.push(...ready);
-        }
-
-        return turns.slice(0, count);
-    }
-
-    static getNextTurn(units) {
-        let next = units.find(unit => unit.energy >= 100);
-
-        while (next === undefined) {
-            const ready = units.filter(unit => {
-                if (unit.isAlive()) {
-                    unit.energy += unit.stats.current.speed;
-                    return unit.energy >= 100;
-                }
-                return false;
-            });
-            ready.sort((a, b) => b.energy - a.energy);
-            next = ready[0];
-        }
-        next.energy -= 100;
-        return next;
-    }
-
-    static _isReady(unit, loops) {
-        if (!unit.isAlive())
-            return false;
-        
-        const energy = unit.energy + (unit.stats.current.speed * loops),
-              energized = energy >= 100,
-              isNewlyEnergized = Math.floor(energy / 100) > Math.floor((energy - (unit.stats.current.speed * 1)) / 100);
-
-        return energized && isNewlyEnergized;
     }
 }

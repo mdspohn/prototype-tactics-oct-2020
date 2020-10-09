@@ -8,14 +8,57 @@ class Actions {
     // -------------------------------
 
     async nextTurn(scene, states) {
-        scene.active = CombatLogic.getNextTurn(scene.beasts);
+        scene.active = this._getNext(scene.beasts);
         scene.active.resetTurn();
-        scene.ui.updateTurns(CombatLogic.getTurns(scene.beasts), scene.active);
+        scene.ui.updateTurns(this._getTurns(scene.beasts), scene.active);
         scene.camera.toLocation(scene.active.location, 750, 'ease-out');
         await scene.ui.nextTurn(scene.active);
 
         return Promise.resolve((scene.active.ai) ? states.AI_TURN : states.PLAYER_TURN);
     }
+
+    _getNext(beasts) {
+        let next = beasts.find(beast => beast.energy >= 100);
+
+        while (next === undefined) {
+            const ready = beasts.filter(beast => {
+                if (beast.isAlive()) {
+                    beast.energy += beast.stats.current.speed;
+                    return beast.energy >= 100;
+                }
+                return false;
+            }).sort((a, b) => b.energy - a.energy);
+
+            next = ready[0];
+        }
+        next.energy -= 100;
+
+        return next;
+    }
+
+    _getTurns(beasts, amount = 7) {
+        let counter = 0;
+
+        const turns = new Array();
+        while (turns.length < amount) {
+            const available = beasts.filter(beast => {
+                const energy = beast.energy + (beast.stats.current.speed * counter),
+                      isReady = energy >= 100,
+                      isNewlyReady = Math.floor(energy / 100) > Math.floor((energy - (beast.stats.current.speed * 1)) / 100);
+
+                return beast.isAlive() && isReady && isNewlyReady;
+            }).sort((a, b) => ((b.energy + b.stats.current.speed * counter) % 100) - ((a.energy + a.stats.current.speed * counter) % 100));
+
+            counter += 1;
+            turns.push(...available);
+        }
+
+        return turns.slice(0, amount);
+    }
+
+    // ------------------------
+    // Player Actions
+    // -----------------------------
 
     async requestMove(scene, states) {
         scene.markers.range = BeastLogic.getRange(scene.active, scene.beasts, scene.map);
@@ -90,7 +133,7 @@ class Actions {
         scene.state = states.ATTACK_CONFIRM;
 
         scene.markers.clear();
-        await this.skill(id, scene.active, target, scene);
+        await this.useSkill(id, scene.active, target, scene);
         scene.ui.cancelAttack();
 
         return Promise.resolve(states.PLAYER_TURN);
@@ -119,6 +162,24 @@ class Actions {
     // Unit Actions
     // ---------------------------------
 
+    async changeOrientation(unit, arg1, arg2) {
+        let direction = arg1;
+        if (direction instanceof Location)
+            direction = CombatLogic.getOrientation(unit.location, direction);
+        if (typeof direction === 'number')
+            direction = CombatLogic.getOrientationToCoords(unit, arg1, arg2);
+
+        if (unit.orientation !== direction) {
+            unit.orientation = direction;
+            const animation = BeastLogic.getDefaultAnimation(unit, unit.animation);
+            animation.frame = unit.animations.current.frame;
+            animation.ms = unit.animations.current.ms;
+            unit.animate(animation, true);
+        }
+
+        return Promise.resolve(direction);
+    }
+
     async move(unit, path, animationId = null) {
         const origin = unit.location,
               destination = path[path.length - 1],
@@ -140,11 +201,14 @@ class Actions {
         return new Promise(complete);
     }
 
-    async skill(id, attacker, target, scene) {
+    async useSkill(id, attacker, target, scene) {
         const config = this.managers.skills.get(id),
               range = SkillLogic.getRange(config, attacker, scene.beasts, scene.map),
               selection = SkillLogic.getSelection(config, target, scene.beasts, scene.map, range/* range restriction */);
 
+        if (!range.has(target))
+            return Promise.resolve();
+            
         // -----------------
         // Calculate Damage / Crit
         // ----------------------
@@ -153,23 +217,12 @@ class Actions {
         // Animation Sequence
         // -------------------------------
 
+        await this.changeOrientation(attacker, target);
+
         for (let i = 0; i < config.sequence.length; i++)
             await this._doSegment(config.sequence[i], attacker, target, selection, range, scene);
 
         return Promise.resolve();
-    }
-
-    async changeOrientation(unit, x, y) {
-        const orientation = CombatLogic.getOrientationToCoords(unit, x, y);
-        if (unit.orientation !== orientation) {
-            unit.orientation = orientation;
-            const animation = BeastLogic.getDefaultAnimation(unit, unit.animation);
-            animation.frame = unit.animations.current.frame;
-            animation.ms = unit.animations.current.ms;
-            unit.animate(animation, true);
-        }
-
-        return Promise.resolve(orientation);
     }
 
     // ----------------------------
@@ -179,76 +232,94 @@ class Actions {
     async _doSegment(segment, attacker, target, selection, range, scene) {
         switch (segment.type) {
             case 'animation':
-                return this.useSkill_animationSegment(segment, attacker, target, selection, range, scene.beasts, scene.map);
-            case 'effect':
-                return this.useSkill_effectSegment(segment, attacker, target, selection, range, scene.beasts, scene.map, this.managers.effects);
-            case 'filter':
-                return this.useSkill_filterSegment(segment, attacker, selection, scene.beasts);
+                return this._doAnimationSegment(segment, attacker, target, selection, range, scene);
             case 'damage':
-                return this.useSkill_damageSegment(segment, attacker, selection, scene.beasts);
+                return this._doDamageSegment(segment, attacker, target, selection, range, scene);
+            case 'filter':
+                return this._doFilterSegment(segment, attacker, target, selection, range, scene);
+            case 'effect':
+                return this.useSkill_effectSegment(segment, attacker, target, selection, range, scene);
             case 'sound':
-                return this.useSkill_soundSegment(segment, this.managers.sounds);
+                return this.useSkill_soundSegment(segment, attacker, target, selection, range, scene);
             case 'camera':
-                return this.useSkill_cameraSegment(segment, scene.camera);
+                return this.useSkill_cameraSegment(segment, attacker, target, selection, range, scene);
             case 'wait':
-                return this.useSkill_waitSegment(segment);
+                return this.useSkill_waitSegment(segment, attacker, target, selection, range, scene);
         }
     }
 
-    useSkill_animationSegment(segment, unit, target, selection, range, entities, map) {
-        const unitsToAnimate = segment.unit === 'attacker' ? [unit] : entities.filter(entity => selection.has(entity.location)),
-              pending = new Array();
+    // Animation_Segment <Object> ------------------------------------------------------
+    //  -> type     <String> ['animation']                // segment type
+    //  -> id       <String> ['slash', 'stagger',...]     // animation ID
+    //  -> subject  <String> ['attacker', 'defender',...] // object to animate
+    //  -> movement <Object>                              // movement data to be added to animation
+    //      -> type       <String> ['teleport', 'normal',...]
+    //      -> toLocation <String> ['target', 'target-before', 'behind',...]
+    //  -> await    <String> ['hit', 'burst']             // event to wait on before continuing
+    // -------------------------------------------------------------------------------------------------
 
-        for (let i = 0; i < unitsToAnimate.length; i++) {
-            const actor = unitsToAnimate[i];
-            let destination = target, path = new Array();
+    _doAnimationSegment(segment, attacker, target/* Location */, selection, range, scene) {
+        const id      = segment.id,
+              subject = segment.subject,
+              event   = segment.await,
+              hasMovement = segment.movement !== undefined,
+              targets = (subject === 'attacker') ? [attacker] : scene.beasts.filter(beast => selection.has(beast.location));
 
-            if (segment.movement) {
-                switch (segment.location) {
-                    case 'before-target':
-                        destination = range.get(target).previous;
-                        if (destination !== actor.location) {
-                            let next = destination;
-                            while (range.get(next) !== undefined && range.get(next).previous instanceof Location) {
-                                path.unshift(next);
-                                next = range.get(next).previous;
-                            }
-                        } else {
-                            // skip movement animation segment if we don't actually move
-                            continue;
+        const animations = [];
+        targets.forEach(actor => {
+            const config = new Object();
+            config.unit = actor;
+            config.animationId = id;
+            config.event = event;
+            config.destination = actor.location;
+            config.path = new Array();
+
+            if (hasMovement) {
+                const type = segment.movement.type,
+                      toLocation = segment.movement.toLocation;
+
+                let baseTarget = target,
+                    baseOrientation = CombatLogic.getOrientation(actor.location, target);
+
+                if (toLocation === 'target-before' || toLocation === 'front')
+                    baseOrientation = CombatLogic.getOppositeOrientation(baseOrientation);
+                
+                if (subject === 'defender') {
+                    if (toLocation === 'front') {
+                        baseTarget = attacker.location;
+                        baseOrientation = attacker.orientation;
+                    } else if (toLocation === 'behind') {
+                        baseTarget = attacker.location;
+                        baseOrientation = CombatLogic.getOppositeOrientation(attacker.orientation);
+                    }
+                } else if (subject === 'attacker') {
+                    const targetOrientation = scene.beasts.find(beast => beast.location === target)?.orientation;
+                    if (targetOrientation !== undefined) {
+                        if (toLocation === 'front') {
+                            baseOrientation = targetOrientation;
+                        } else if (toLocation === 'behind') {
+                            baseOrientation = CombatLogic.getOppositeOrientation(targetOrientation);
                         }
-                        break;
-                    case 'knockback':
-                        const location = CombatLogic.getKnockbackTile(unit, actor, map);
-                        if (location !== undefined && !entities.some(entity => entity.location === location) && location.z <= actor.location.z) {
-                            destination = location;
-                            path = [destination];
-                        } else {
-                            destination = actor.location;
-                        }
-                        break;
+                    }
+                }
+
+                config.destination = (toLocation !== 'target') ? CombatLogic.getNextLocation(scene.map, baseTarget, baseOrientation) : target;
+
+                if (type === 'teleport') {
+                    config.path.push(config.destination);
+                } else {
+                    config.path = BeastLogic.getPath(config.destination, BeastLogic.getRange(actor, scene.beasts, scene.map));
                 }
             }
-            
-            pending.push({
-                unit: actor,
-                animationId: segment.id,
-                destination,
-                path,
-                event: segment.await
-            });
-        }
 
-        if (segment.await !== undefined && pending.length !== 0)
-            return Promise.all([...pending.map(opts => this.useSkill_animateUnit(opts))]);
+            animations.push(config);
+        });
 
-        pending.forEach(opts => this.useSkill_animateUnit(opts));
-
-        return Promise.resolve();
+        return Promise.all(animations.map(config => this._startAnimationSegment(config)));
     }
 
-    useSkill_animateUnit({ unit, animationId, destination, path, event } = opts) {
-        if (path.length !== 0) {
+    _startAnimationSegment({ unit, animationId, destination, path, event } = opts) {
+        if (path.length !== 0 && destination !== unit.location) {
             const animations = BeastLogic.getMovementAnimations(unit, path, destination, animationId);
             unit.animate(animations, true);
 
@@ -281,6 +352,9 @@ class Actions {
 
             unit.animate(animation, true);
 
+            if (event === undefined)
+                return Promise.resolve();
+
             return new Promise((resolve) => {
                 Events.listen(event, (data, id) => {
                     Events.remove(event, id);
@@ -289,14 +363,14 @@ class Actions {
             });
         }
     }
-
-    useSkill_filterSegment(segment, unit, selection, entities) {
-        const unitsToFilter = segment.unit === 'attacker' ? [unit] : entities.filter(entity => selection.has(entity.location)),
+    
+    _doFilterSegment(segment, attacker, target/* Location */, selection, range, scene) {
+        const unitsToFilter = segment.subject === 'attacker' ? [attacker] : scene.beasts.filter(beast => selection.has(beast.location)),
               promises = [Promise.resolve()];
 
-        unitsToFilter.forEach(target => {
+        unitsToFilter.forEach(beast => {
             segment.filters.forEach(filter => {
-                target.filters.push({
+                beast.filters.push({
                     type: filter.type,
                     suffix: filter.suffix || '',
                     initial: filter.initial,
@@ -311,7 +385,7 @@ class Actions {
             if (segment.await !== undefined) {
                 const complete = new Promise((resolve) => {
                     Events.listen(segment.await, (data, id) => {
-                        if (data.unit !== target)
+                        if (data.unit !== beast)
                             return;
                         Events.remove(segment.await, id);
                         resolve();
@@ -324,11 +398,11 @@ class Actions {
         return Promise.all(promises);
     }
 
-    useSkill_damageSegment(segment, unit, selection, entities) {
-        const unitsToDamage = segment.unit === 'attacker' ? [unit] : entities.filter(entity => selection.has(entity.location));
+    _doDamageSegment(segment, attacker, target/* Location */, selection, range, scene) {
+        const unitsToDamage = segment.subject === 'attacker' ? [attacker] : scene.beasts.filter(beast => selection.has(beast.location));
 
-        unitsToDamage.forEach(target => {
-            target.doDamage(segment.amount, segment.fontSize);
+        unitsToDamage.forEach(beast => {
+            beast.doDamage(segment.amount, segment.fontSize);
         });
 
         return Promise.resolve();

@@ -9,7 +9,7 @@ class CombatController {
         // -----------------------
 
         this.states = new Object();
-        this.states["NONE"]           = 0;
+        this.states["CINEMATIC"]      = 0;
         this.states["AI_TURN"]        = 10;
         this.states["PLAYER_TURN"]    = 20;
         this.states["MOVE_REQUEST"]   = 21;
@@ -27,7 +27,7 @@ class CombatController {
         // -----------------------
 
         this.scene = new Object();
-        this.scene.state = this.states.NONE;
+        this.scene.state = this.states.CINEMATIC;
         this.scene.active = null;
         this.scene.ui = new CombatUI();
         this.scene.effects = new Effects();
@@ -75,6 +75,7 @@ class CombatController {
     }
 
     initialize() {
+        // TODO: cinematic sequence, then start combat
         this.scene.camera.toCenter(Game.canvas, this.scene.map);
         this.nextTurn();
     }
@@ -117,11 +118,14 @@ class CombatController {
     // --------------------------
 
     async nextTurn() {
-        this.scene.state = await this.actions.nextTurn(this.scene, this.states);
+        this.state = await this.actions.nextTurn(this.scene, this.states);
+        if (this.state === this.states.AI_TURN) {
+            // TODO: begin AI turn sequence
+        }
     }
 
     // -------------------
-    // Player Move
+    // Player Actions
     // -------------------------
 
     async requestMove() {
@@ -153,15 +157,11 @@ class CombatController {
         this.state = await this.actions.confirmMove(this.scene, this.states, location);
     }
 
-    // -------------------
-    // Player Attack
-    // -------------------------
-
     async requestAttack() {
         if (this.state === this.states.ATTACK_REQUEST) {
             return this.cancelRequestAttack();
         } else if (this.state === this.states.PLAYER_TURN && this.active.canAttack()) {
-            this.state = await this.actions.requestAttack(this.scene, this.states, 'double-slash');
+            this.state = await this.actions.requestAttack(this.scene, this.states, 'anime');
         }
     }
 
@@ -176,12 +176,8 @@ class CombatController {
         if (this.state !== this.states.ATTACK_REQUEST)
             return;
 
-        this.state = await this.actions.confirmAttack(this.scene, this.states, 'double-slash', location);
+        this.state = await this.actions.confirmAttack(this.scene, this.states, 'anime', location);
     }
-
-    // ------------------
-    // Player End Turn
-    // -----------------------
 
     async requestWait() {
         if (this.state !== this.states.PLAYER_TURN)
@@ -285,7 +281,7 @@ class CombatController {
                 return;
             case this.states.ATTACK_REQUEST:
                 if (BeastLogic.isValidSelection(location, this.markers.range)) {
-                    this.markers.selection = SkillLogic.getSelection(this.actions.managers.skills.get('slash'), location, this.beasts, this.map, this.markers.range);
+                    this.markers.selection = SkillLogic.getSelection(this.actions.managers.skills.get('anime'), location, this.beasts, this.map, this.markers.range);
                 } else {
                     this.markers.selection = null;
                     location = null;

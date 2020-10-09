@@ -44,7 +44,7 @@ class BeastRenderer {
                 const completed = new Array();
                 beast.filters.forEach((filter, index) => {
                     filter.ms += ~~!isDeltaUpdate * adjustedMs;
-                    filter.value = Math.min(filter.target * (Math.max(filter.ms + (~~isDeltaUpdate * adjustedMs), 0) / filter.duration), filter.target);
+                    filter.value = filter.initial + (filter.target - filter.initial) * Math.min(Math.max(filter.ms + (~~isDeltaUpdate * adjustedMs), 0) / filter.duration, 1);
                     if (filter.value === filter.target) {
                         if (filter.reverse) {
                             [filter.target, filter.initial] = [filter.initial, filter.target];

@@ -57,24 +57,159 @@ GAME_DATA.skills['slash'] = {
     sequence: [
         {
             type: 'animation',
-            unit: 'attacker',
+            subject: 'attacker',
             id: 'slash',
             await: 'hit'
         },
         {
             type: 'animation',
-            unit: 'defender',
+            subject: 'defender',
             id: 'hit'
         },
         {
             type: 'damage',
-            unit: 'defender',
+            subject: 'defender',
             amount: 22,
             fontSize: 30
         },
         {
             type: 'filter',
-            unit: 'defender',
+            subject: 'defender',
+            filters: [
+                {
+                    type: 'brightness',
+                    initial: 100,
+                    target: 0,
+                    suffix: '%',
+                    duration: 150,
+                    reverse: true
+                },
+                {
+                    type: 'invert',
+                    initial: 0,
+                    target: 100,
+                    suffix: '%',
+                    duration: 150,
+                    reverse: true
+                }
+            ],
+            await: 'brightness-filter-complete'
+        }
+    ]
+};
+
+GAME_DATA.skills['anime'] = {
+    name: 'Melee Attack',
+    description: '...',
+    range: {
+        min: 1,
+        max: 4,
+        pattern: 'CARDINAL',
+        z: 2
+    },
+    selection: {
+        min: 0,
+        max: 0,
+        pattern: 'POINT',
+        z: 2
+    },
+    sequence: [
+        {
+            type: 'animation',
+            subject: 'attacker',
+            id: 'anime',
+            await: 'hit'
+        },
+        {
+            type: 'filter',
+            subject: 'attacker',
+            filters: [
+                {
+                    type: 'opacity',
+                    initial: 100,
+                    target: 0,
+                    suffix: '%',
+                    duration: 200,
+                    reverse: true
+                }
+            ]
+        },
+        {
+            type: 'animation',
+            subject: 'attacker',
+            movement: {
+                type: 'teleport',
+                toLocation: 'target-after'
+            },
+            id: 'dash',
+            await: 'move-complete'
+        },
+        {
+            type: 'animation',
+            subject: 'attacker',
+            id: 'anime',
+            await: 'hit'
+        },
+        {
+            type: 'animation',
+            subject: 'defender',
+            id: 'hit'
+        },
+        {
+            type: 'filter',
+            subject: 'defender',
+            filters: [
+                {
+                    type: 'brightness',
+                    initial: 100,
+                    target: 0,
+                    suffix: '%',
+                    duration: 100,
+                    reverse: true
+                },
+                {
+                    type: 'invert',
+                    initial: 0,
+                    target: 100,
+                    suffix: '%',
+                    duration: 100,
+                    reverse: true
+                }
+            ],
+            await: 'brightness-filter-complete'
+        },
+        {
+            type: 'filter',
+            subject: 'defender',
+            filters: [
+                {
+                    type: 'brightness',
+                    initial: 100,
+                    target: 0,
+                    suffix: '%',
+                    duration: 100,
+                    reverse: true
+                },
+                {
+                    type: 'invert',
+                    initial: 0,
+                    target: 100,
+                    suffix: '%',
+                    duration: 100,
+                    reverse: true
+                }
+            ],
+            await: 'brightness-filter-complete'
+        },
+        {
+            type: 'damage',
+            subject: 'defender',
+            amount: 'anime isnt real',
+            fontSize: 30
+        },
+        {
+            type: 'filter',
+            subject: 'defender',
             filters: [
                 {
                     type: 'brightness',
@@ -116,24 +251,28 @@ GAME_DATA.skills['double-slash'] = {
     sequence: [
         {
             type: 'animation',
-            unit: 'attacker',
+            subject: 'attacker',
+            movement: {
+                type: 'teleport',
+                toLocation: 'target-before'
+            },
             id: 'slash',
             await: 'hit'
         },
         {
             type: 'animation',
-            unit: 'defender',
+            subject: 'defender',
             id: 'hit'
         },
         {
             type: 'damage',
-            unit: 'defender',
+            subject: 'defender',
             amount: 22,
             fontSize: 30
         },
         {
             type: 'filter',
-            unit: 'defender',
+            subject: 'defender',
             filters: [
                 {
                     type: 'brightness',
@@ -156,26 +295,26 @@ GAME_DATA.skills['double-slash'] = {
         },
         {
             type: 'animation',
-            unit: 'attacker',
+            subject: 'attacker',
             id: 'slash-reverse',
             await: 'hit'
         },
         {
             type: 'animation',
-            unit: 'defender',
+            subject: 'defender',
             //movement: true,
             location: 'knockback',
             id: 'hit'
         },
         {
             type: 'damage',
-            unit: 'defender',
+            subject: 'defender',
             amount: 33,
             fontSize: 40
         },
         {
             type: 'filter',
-            unit: 'defender',
+            subject: 'defender',
             filters: [
                 {
                     type: 'brightness',
