@@ -205,7 +205,7 @@ class Actions {
         console.log('----------- START ----------', id);
         const config = this.managers.skills.get(id),
               range = SkillLogic.getRange(config, attacker, scene.beasts, scene.map),
-              selection = SkillLogic.getSelection(config, target, scene.beasts, scene.map, (config.target.overflow ? range : null)),
+              selection = SkillLogic.getSelection(config, target, scene.beasts, scene.map, (config.target.overflow ? null : range)),
               secondary = scene.beasts.filter(beast => selection.has(beast.location)),
               primary = secondary.find(beast => beast.location === target);
 
@@ -366,7 +366,8 @@ class Actions {
 
             return new Promise((resolve) => {
                 Events.listen(event, (data, id) => {
-                    if (data !== beast)
+                    console.log(beast, event, data, id)
+                    if (data.unit !== beast)
                         return;
                     Events.remove(event, id);
                     resolve();

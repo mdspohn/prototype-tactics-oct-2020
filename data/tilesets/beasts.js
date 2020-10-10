@@ -531,13 +531,38 @@ GAME_DATA.tilesets.beasts['player'] = {
         "brace": {
             "east": {
                 "frames": [
-                    { "idx": 3, "ms": 1000, "px": 1, "py": 1 }
+                    { "idx": 10, "ms": 1000, "px": 1, "py": 1 }
                 ]
             },
             "south": {
                 "mirrored": true,
                 "frames": [
-                    { "idx": 3, "ms": 1000, "px": 1, "py": 1 }
+                    { "idx": 10, "ms": 1000, "px": 1, "py": 1 }
+                ]
+            },
+            "west": {
+                "frames": [
+                    { "idx": 5, "ms": 1000, "px": 1, "py": 1 }
+
+                ]
+            },
+            "north": {
+                "mirrored": true,
+                "frames": [
+                    { "idx": 5, "ms": 1000, "px": 1, "py": 1 }
+                ]
+            }
+        },
+        "crouch": {
+            "east": {
+                "frames": [
+                    { "idx": 10, "ms": 1000 }
+                ]
+            },
+            "south": {
+                "mirrored": true,
+                "frames": [
+                    { "idx": 10, "ms": 1000 }
                 ]
             },
             "west": {
@@ -856,8 +881,8 @@ GAME_DATA.tilesets.beasts['slime'] = {
         "stagger": {
             "east": {
                 "frames": [
-                    { "idx": 1, "ms": 50, "intx": -1, "px": 0.5, "py": 0.5 },
-                    { "idx": 1, "ms": 50, "intx": 1, "px": 0.5, "py": 0.5 },
+                    { "idx": 1, "ms": 120, "intx": -1, "px": 0.5, "py": 0.5, "ymult": true },
+                    { "idx": 1, "ms": 120, "intx": 1, "px": 0.5, "py": 0.5, "ymult": true },
                     { "idx": 1, "ms": 50, "intx": -1 },
                     { "idx": 1, "ms": 50, "intx": 1 },
                     { "idx": 1, "ms": 50, "intx": -1 },
@@ -877,8 +902,8 @@ GAME_DATA.tilesets.beasts['slime'] = {
             },
             "west": {
                 "frames": [
-                    { "idx": 1, "ms": 50, "intx": -1, "px": 0.5, "py": 0.5 },
-                    { "idx": 1, "ms": 50, "intx": 1, "px": 0.5, "py": 0.5 },
+                    { "idx": 1, "ms": 50, "intx": -1, "px": 0.5, "py": 0.5, "ymult": true },
+                    { "idx": 1, "ms": 50, "intx": 1, "px": 0.5, "py": 0.5, "ymult": true },
                     { "idx": 1, "ms": 50, "intx": -1 },
                     { "idx": 1, "ms": 50, "intx": 1 },
                     { "idx": 1, "ms": 50, "intx": -1 },

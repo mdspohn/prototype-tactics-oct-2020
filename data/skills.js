@@ -304,19 +304,50 @@ GAME_DATA.skills["anime-slash"] = {
     range:  { selection: 'cardinal', zu: 2, zd: 2, min: 1, max: 4 },
     target: { selection: 'cardinal', zu: 2, zd: 2, min: 0, max: 0 },
     selectable: ['ally', 'enemy'],
+    power: 999,
     sequence: [
         {
             category: 'animation',
             type: 'beast',
             on: 'self',
             animations: [
-                { id: 'brace' },
                 {   
-                    id: 'anime-slash',
+                    id: 'brace',
+                }
+            ],
+            wait: 'brace-complete'
+        },
+        {
+            category: 'filter',
+            type: 'beast',
+            on: 'self',
+            filters: [
+                { type: 'opacity', suffix: '%', i: 50, t: 0,   duration: 200, revert: true },
+            ]
+        },
+        {
+            category: 'animation',
+            type: 'beast',
+            on: 'self',
+            animations: [
+                {   
+                    id: 'dash',
                     movement: true,
+                    type: 'teleport',
                     destination: 'target',
-                    offset: 1,
+                    offset: 2,
                     orientation: 'to-destination',
+                }
+            ],
+            wait: 'move-complete'
+        },
+        {
+            category: 'animation',
+            type: 'beast',
+            on: 'self',
+            animations: [
+                {   
+                    id: 'anime'
                 }
             ],
             wait: 'hit'
@@ -341,6 +372,170 @@ GAME_DATA.skills["anime-slash"] = {
                 { type: 'invert',     suffix: '%', i: 0,   t: 100, duration: 150, revert: true }
             ],
             wait: 'brightness-filter-complete'
+        },
+        {
+            category: 'filter',
+            type: 'beast',
+            on: 'primary',
+            filters: [
+                { type: 'brightness', suffix: '%', i: 100, t: 0,   duration: 150, revert: true },
+                { type: 'invert',     suffix: '%', i: 0,   t: 100, duration: 150, revert: true }
+            ],
+            wait: 'brightness-filter-complete'
+        },
+        {
+            category: 'filter',
+            type: 'beast',
+            on: 'primary',
+            filters: [
+                { type: 'opacity', suffix: '%', i: 100, t: 0, duration: 250, revert: false },
+            ],
+            wait: 'opacity-filter-complete'
+        },
+        {
+            category: 'filter',
+            type: 'beast',
+            on: 'primary',
+            filters: [
+                { type: 'opacity', suffix: '%', i: 0, t: 1, duration: 3000, revert: false },
+            ],
+            wait: 'opacity-filter-complete'
+        }
+    ]
+};
+GAME_DATA.skills["sneak"] = {
+    range:  { selection: 'fill', zu: 2, zd: 2, min: 1, max: 6 },
+    target: { selection: 'cardinal', zu: 2, zd: 2, min: 0, max: 0 },
+    selectable: ['ally', 'enemy'],
+    sequence: [
+        {
+            category: 'filter',
+            type: 'beast',
+            on: 'primary',
+            filters: [
+                { type: 'hue-rotate', suffix: 'deg', i: 0, t: 1440, duration: 3000, revert: true },
+            ]
+        },
+        {
+            category: 'animation',
+            type: 'beast',
+            on: 'self',
+            animations: [ { 
+                id: 'crouch',
+            } ]
+        },
+        {
+            category: 'filter',
+            type: 'beast',
+            on: 'self',
+            filters: [
+                { type: 'opacity', suffix: '%', i: 100, t: 0, duration: 1000, revert: false },
+            ],
+            wait: 'opacity-filter-complete'
+        },
+        {
+            category: 'animation',
+            type: 'beast',
+            on: 'self',
+            animations: [ { 
+                id: 'crouch',
+                movement: true,
+                type: 'teleport',
+                destination: 'target',
+                offset: -1,
+                orientation: 'to-destination',
+            } ]
+        },
+        {
+            category: 'filter',
+            type: 'beast',
+            on: 'self',
+            filters: [
+                { type: 'opacity', suffix: '%', i: 0, t: 1, duration: 1000, revert: false },
+            ],
+            wait: 'opacity-filter-complete'
+        },
+        {
+            category: 'filter',
+            type: 'beast',
+            on: 'self',
+            filters: [
+                { type: 'opacity', suffix: '%', i: 0, t: 100, duration: 500, revert: false },
+            ]
+        },
+        {
+            category: 'animation',
+            type: 'beast',
+            on: 'self',
+            animations: [ { 
+                id: 'slash',
+            } ],
+            wait: 'hit'
+        },
+        {
+            category: 'animation',
+            type: 'beast',
+            on: 'primary',
+            animations: [ { 
+                id: 'stagger',
+            } ]
+        },
+        {
+            category: 'damage',
+            on: 'primary',
+            percentage: 100
+        },
+        {
+            category: 'filter',
+            type: 'beast',
+            on: 'primary',
+            filters: [
+                { type: 'brightness', suffix: '%', i: 100, t: 0,   duration: 150, revert: true },
+                { type: 'invert',     suffix: '%', i: 0,   t: 100, duration: 150, revert: true }
+            ],
+            wait: 'brightness-filter-complete'
+        },
+    ]
+};
+
+GAME_DATA.skills["pull"] = {
+    range:  { selection: 'cardinal', zu: 2, zd: 2, min: 1, max: 4 },
+    target: { selection: 'cardinal', zu: 2, zd: 2, min: 0, max: 0, overflow: true },
+    selectable: ['ally', 'enemy'],
+    sequence: [
+        {
+            category: 'animation',
+            type: 'beast',
+            on: 'primary',
+            animations: [ { 
+                id: 'stagger',
+                movement: true,
+                type: 'teleport',
+                destination: 'attacker',
+                offset: -1,
+                orientation: 'to-destination',
+            } ]
+        }
+    ]
+};
+
+GAME_DATA.skills["push"] = {
+    range:  { selection: 'fill', zu: 2, zd: 2, min: 1, max: 4 },
+    target: { selection: 'cardinal', zu: 2, zd: 2, min: 0, max: 1 },
+    selectable: ['ally', 'enemy'],
+    sequence: [
+        {
+            category: 'animation',
+            type: 'beast',
+            on: 'secondary',
+            animations: [ { 
+                id: 'stagger',
+                movement: true,
+                type: 'teleport',
+                destination: 'self',
+                offset: -5,
+                orientation: 'to-destination',
+            } ]
         }
     ]
 };
