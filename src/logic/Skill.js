@@ -2,7 +2,7 @@ class SkillLogic {
 
     static getRange(skill, attacker, entities, layout) {
         const range = new WeakMap();
-        SkillLogic._addPattern(skill.range.pattern, range, {
+        SkillLogic._addPattern(skill.range.selection, range, {
             location: attacker.location,
             orientation: null,
             entities: entities,
@@ -12,7 +12,7 @@ class SkillLogic {
             step: 0,
             min: ~~skill.range.min,
             max: skill.range.max,
-            z: skill.range.z,
+            z: skill.range.zu,
             color: 'white',
             includeHazards: true, // XXX account for movement skills
             includeEntities: true // XXX account for movement skills
@@ -22,7 +22,7 @@ class SkillLogic {
 
     static getSelection(skill, target, entities, layout, range = null) {
         const selection = new WeakMap();
-        SkillLogic._addPattern(skill.selection.pattern, selection, {
+        SkillLogic._addPattern(skill.target.selection, selection, {
             location: target,
             orientation: null,
             entities: entities,
@@ -30,9 +30,9 @@ class SkillLogic {
             restrictions: range,
             previous: null,
             step: 0,
-            min: ~~skill.selection.min,
-            max: skill.selection.max,
-            z: skill.selection.z,
+            min: ~~skill.target.min,
+            max: skill.target.max,
+            z: skill.target.zu,
             color: 'red',
             //secondary: 'yellow',
             includeHazards: true, // XXX account for movement skills
@@ -43,21 +43,21 @@ class SkillLogic {
 
     static _addPattern(id, range, opts) {
         switch(id) {
-            case 'POINT':
+            case 'fill':
                 SkillLogic._addPointPattern(range, opts);
                 break;
-            case 'CARDINAL':
+            case 'cardinal':
                 SkillLogic._addCardinalPattern(range, opts);
                 break;
-            case 'FILL':
-                SkillLogic._addFillPattern(range, opts);
-                break;
-            case 'CONCURRENT':
-                SkillLogic._addConcurrentPattern(range, opts);
-                break;
-            case 'ENTITIES':
-                SkillLogic._addEntityPattern(range, opts);
-                break;
+            // case 'fill':
+            //     SkillLogic._addFillPattern(range, opts);
+            //     break;
+            // case 'CONCURRENT':
+            //     SkillLogic._addConcurrentPattern(range, opts);
+            //     break;
+            // case 'ENTITIES':
+            //     SkillLogic._addEntityPattern(range, opts);
+            //     break;
             default:
                 return console.warn('Skill pattern not found: ', id);
         }

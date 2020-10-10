@@ -1,99 +1,346 @@
-// -----------------------
-// BASIC ATTACKS
-// ---------------------------
-
-
-GAME_DATA.skills['spear'] = {
-    name: 'Spear Attack',
-    description: '...',
+GAME_DATA.skills["EXAMPLE_ATTACK"] = {
+    name: 'EXAMPLE_ATTACK',
+    description: 'EXAMPLE_ATTACK the target using an EXAMPLE_WEAPON.',
+    tp: 0,
+    mp: 0,
+    projectile: false,
+    arc: false,
     range: {
-        min: 1,
-        max: 2,
-        pattern: 'CARDINAL',
-        z: 2
+        selection: 'cardinal', // diagonal, square, fill
+        phase: false, // ignore obstructions
+        zu: 2,  // nullable
+        zd: 2,  // nullable
+        min: 1, // nullable
+        max: 1  // nullable
     },
-    selection: {
-        min: 0,
-        max: 1,
-        pattern: 'CONCURRENT',
-        z: 2
-    }
-};
-
-GAME_DATA.skills['bow'] = {
-    name: 'Bow Attack',
-    description: '...',
-    range: {
-        min: 3,
-        max: 6,
-        pattern: 'POINT',
-        z: 3
+    target: {
+        selection: 'cardinal', // diagonal, square, fill, to-point, enemy, ally, all
+        tiles: true, // can target empty tiles
+        phase: false, // ignore obstructions
+        overflow: false, // can affect tiles outside of range if AoE
+        zu: 2,  // nullable
+        zd: 2,  // nullable
+        min: 0, // nullable
+        max: 0  // nullable
     },
-    selection: {
-        min: 0,
-        max: 0,
-        pattern: 'POINT'
-    }
-};
-
-// -----------------------
-// TP-COST SKILLS
-// ---------------------------
-GAME_DATA.skills['slash'] = {
-    name: 'Melee Attack',
-    description: '...',
-    range: {
-        min: 1,
-        max: 1,
-        pattern: 'POINT',
-        z: 2
-    },
-    selection: {
-        min: 0,
-        max: 0,
-        pattern: 'POINT',
-        z: 2
-    },
+    selectable: ['ally', 'enemy', 'self', 'empty'],
     sequence: [
         {
-            type: 'animation',
-            subject: 'attacker',
-            id: 'slash',
-            await: 'hit'
-        },
-        {
-            type: 'animation',
-            subject: 'defender',
-            id: 'hit'
-        },
-        {
-            type: 'damage',
-            subject: 'defender',
-            amount: 22,
-            fontSize: 30
-        },
-        {
-            type: 'filter',
-            subject: 'defender',
-            filters: [
-                {
-                    type: 'brightness',
-                    initial: 100,
-                    target: 0,
-                    suffix: '%',
-                    duration: 150,
-                    reverse: true
+            category: 'animation', // [animation, filter, damage, wait]
+            type: 'beast',         // [beast, tile, decoration]
+            on: 'self',            // [self, primary, secondary, all]
+            animations: [
+                { id: 'brace' },
+                {   // example of dashing to tile next to target
+                    id: 'dash', 
+                    movement: true,                // move
+                    destination: 'primary',        // to destination ['self', 'attacker', 'primary', 'target']
+                    offset: -1,                    // with this tile offset
+                    orientation: 'to-destination', // based on the orientation of ['self', 'attacker', 'primary', 'to-destination']
                 },
-                {
-                    type: 'invert',
-                    initial: 0,
-                    target: 100,
-                    suffix: '%',
-                    duration: 150,
-                    reverse: true
+                { id: 'slash' }
+            ],
+            wait: 'hit'
+        },
+        {
+            category: 'animation',
+            type: 'beast',
+            on: 'primary',
+            animations: [
+                {   // example of knockback from target point
+                    id: 'stagger',
+                    movement: true,
+                    destination: 'target',
+                    offset: -1,
+                    orientation: 'to-destination',
+                }
+            ]
+        },
+        {
+            category: 'damage',
+            on: 'primary',
+            percentage: 100,
+            allowKnockback: true
+        },
+        {
+            category: 'filter',
+            on: 'primary',
+            filters: [
+                { type: 'brightness', suffix: '%', i: 100, t: 0,   duration: 150, revert: true },
+                { type: 'invert',     suffix: '%', i: 0,   t: 100, duration: 150, revert: true }
+            ],
+            wait: 'brightness-filter-complete'
+        }
+    ]
+};
+
+GAME_DATA.skills["slash"] = {
+    name: 'Slash',
+    description: 'Slash at the target using a one-handed weapon.',
+    range:  { selection: 'cardinal', zu: 2, zd: 2, min: 1, max: 1 },
+    target: { selection: 'cardinal', zu: 2, zd: 2, min: 0, max: 0 },
+    selectable: ['ally', 'enemy'],
+    power: 25,
+    sequence: [
+        {
+            category: 'animation',
+            type: 'beast',
+            on: 'self',
+            animations: [
+                { id: 'slash' }
+            ],
+            wait: 'hit'
+        },
+        {
+            category: 'animation',
+            type: 'beast',
+            on: 'primary',
+            animations: [
+                { id: 'stagger' }
+            ]
+        },
+        {
+            category: 'damage',
+            on: 'primary',
+            percentage: 100
+        },
+        {
+            category: 'filter',
+            on: 'primary',
+            filters: [
+                { type: 'brightness', suffix: '%', i: 100, t: 0,   duration: 250, revert: true },
+                { type: 'invert',     suffix: '%', i: 0,   t: 100, duration: 250, revert: true }
+            ],
+            wait: 'brightness-filter-complete'
+        }
+    ]
+};
+
+GAME_DATA.skills["double-slash"] = {
+    name: 'Double Slash',
+    description: 'Slash at the target using a one-handed weapon, then feint into a second swing.',
+    range:  { selection: 'cardinal', zu: 2, zd: 2, min: 1, max: 1 },
+    target: { selection: 'cardinal', zu: 2, zd: 2, min: 0, max: 0 },
+    selectable: ['ally', 'enemy'],
+    power: 40,
+    sequence: [
+        {
+            category: 'animation',
+            type: 'beast',
+            on: 'self',
+            animations: [
+                { id: 'slash' }
+            ],
+            wait: 'hit'
+        },
+        {
+            category: 'animation',
+            type: 'beast',
+            on: 'primary',
+            animations: [
+                { id: 'stagger' }
+            ]
+        },
+        {
+            category: 'damage',
+            type: 'beast',
+            on: 'primary',
+            percentage: 40
+        },
+        {
+            category: 'filter',
+            type: 'beast',
+            on: 'primary',
+            filters: [
+                { type: 'brightness', suffix: '%', i: 100, t: 0,   duration: 250, revert: true },
+                { type: 'invert',     suffix: '%', i: 0,   t: 100, duration: 250, revert: true }
+            ],
+            wait: 'brightness-filter-complete'
+        },
+        {
+            category: 'animation',
+            type: 'beast',
+            on: 'self',
+            animations: [
+                { id: 'slash-reverse' }
+            ],
+            wait: 'hit'
+        },
+        {
+            category: 'animation',
+            type: 'beast',
+            on: 'primary',
+            animations: [
+                {   
+                    id: 'stagger',
+                }
+            ]
+        },
+        {
+            category: 'damage',
+            type: 'beast',
+            on: 'primary',
+            percentage: 60
+        },
+        {
+            category: 'filter',
+            type: 'beast',
+            on: 'primary',
+            filters: [
+                { type: 'brightness', suffix: '%', i: 100, t: 0,   duration: 250, revert: true },
+                { type: 'invert',     suffix: '%', i: 0,   t: 100, duration: 250, revert: true }
+            ],
+            wait: 'brightness-filter-complete'
+        }
+    ]
+};
+
+GAME_DATA.skills["heavy-slash"] = {
+    name: 'Heavy Slash',
+    description: 'Slash at the target using a two-handed weapon. Knocks the target back.',
+    range:  { selection: 'cardinal', zu: 2, zd: 2, min: 1, max: 1 },
+    target: { selection: 'cardinal', zu: 2, zd: 2, min: 0, max: 0 },
+    selectable: ['ally', 'enemy'],
+    sequence: [
+        {
+            category: 'animation',
+            type: 'beast',
+            on: 'self',
+            animations: [
+                { id: 'heavy-slash' },
+            ],
+            wait: 'hit'
+        },
+        {
+            category: 'animation',
+            type: 'beast',
+            on: 'primary',
+            animations: [
+                {   
+                    id: 'stagger',
+                    movement: true,
+                    destination: 'self',
+                    offset: 1,
+                    orientation: 'attacker',
+                }
+            ]
+        },
+        {
+            category: 'damage',
+            on: 'primary',
+            percentage: 100
+        },
+        {
+            category: 'filter',
+            type: 'beast',
+            on: 'primary',
+            filters: [
+                { type: 'brightness', suffix: '%', i: 100, t: 0,   duration: 150, revert: true },
+                { type: 'invert',     suffix: '%', i: 0,   t: 100, duration: 150, revert: true }
+            ],
+            wait: 'brightness-filter-complete'
+        }
+    ]
+};
+
+GAME_DATA.skills["leap-slash"] = {
+    name: 'Leap Slash',
+    description: 'Leap at the target, coming down with all your weight into your weapon.',
+    range:  { selection: 'cardinal', zu: 2, zd: 2, min: 1, max: 4 },
+    target: { selection: 'cardinal', zu: 2, zd: 2, min: 0, max: 0 },
+    selectable: ['ally', 'enemy'],
+    power: 25,
+    sequence: [
+        {
+            category: 'animation',
+            type: 'beast',
+            on: 'self',
+            animations: [
+                // { id: 'brace' },
+                {   
+                    id: 'leap-slash',
+                    movement: true,
+                    type: 'teleport',
+                    destination: 'target',
+                    offset: -1,
+                    orientation: 'to-destination',
                 }
             ],
-            await: 'brightness-filter-complete'
+            wait: 'hit'
+        },
+        {
+            category: 'animation',
+            type: 'beast',
+            on: 'primary',
+            animations: [ { 
+                id: 'stagger',
+                movement: true,
+                destination: 'self',
+                offset: 1,
+                orientation: 'attacker',
+            } ]
+        },
+        {
+            category: 'damage',
+            on: 'primary',
+            percentage: 100
+        },
+        {
+            category: 'filter',
+            type: 'beast',
+            on: 'primary',
+            filters: [
+                { type: 'brightness', suffix: '%', i: 100, t: 0,   duration: 150, revert: true },
+                { type: 'invert',     suffix: '%', i: 0,   t: 100, duration: 150, revert: true }
+            ],
+            wait: 'brightness-filter-complete'
+        }
+    ]
+};
+
+GAME_DATA.skills["anime-slash"] = {
+    name: 'Anime Slash',
+    description: 'You\'re already dead.',
+    range:  { selection: 'cardinal', zu: 2, zd: 2, min: 1, max: 4 },
+    target: { selection: 'cardinal', zu: 2, zd: 2, min: 0, max: 0 },
+    selectable: ['ally', 'enemy'],
+    sequence: [
+        {
+            category: 'animation',
+            type: 'beast',
+            on: 'self',
+            animations: [
+                { id: 'brace' },
+                {   
+                    id: 'anime-slash',
+                    movement: true,
+                    destination: 'target',
+                    offset: 1,
+                    orientation: 'to-destination',
+                }
+            ],
+            wait: 'hit'
+        },
+        {
+            category: 'animation',
+            type: 'beast',
+            on: 'primary',
+            animations: [ { id: 'stagger' } ]
+        },
+        {
+            category: 'damage',
+            on: 'primary',
+            percentage: 100
+        },
+        {
+            category: 'filter',
+            type: 'beast',
+            on: 'primary',
+            filters: [
+                { type: 'brightness', suffix: '%', i: 100, t: 0,   duration: 150, revert: true },
+                { type: 'invert',     suffix: '%', i: 0,   t: 100, duration: 150, revert: true }
+            ],
+            wait: 'brightness-filter-complete'
         }
     ]
 };
@@ -204,7 +451,7 @@ GAME_DATA.skills['anime'] = {
         {
             type: 'damage',
             subject: 'defender',
-            amount: 'anime isnt real',
+            amount: 'Miss',
             fontSize: 30
         },
         {
@@ -230,213 +477,6 @@ GAME_DATA.skills['anime'] = {
             ],
             await: 'brightness-filter-complete'
         }
-    ]
-};
-
-GAME_DATA.skills['double-slash'] = {
-    name: 'Melee Attack',
-    description: '...',
-    range: {
-        min: 1,
-        max: 1,
-        pattern: 'POINT',
-        z: 2
-    },
-    selection: {
-        min: 0,
-        max: 0,
-        pattern: 'POINT',
-        z: 2
-    },
-    sequence: [
-        {
-            type: 'animation',
-            subject: 'attacker',
-            movement: {
-                type: 'teleport',
-                toLocation: 'target-before'
-            },
-            id: 'slash',
-            await: 'hit'
-        },
-        {
-            type: 'animation',
-            subject: 'defender',
-            id: 'hit'
-        },
-        {
-            type: 'damage',
-            subject: 'defender',
-            amount: 22,
-            fontSize: 30
-        },
-        {
-            type: 'filter',
-            subject: 'defender',
-            filters: [
-                {
-                    type: 'brightness',
-                    initial: 100,
-                    target: 0,
-                    suffix: '%',
-                    duration: 150,
-                    reverse: true
-                },
-                {
-                    type: 'invert',
-                    initial: 0,
-                    target: 100,
-                    suffix: '%',
-                    duration: 150,
-                    reverse: true
-                }
-            ],
-            await: 'brightness-filter-complete'
-        },
-        {
-            type: 'animation',
-            subject: 'attacker',
-            id: 'slash-reverse',
-            await: 'hit'
-        },
-        {
-            type: 'animation',
-            subject: 'defender',
-            //movement: true,
-            location: 'knockback',
-            id: 'hit'
-        },
-        {
-            type: 'damage',
-            subject: 'defender',
-            amount: 33,
-            fontSize: 40
-        },
-        {
-            type: 'filter',
-            subject: 'defender',
-            filters: [
-                {
-                    type: 'brightness',
-                    initial: 100,
-                    target: 0,
-                    suffix: '%',
-                    duration: 200,
-                    reverse: true
-                },
-                {
-                    type: 'invert',
-                    initial: 0,
-                    target: 100,
-                    suffix: '%',
-                    duration: 200,
-                    reverse: true
-                }
-            ],
-            await: 'brightness-filter-complete'
-        }
-        // {
-        //     type: 'damage',
-        //     actor: 'defender',
-        //     percentage: 100
-        // }
-
-    ]
-};
-
-GAME_DATA.skills['flicker'] = {
-    name: 'Flicker Strike',
-    description: '...',
-    range:     { min: 1, max: 10, pattern: 'CARDINAL', z: 0 },
-    selection: { min: 0, max: 0, pattern: 'POINT',    z: 0 },
-    canTarget: 'enemy', // ['ally', 'neutral', 'foe', 'entity', 'tile']
-    hasMovement: true, // show movement markers for this skill
-    isTeleport: false,
-    blockedBy: ['ally', 'neutral', 'foe', 'hazard'],
-    moveTo: 'before-target', // where movement markers will point to ['target', 'before-target']
-    sequence: [
-        // {
-        //     type: 'animation',
-        //     unit: 'attacker',
-        //     id: 'brace'
-        // },
-        {
-            type: 'effect',
-            category: 'tile',
-            location: 'origin',
-            id: 'crackle',
-            z: 1,
-            await: 'crackle-complete'
-        },
-        {
-            type: 'effect',
-            category: 'tile',
-            location: 'origin',
-            id: 'dust',
-            z: -1
-        },
-        {
-            type: 'animation',
-            unit: 'attacker',
-            id: 'dash',
-            movement: true,
-            location: 'before-target',
-            await: 'move-complete'
-        },
-        {
-            type: 'animation',
-            unit: 'attacker',
-            id: 'punch',
-            await: 'hit'
-        },
-        {
-            type: 'animation',
-            unit: 'defender',
-            movement: true,
-            location: 'knockback',
-            id: 'hit'
-        },
-        // {
-        //     type: 'effect',
-        //     category: 'text',
-        //     subcategory: 'damage',
-        //     unit: 'defender',
-        //     percent: 25
-        // },
-        // {
-        //     type: 'wait',
-        //     ms: 1000
-        // },
-        // {
-        //     type: 'effect',
-        //     category: 'map',
-        //     location: 'target',
-        //     id: 'lightning',
-        //     await: 'lightning-strike'
-        // },
-        // {
-        //     type: 'camera',
-        //     id: 'shake'
-        // },
-        // {
-        //     type: 'effect',
-        //     category: 'screen',
-        //     id: 'flash',
-        //     await: 'lightning-complete'
-        // },
-        // {
-        //     type: 'effect',
-        //     category: 'text',
-        //     subcategory: 'damage',
-        //     unit: 'defender',
-        //     percent: 75
-        // },
-        // {
-        //     type: 'effect',
-        //     category: 'text',
-        //     subcategory: 'status',
-        //     unit: 'defender'
-        // }
     ]
 };
 

@@ -10,16 +10,16 @@ class CombatLogic {
     // ORIENTATIONS
     // ------------------------------------------
 
-    static getNextLocation(map, location, orientation) {
+    static getLocation(map, location, orientation, offset = 1) {
         switch (orientation) {
             case CombatLogic.ORIENTATIONS.NORTH:
-                return map.getLocation(location.x - 1, location.y);
+                return map.getLocation(location.x - offset, location.y);
             case CombatLogic.ORIENTATIONS.SOUTH:
-                return map.getLocation(location.x + 1, location.y);
+                return map.getLocation(location.x + offset, location.y);
             case CombatLogic.ORIENTATIONS.EAST:
-                return map.getLocation(location.x, location.y + 1);
+                return map.getLocation(location.x, location.y + offset);
             case CombatLogic.ORIENTATIONS.WEST:
-                return map.getLocation(location.x, location.y - 1);
+                return map.getLocation(location.x, location.y - offset);
         }
     }
 

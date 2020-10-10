@@ -425,7 +425,8 @@ GAME_DATA.tilesets.beasts['player'] = {
                     { "idx": 30, "ms": 20, intx: 3, inty: -2 },
                     { "idx": 30, "ms": 20, intx: 2, inty: -1 },
                     { "idx": 32, "ms": 50, intx: 2, inty: -1, "event": "hit" },
-                    { "idx": 33, "ms": 500, intx: 2, inty: -1 }
+                    { "idx": 33, "ms": 500, intx: 2, inty: -1 },
+                    { "idx": 32, "ms": 50,  intx: 0, inty: 0 }
                 ]
             },
             "west": {
@@ -456,6 +457,33 @@ GAME_DATA.tilesets.beasts['player'] = {
                     { "idx": 30, "ms": 20,  },
                     { "idx": 31, "ms": 400,   },
                     { "idx": 30, "ms": 40,   },
+                ]
+            },
+            "west": {
+                "frames": [
+                ]
+            },
+            "north": {
+                "mirrored": true,
+                "frames": [
+                ]
+            }
+        },
+        "leap-slash": {
+            "east": {
+                "mirrored": true,
+                "frames": [
+                ]
+            },
+            "south": {
+                "frames": [
+                    { "idx": 40, "ms": 300,  },
+                    { "idx": 41, "ms": 500,   },
+                    { "idx": 42, "ms": 50,  },
+                    { "idx": 43, "ms": 70, inty: -5, px: 0.66, py: 0, pz: 0.5, xmult: true },
+                    { "idx": 43, "ms": 50, inty: 0, px: 0.34, py: 1, pz: 0.5, "event": "hit", xmult: true },
+                    { "idx": 44, "ms": 50 },
+                    { "idx": 32, "ms": 400 },
                 ]
             },
             "west": {
@@ -825,7 +853,7 @@ GAME_DATA.tilesets.beasts['slime'] = {
                 ]
             }
         },
-        "hit": {
+        "stagger": {
             "east": {
                 "frames": [
                     { "idx": 1, "ms": 50, "intx": -1, "px": 0.5, "py": 0.5 },
