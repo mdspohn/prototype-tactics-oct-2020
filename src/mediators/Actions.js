@@ -56,7 +56,7 @@ class Actions {
     // -----------------------------
 
     async requestMove(scene, states) {
-        scene.markers.range = BeastLogic.getRange(scene.active, scene.beasts, scene.map);
+        scene.markers.range = BeastLogic.getRange(scene.active, scene);
         scene.ui.requestMove();
 
         return Promise.resolve(states.MOVE_REQUEST);
@@ -111,7 +111,7 @@ class Actions {
     }
 
     async requestAttack(scene, states, id) {
-        scene.markers.range = SkillLogic.getRange(this.managers.skills.get(id), scene.active, scene.beasts, scene.map);
+        scene.markers.range = SkillLogic.getRange(this.managers.skills.get(id), scene.active.location, scene);
         scene.ui.requestAttack();
 
         return Promise.resolve(states.ATTACK_REQUEST);
@@ -199,8 +199,8 @@ class Actions {
     async useSkill(id, attacker, target, scene) {
         console.log('----------- START ----------', id);
         const config = this.managers.skills.get(id),
-              range = SkillLogic.getRange(config, attacker, scene.beasts, scene.map),
-              selection = SkillLogic.getSelection(config, target, scene.beasts, scene.map, (config.target.overflow ? null : range)),
+              range = SkillLogic.getRange(config, attacker.location, scene),
+              selection = SkillLogic.getSelection(config, target, scene, range),
               secondary = scene.beasts.filter(beast => selection.has(beast.location)),
               primary = secondary.find(beast => beast.location === target);
 

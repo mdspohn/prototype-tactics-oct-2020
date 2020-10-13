@@ -19,11 +19,11 @@ class MarkerRenderer {
         const range      = markers.range.get(location),
               onPath     = markers.path.includes(location),
               selection  = markers.selection.get(location),
-              isMirrored = location.isSloped && [CombatLogic.ORIENTATIONS.WEST, CombatLogic.ORIENTATIONS.EAST].includes(location.orientation),
+              isMirrored = location.isSloped && [CombatLogic.WEST, CombatLogic.EAST].includes(location.orientation),
               translateX = Game.camera.getPosX() + (location.posX * scaling) + (~~isMirrored * 32 * scaling),
               translateY = Game.camera.getPosY() + (location.posY * scaling),
-              color      = (!!selection && selection.isSelectable) ? selection.color : (!!range && range.isSelectable) ? range.color : null,
-              x          = (!location.isSloped) ? 0 : [CombatLogic.ORIENTATIONS.WEST, CombatLogic.ORIENTATIONS.NORTH].includes(location.orientation) ? 1 : 2;
+              color      = (!!selection && selection.isSelectable) ? 'red' : (!!range && range.isSelectable) ? 'white' : null,
+              x          = (!location.isSloped) ? 0 : [CombatLogic.WEST, CombatLogic.NORTH].includes(location.orientation) ? 1 : 2;
 
         Game.ctx.save();
         Game.ctx.translate(translateX, translateY);

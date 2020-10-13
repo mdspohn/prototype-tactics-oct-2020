@@ -521,7 +521,7 @@ GAME_DATA.skills["pull"] = {
 
 GAME_DATA.skills["push"] = {
     range:  { selection: 'fill', zu: 2, zd: 2, min: 1, max: 4 },
-    target: { selection: 'cardinal', zu: 2, zd: 2, min: 0, max: 1 },
+    target: { selection: 'cardinal', zu: 2, zd: 2, min: 0, max: 1, overflow: true },
     selectable: ['ally', 'enemy'],
     sequence: [
         {

@@ -41,10 +41,10 @@ class Markers {
         this.configurations.focus.y = 3;
 
         this.configurations.orientation = new Object();
-        this.configurations.orientation[CombatLogic.ORIENTATIONS.NORTH] = [0, 0];
-        this.configurations.orientation[CombatLogic.ORIENTATIONS.SOUTH] = [1, 1];
-        this.configurations.orientation[CombatLogic.ORIENTATIONS.EAST]  = [0, 1];
-        this.configurations.orientation[CombatLogic.ORIENTATIONS.WEST]  = [1, 0];
+        this.configurations.orientation[CombatLogic.NORTH] = [0, 0];
+        this.configurations.orientation[CombatLogic.SOUTH] = [1, 1];
+        this.configurations.orientation[CombatLogic.EAST]  = [0, 1];
+        this.configurations.orientation[CombatLogic.WEST]  = [1, 0];
     }
 
     get range()       { return this.tiles.range     || Markers.EMPTY_WEAKMAP; }

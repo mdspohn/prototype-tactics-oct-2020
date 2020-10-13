@@ -1,5 +1,5 @@
-class Pathing {
-    static getRange(opts, scene, range = new WeakMap(), selection = null) {
+class PathingLogic {
+    static getRange(scene, opts, range = new WeakMap(), selection = null) {
         const location = opts.location,
               previous = opts.previous,
               steps = ~~opts.steps,
@@ -13,7 +13,7 @@ class Pathing {
               selectableEntities     = Boolean(opts.selectableEntities),
               selectableObstructions = Boolean(opts.selectableObstructions),
               selectableHazards      = Boolean(opts.selectableHazards),
-              continueOnEntities     = Boolean(opts.continueOnEntity),
+              continueOnEntities     = Boolean(opts.continueOnEntities),
               continueOnObstructions = Boolean(opts.continueOnObstructions),
               continueOnHazards      = Boolean(opts.continueOnHazards),
               useHazardLeap          = Boolean(opts.useHazardLeap),
@@ -21,14 +21,14 @@ class Pathing {
               hazardLeap             = ~~opts.hazardLeap;
 
         let validLocation = !range.has(location) || range.get(location).steps > steps;
-        validLocation &= restrictedRange === undefined || restrictedRange.has(location);
+        validLocation &= (restrictedRange === undefined || restrictedRange.has(location));
 
         if (!validLocation)
             return;
 
-        let selectable = min <= steps,
+        let isSelectable = min <= steps,
             isHazard = location.isHazard || (waterIsHazard && location.isWater),
-            advance = steps < max;
+            continuePathing = steps < max;
 
         // check things that don't apply to the point of origin
         if (previous !== undefined) {
@@ -39,73 +39,68 @@ class Pathing {
 
             // entities
             const occupant = scene.beasts.find(beast => beast.location === location);
-            if (occupant !== undefined) {
-                selectable &= selectableEntities;
-                advance &= continueOnEntities;
-            }
+            isSelectable &= ((occupant === undefined) || selectableEntities);
+            continuePathing &= ((occupant === undefined) || continueOnEntities);
             
             // hazards
-            if (isHazard) {
-                selectable &= selectableHazards;
-                if (useHazardLeap) {
-                    if (hazardLeap > 0) {
-                        opts.hazardLeap = hazardLeap - 1;
-                        opts.orientationLock = true;
-                        opts.orientation = CombatLogic.getOrientation(previous, location);
-                    } else {
-                        advance = false;
-                    }
-                } else {
-                    advance &= continueOnHazards;
-                }
+            isSelectable &= (!isHazard || selectableHazards);
+            continuePathing &= (!isHazard || continueOnHazards || (useHazardLeap && hazardLeap > 0));
+
+            if (isHazard && useHazardLeap && hazardLeap > 0 && !selectableHazards) {
+                opts.hazardLeap = hazardLeap - 1;
+                opts.orientation = CombatLogic.getOrientation(previous, location);
+                opts.orientationLock = true;
             }
         }
 
-        if (selectable || advance) {
-            range.set(location, {
-                previous,
-                steps,
-                selectable,
-                isHazard
-            });
+        if (isSelectable || continuePathing) {
+            range.set(location, { previous, steps, isSelectable, isHazard });
 
             if (selection !== null)
                 selection.push(location);
         }
 
-        if (!advance)
-            return;
-        
-        const nextLocations = new Array();
-        if (orientationLock && orientation !== undefined) {
-            nextLocations.push(CombatLogic.getLocation(scene.map, location, orientation, 1));
-        } else {
-            nextLocations.push(scene.map.getLocation(location.x - 1, location.y));
-            nextLocations.push(scene.map.getLocation(location.x + 1, location.y));
-            nextLocations.push(scene.map.getLocation(location.x, location.y - 1));
-            nextLocations.push(scene.map.getLocation(location.x, location.y + 1));
+        if (continuePathing) {
+            const nextLocations = new Array();
+            if (orientationLock && orientation !== undefined) {
+                nextLocations.push(CombatLogic.getLocation(scene.map, location, orientation, 1));
+            } else {
+                nextLocations.push(scene.map.getLocation(location.x - 1, location.y));
+                nextLocations.push(scene.map.getLocation(location.x + 1, location.y));
+                nextLocations.push(scene.map.getLocation(location.x, location.y - 1));
+                nextLocations.push(scene.map.getLocation(location.x, location.y + 1));
+            }
+
+            nextLocations.forEach(next => {
+                if (next === undefined || !next.isReachable)
+                    return;
+                
+                const optsChanges = new Object();
+                optsChanges.location = next;
+                optsChanges.previous = location;
+                optsChanges.steps = steps + 1;
+                optsChanges.orientation = CombatLogic.getOrientation(location, next);
+
+                this.getRange(scene, Object.assign(opts, optsChanges), range, selection);
+            });
         }
 
-        for (next in nextLocations) {
-            // is this a valid location
-            if (next === undefined || !next.isReachable)
-                return;
-            
-            const optsChanges = new Object();
-            optsChanges.start = next;
-            optsChanges.previous = location;
-            optsChanges.steps = steps + 1;
-            optsChanges.orientation = CombatLogic.getOrientation(location, next);
-
-            this.getRange(Object.assign(opts, optsChanges), scene, range, selection);
+        if (steps === 0) {
+            range.asArray = () => selection;
+            return range;
         }
-
-        range.asArray = () => selection;
-        return range;
 
     }
 
     static getPathTo(location, range) {
+        let path = new Array(),
+            next = location;
 
+        while (range.get(next) !== undefined && range.get(next).previous instanceof Location) {
+            path.unshift(next);
+            next = range.get(next).previous;
+        }
+
+        return path;
     }
 }

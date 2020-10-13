@@ -33,30 +33,23 @@ class BeastLogic {
     // Movement
     // -----------------------------------
 
-    static getRange(unit, entities, map) {
-        const range = new WeakMap(),
-              opts = new Object();
-
-        opts.previous = undefined;
-        opts.distance = unit.getRemainingMovement();
-        opts.steps = 0;
-        opts.hazardLeap = Math.floor(unit.stats.current.jump / 2);
-
-        BeastLogic._populateRange(range, unit.location, map, unit, entities, opts);
-
-        return range;
+    static getRange(beast, scene) {
+        return PathingLogic.getRange(scene, {
+            location: beast.location,
+            min: 1,
+            max: beast.getRemainingMovement(),
+            zUp: beast.stats.current.jump,
+            zDown: beast.stats.current.jump + 1,
+            selectableHazards: beast.canFly(),
+            continueOnHazards: beast.canFly(),
+            waterIsHazard: !beast.canSwim(),
+            useHazardLeap: !beast.canFly(),
+            hazardLeap: Math.floor(beast.stats.current.jump / 2)
+        });
     }
 
     static getPath(location, range) {
-        let path = new Array(),
-            next = location;
-
-        while (range.get(next) !== undefined && range.get(next).previous instanceof Location) {
-            path.unshift(next);
-            next = range.get(next).previous;
-        }
-
-        return path;
+        return PathingLogic.getPathTo(location, range);
     }
 
     static isInRange(location, range) {
@@ -65,61 +58,6 @@ class BeastLogic {
 
     static isValidSelection(location, range) {
         return BeastLogic.isInRange(location, range) && range.get(location).isSelectable;
-    }
-
-    static _populateRange(range, location, map, unit, entities, opts) {
-        if (!range.has(location) || range.get(location).steps > opts.steps) {
-            const occupant = entities.find(entity => entity.location === location),
-                  allegiance = BeastLogic.getAllegiance(unit, occupant);
-            
-            // check if tile should be considered a hazard to possibly jump over
-            let isHazard = false;
-            isHazard |= location.z === 0;
-            isHazard |= location.isWater;
-
-            // check if tile can be moved to
-            let isSelectable = !isHazard;
-            isSelectable &= occupant === undefined;
-
-            const config = new Object();
-            config.previous = opts.previous;
-            config.steps = opts.steps;
-            config.isHazard = Boolean(isHazard);
-            config.canLeap = opts.hazardLeap >= 1;
-            config.isSelectable = Boolean(isSelectable);
-            config.occupant = occupant;
-            config.canPass = [BeastLogic.ALLEGIANCES.SELF, BeastLogic.ALLEGIANCES.ALLY].includes(allegiance);
-            config.color = 'white';
-
-            range.set(location, config);
-
-            if (opts.steps >= opts.distance)
-                return;
-
-            Array.of(
-                map.getLocation(location.x, location.y - 1),
-                map.getLocation(location.x, location.y + 1),
-                map.getLocation(location.x + 1, location.y),
-                map.getLocation(location.x - 1, location.y)
-            ).forEach(next => {
-                if (next === undefined || !next.isReachable)
-                    return;
-
-                if (config.isHazard && ((CombatLogic.getOrientation(location, next) != CombatLogic.getOrientation(opts.previous, location)) || !config.canLeap))
-                    return;
-
-                const zDiff = next.z - location.z;
-                if (zDiff < (-unit.stats.current.jump - 1) || zDiff > unit.stats.current.jump)
-                    return;
-                
-                this._populateRange(range, next, map, unit, entities, {
-                    previous: location,
-                    distance: opts.distance,
-                    steps: opts.steps + 1,
-                    hazardLeap: (isHazard) ? (opts.hazardLeap - (1 * isHazard)) : Math.floor(unit.stats.current.jump / 2)
-                });
-            });
-        }
     }
 
     // ---------------------------

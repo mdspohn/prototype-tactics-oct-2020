@@ -282,7 +282,7 @@ class CombatController {
             case this.states.ATTACK_REQUEST:
                 if (BeastLogic.isValidSelection(location, this.markers.range)) {
                     const skill = this.actions.managers.skills.get(this.active.attack);
-                    this.markers.selection = SkillLogic.getSelection(skill, location, this.beasts, this.map, (skill.target.overflow ? null : this.markers.range));
+                    this.markers.selection = SkillLogic.getSelection(skill, location, this.scene, this.markers.range);
                 } else {
                     this.markers.selection = null;
                     location = null;

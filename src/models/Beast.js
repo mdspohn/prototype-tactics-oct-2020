@@ -50,7 +50,7 @@ class Beast {
         // Skills
         // -------------------------------
 
-        this.attack = 'double-slash';
+        this.attack = 'push';
         this.skills = ['double-slash', 'leap-slash', 'magic'];
 
         // ---------------------
@@ -189,6 +189,14 @@ class Beast {
 
     getRemainingMovement() {
         return this.stats.current.move - this.traveled.total;
+    }
+
+    canSwim() {
+        return false;
+    }
+
+    canFly() {
+        return false;
     }
 
     canMove() {
