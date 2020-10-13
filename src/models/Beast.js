@@ -46,6 +46,13 @@ class Beast {
 
         this.equipment = new BeastEquipment();
 
+        // ------------------------
+        // Skills
+        // -------------------------------
+
+        this.attack = 'double-slash';
+        this.skills = ['double-slash', 'leap-slash', 'magic'];
+
         // ---------------------
         // State
         // ----------------------
@@ -71,6 +78,46 @@ class Beast {
         // ---------------------------
 
         this.tileset = tileset;
+
+        // this.animation = new Object();
+        // this.animation.id = 'idle';
+        // this.animation.orientation = 'south';
+        // this.animation.ms = 0;
+        // this.animation.delta = 0;
+
+        // this.animation.next = new Array();
+        // this.animation.next.push({
+        //     id: 'move',
+        //     orientation: 'east',
+        //     destination: this.location,
+        //     swap: 'move-step'
+        // });
+
+        // this.filters = new Object();
+        // this.filters['brightness'] = {
+        //     suffix: '%',
+        //     ms: 0,
+        //     delta: 0,
+        //     duration: 0,
+        //     current: 0,
+        //     target: 0
+        // };
+        // this.filters['opacity'] = {
+        //     suffix: '%',
+        //     ms: 0,
+        //     delta: 0,
+        //     duration: 0,
+        //     current: 0,
+        //     target: 0
+        // };
+        // this.filters['hue-rotate'] = {
+        //     suffix: 'deg',
+        //     ms: 0,
+        //     delta: 0,
+        //     duration: 0,
+        //     current: 0,
+        //     target: 0
+        // };
 
         this.animations = new Object();
         this.animations.queue = new Array();

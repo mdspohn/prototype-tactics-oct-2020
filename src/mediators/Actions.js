@@ -8,20 +8,9 @@ class Actions {
     // -------------------------------
 
     async nextTurn(scene, states) {
-        scene.active = this._getNext(scene.beasts);
-        scene.active.resetTurn();
-        scene.ui.updateTurns(this._getTurns(scene.beasts), scene.active);
-        scene.camera.toLocation(scene.active.location, 750, 'ease-out');
-        await scene.ui.nextTurn(scene.active);
-
-        return Promise.resolve((scene.active.ai) ? states.AI_TURN : states.PLAYER_TURN);
-    }
-
-    _getNext(beasts) {
-        let next = beasts.find(beast => beast.energy >= 100);
-
+        let next = scene.beasts.find(beast => beast.energy >= 100);
         while (next === undefined) {
-            const ready = beasts.filter(beast => {
+            const ready = scene.beasts.filter(beast => {
                 if (beast.isAlive()) {
                     beast.energy += beast.stats.current.speed;
                     return beast.energy >= 100;
@@ -33,7 +22,13 @@ class Actions {
         }
         next.energy -= 100;
 
-        return next;
+        scene.active = next;
+        scene.active.resetTurn();
+        scene.ui.updateTurns(this._getTurns(scene.beasts), scene.active);
+        scene.camera.toLocation(scene.active.location, 750, 'ease-out');
+        await scene.ui.nextTurn(scene.active);
+
+        return Promise.resolve((scene.active.ai) ? states.AI_TURN : states.PLAYER_TURN);
     }
 
     _getTurns(beasts, amount = 7) {
@@ -366,7 +361,6 @@ class Actions {
 
             return new Promise((resolve) => {
                 Events.listen(event, (data, id) => {
-                    console.log(beast, event, data, id)
                     if (data.unit !== beast)
                         return;
                     Events.remove(event, id);
@@ -388,7 +382,7 @@ class Actions {
             animation.orientation = beast.orientation;
             animation.movement = false;
             animation.events = new Object();
-            animation.events.end = { id: `${id}-complete`, data: beast };
+            animation.events.end = { id: `${id}-complete`, data: { unit: beast, animation } };
             animation.x = animation.ox = ~~config.ox;
             animation.y = animation.oy = ~~config.oy;
 

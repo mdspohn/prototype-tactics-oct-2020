@@ -5,7 +5,6 @@ class SkillManager {
 
     load() {
         this.data = GAME_DATA.skills;
-
         return Promise.resolve();
     }
 

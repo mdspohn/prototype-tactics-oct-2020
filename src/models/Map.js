@@ -76,6 +76,7 @@ class Location {
     get posY() { return (this.y * (this.td / 2)) + (this.x * (this.td / 2)) + this.oy - ((this.z - 1) * this.th); }
 
     get isReachable() { return this.tile.unreachable !== true; }
+    get isHazard()    { return this.tile.hazard;       }
     get isWater()     { return this.tile.water;        }
     get isSloped()    { return this.tile.slope;        }
     get orientation() { return this.tile.orientation;  }

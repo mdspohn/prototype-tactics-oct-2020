@@ -161,7 +161,7 @@ class CombatController {
         if (this.state === this.states.ATTACK_REQUEST) {
             return this.cancelRequestAttack();
         } else if (this.state === this.states.PLAYER_TURN && this.active.canAttack()) {
-            this.state = await this.actions.requestAttack(this.scene, this.states, 'sneak');
+            this.state = await this.actions.requestAttack(this.scene, this.states, this.active.attack);
         }
     }
 
@@ -176,7 +176,7 @@ class CombatController {
         if (this.state !== this.states.ATTACK_REQUEST)
             return;
 
-        this.state = await this.actions.confirmAttack(this.scene, this.states, 'sneak', location);
+        this.state = await this.actions.confirmAttack(this.scene, this.states, this.active.attack, location);
     }
 
     async requestWait() {
@@ -281,7 +281,7 @@ class CombatController {
                 return;
             case this.states.ATTACK_REQUEST:
                 if (BeastLogic.isValidSelection(location, this.markers.range)) {
-                    const skill = this.actions.managers.skills.get('sneak');
+                    const skill = this.actions.managers.skills.get(this.active.attack);
                     this.markers.selection = SkillLogic.getSelection(skill, location, this.beasts, this.map, (skill.target.overflow ? null : this.markers.range));
                 } else {
                     this.markers.selection = null;

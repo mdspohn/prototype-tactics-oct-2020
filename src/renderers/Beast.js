@@ -98,7 +98,7 @@ class BeastRenderer {
 
     static nextFrame(beast, animation) {
         if (animation.config[animation.frame].event)
-            Events.dispatch(animation.config[animation.frame].event, beast);
+            Events.dispatch(animation.config[animation.frame].event, { unit: beast, animation } );
 
         animation.px += animation.config[animation.frame].px || 0;
         animation.py += animation.config[animation.frame].py || 0;
