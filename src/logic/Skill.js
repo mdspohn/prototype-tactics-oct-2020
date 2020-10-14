@@ -1,5 +1,4 @@
 class SkillLogic {
-
     static getRange(skill, location, scene) {
         return PathingLogic.getRange(scene, {
             location,

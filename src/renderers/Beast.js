@@ -1,6 +1,11 @@
 class BeastRenderer {
     static update(beasts, ms, isDeltaUpdate, { speed = 1, scaling = 1 } = settings) {
         beasts.forEach(beast => {
+
+            // ------------------------------
+            // Animation
+            // ------------------------------
+
             const adjustedMs = ms * speed;
             let animation = beast.animations.current;
 
@@ -40,26 +45,44 @@ class BeastRenderer {
                 animation.cz = animation.iz + Math.round(pz * (animation.tz - animation.iz));
             }
 
+            // ------------------------------
+            // Filter Effects
+            // ------------------------------
+
             if (beast.filters.length > 0) {
                 const completed = new Array();
-                beast.filters.forEach((filter, index) => {
-                    filter.ms += ~~!isDeltaUpdate * adjustedMs;
-                    filter.value = filter.i + (filter.t - filter.i) * Math.min(Math.max(filter.ms + (~~isDeltaUpdate * adjustedMs), 0) / filter.duration, 1);
-                    if (filter.value === filter.t) {
-                        if (filter.revert) {
-                            [filter.t, filter.i] = [filter.i, filter.t];
-                            filter.revert = false;
-                            filter.ms -= filter.duration;
-                            filter.value = Math.min(filter.t * (Math.max(filter.ms + (~~isDeltaUpdate * adjustedMs), 0) / filter.duration), filter.t);
+                beast.filters.forEach((effect, index) => {
+                    if (effect.ms === effect.duration && effect.value === effect.t)
+                        return;
+                    
+                    const progress = Math.min(Math.max(effect.ms + (~~isDeltaUpdate * adjustedMs), 0) / effect.duration, 1);
+                    
+                    effect.ms += ~~!isDeltaUpdate * adjustedMs;
+                    effect.value = effect.i + (effect.t - effect.i) * progress;
+        
+                    if (progress === 1) {
+                        if (effect.revert) {
+                            effect.revert = false;
+                            effect.ms -= effect.duration;
+                            [effect.t, effect.i] = [effect.i, effect.t];
+                            effect.value = Math.min(effect.t * (Math.max(effect.ms + (~~isDeltaUpdate * adjustedMs), 0) / effect.duration), effect.t);
                         } else {
-                            Events.dispatch(`${filter.type}-filter-complete`, { unit: beast, animation });
-                            completed.push(index);
+                            Events.dispatch(effect.type + '-filter-complete', { unit: beast });
+                            if (!effect.persist)
+                                completed.push(index);
                         }
                     }
                 });
-                completed.sort((a, b) => b - a);
-                completed.forEach(index => beast.filters.splice(index, 1));
+        
+                if (completed.length !== 0) {
+                    completed.sort((a, b) => b - a);
+                    completed.forEach(index => beast.filters.splice(index, 1));
+                }
             }
+
+            // ------------------------------
+            // Text Effects
+            // ------------------------------
 
             if (beast.text.length > 0) {
                 const completed = new Array();
@@ -164,11 +187,9 @@ class BeastRenderer {
         ctx.save();
         ctx.translate(translateX + (~~isMirrored * beast.tileset.sw * scaling), translateY);
 
-        if (beast.filters.length > 0) {
-            let filters = new String();
-            beast.filters.forEach(effect => filters += `${effect.type}(${effect.value}${effect.suffix}) `);
-            ctx.filter = filters;
-        }
+        let filters = '';
+        beast.filters.forEach(effect => filters += `${effect.type}(${effect.value}${effect.suffix}) `);
+        ctx.filter = filters;
 
         if (beast.text.length > 0) {
             const animation = beast.animations.current,

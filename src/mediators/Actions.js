@@ -24,31 +24,11 @@ class Actions {
 
         scene.active = next;
         scene.active.resetTurn();
-        scene.ui.updateTurns(this._getTurns(scene.beasts), scene.active);
+        scene.ui.updateTurns(CombatLogic.getTurnOrder(scene.beasts), scene.active);
         scene.camera.toLocation(scene.active.location, 750, 'ease-out');
         await scene.ui.nextTurn(scene.active);
 
         return Promise.resolve((scene.active.ai) ? states.AI_TURN : states.PLAYER_TURN);
-    }
-
-    _getTurns(beasts, amount = 7) {
-        let counter = 0;
-
-        const turns = new Array();
-        while (turns.length < amount) {
-            const available = beasts.filter(beast => {
-                const energy = beast.energy + (beast.stats.current.speed * counter),
-                      isReady = energy >= 100,
-                      isNewlyReady = Math.floor(energy / 100) > Math.floor((energy - (beast.stats.current.speed * 1)) / 100);
-
-                return beast.isAlive() && isReady && isNewlyReady;
-            }).sort((a, b) => ((b.energy + b.stats.current.speed * counter) % 100) - ((a.energy + a.stats.current.speed * counter) % 100));
-
-            counter += 1;
-            turns.push(...available);
-        }
-
-        return turns.slice(0, amount);
     }
 
     // ------------------------
@@ -78,7 +58,12 @@ class Actions {
             scene.map.addPointOfInterest(data.animation.destination);
         }, true);
 
-        const path = BeastLogic.getPath(target, scene.markers.range);
+        const path = BeastLogic.getPath(target, scene.markers.range),
+              distance = Math.abs(target.x - scene.active.location.x) + Math.abs(target.y - scene.active.location.y);
+
+        scene.active.traveled.last += distance;
+        scene.active.traveled.total += distance;
+
         scene.markers.range = null;
 
         return this.move(scene.active, path).then(data => {
@@ -157,47 +142,35 @@ class Actions {
     // Unit Actions
     // ---------------------------------
 
-    async changeOrientation(unit, arg1, arg2) {
-        let direction = arg1;
-        if (direction instanceof Location)
-            direction = CombatLogic.getOrientation(unit.location, direction);
-        if (typeof direction === 'number')
-            direction = CombatLogic.getOrientationToCoords(unit, arg1, arg2);
-
-        if (unit.orientation !== direction) {
-            unit.orientation = direction;
-            const animation = BeastLogic.getDefaultAnimation(unit, unit.animation);
-            animation.frame = unit.animations.current.frame;
-            animation.ms = unit.animations.current.ms;
-            unit.animate(animation, true);
+    async changeOrientation(beast, arg1, arg2) {
+        let orientation = arg1;
+        if (arg1 instanceof Location) {
+            orientation = CombatLogic.getOrientation(beast.location, arg1);
+        } else if (arg2 !== undefined) {
+            orientation = CombatLogic.getOrientationToCoords(beast, arg1, arg2);
         }
 
-        return Promise.resolve(direction);
+        beast.changeOrientation(orientation);
+
+        return Promise.resolve(orientation);
     }
 
-    async move(unit, path, animationId = null) {
-        const origin = unit.location,
-              destination = path[path.length - 1],
-              distance = Math.abs(destination.x - origin.x) + Math.abs(destination.y - origin.y);
-
+    async move(beast, path, animation = null) {
         const complete = (resolve) => {
             Events.listen('move-complete', (data, id) => {
-                if (data.unit !== unit)
+                if (data.unit !== beast)
                     return;
                 Events.remove('move-complete', id);
                 resolve(data);
             }, true);
         };
 
-        unit.traveled.last += distance;
-        unit.traveled.total += distance;
-        unit.animate(BeastLogic.getMovementAnimations(unit, path, destination, animationId));
+        beast.animate(BeastLogic.getMovementAnimations(beast, path, path[path.length - 1], animation));
 
         return new Promise(complete);
     }
 
     async useSkill(id, attacker, target, scene) {
-        console.log('----------- START ----------', id);
         const config = this.managers.skills.get(id),
               range = SkillLogic.getRange(config, attacker.location, scene),
               selection = SkillLogic.getSelection(config, target, scene, range),
@@ -220,7 +193,6 @@ class Actions {
         for (let i = 0; i < config.sequence.length; i++)
             await this._doSegment(config, i, attacker, primary, secondary, target, selection, scene);
 
-        console.log('----------- END ------------', id);
         return Promise.resolve();
     }
 
@@ -340,7 +312,7 @@ class Actions {
                     if (animation.type === 'teleport') {
                         config.path = [config.destination]
                     } else {
-                        config.path = BeastLogic.getPath(config.destination, BeastLogic.getRange(beast, scene.beasts, scene.map));
+                        config.path = BeastLogic.getPath(config.destination, BeastLogic.getRange(beast, scene));
                     }
                 }
 

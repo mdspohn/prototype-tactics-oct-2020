@@ -50,7 +50,7 @@ class Beast {
         // Skills
         // -------------------------------
 
-        this.attack = 'push';
+        this.attack = 'double-slash';
         this.skills = ['double-slash', 'leap-slash', 'magic'];
 
         // ---------------------
@@ -78,46 +78,6 @@ class Beast {
         // ---------------------------
 
         this.tileset = tileset;
-
-        // this.animation = new Object();
-        // this.animation.id = 'idle';
-        // this.animation.orientation = 'south';
-        // this.animation.ms = 0;
-        // this.animation.delta = 0;
-
-        // this.animation.next = new Array();
-        // this.animation.next.push({
-        //     id: 'move',
-        //     orientation: 'east',
-        //     destination: this.location,
-        //     swap: 'move-step'
-        // });
-
-        // this.filters = new Object();
-        // this.filters['brightness'] = {
-        //     suffix: '%',
-        //     ms: 0,
-        //     delta: 0,
-        //     duration: 0,
-        //     current: 0,
-        //     target: 0
-        // };
-        // this.filters['opacity'] = {
-        //     suffix: '%',
-        //     ms: 0,
-        //     delta: 0,
-        //     duration: 0,
-        //     current: 0,
-        //     target: 0
-        // };
-        // this.filters['hue-rotate'] = {
-        //     suffix: 'deg',
-        //     ms: 0,
-        //     delta: 0,
-        //     duration: 0,
-        //     current: 0,
-        //     target: 0
-        // };
 
         this.animations = new Object();
         this.animations.queue = new Array();
@@ -177,10 +137,20 @@ class Beast {
     // -----------------------------
 
     animate(animations, force = false) {
-        animations = Array.isArray(animations) ? animations : [animations];
-        this.animations.queue.push(...animations);
-        if (force)
-            this.animations.current.terminate = true;
+        this.animations.queue.push(...GeneralLogic.toArray(animations));
+        this.animations.current.terminate = force;
+    }
+
+    changeOrientation(orientation) {
+        if (this.orientation === orientation)
+            return;
+        
+        this.orientation = orientation;
+        
+        const animation = BeastLogic.getDefaultAnimation(this, this.animation);
+        animation.frame = this.animations.current.frame;
+        animation.ms = this.animations.current.ms;
+        this.animate(animation, true);
     }
 
     // -----------------------

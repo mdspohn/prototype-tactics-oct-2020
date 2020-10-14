@@ -37,4 +37,24 @@ class CombatLogic {
                 return this.EAST;
         }
     }
+
+    static getTurnOrder(beasts, amount = 7) {
+        let counter = 0;
+
+        const turns = new Array();
+        while (turns.length < amount) {
+            const available = beasts.filter(beast => {
+                const energy = beast.energy + (beast.stats.current.speed * counter),
+                      isReady = energy >= 100,
+                      isNewlyReady = Math.floor(energy / 100) > Math.floor((energy - (beast.stats.current.speed * 1)) / 100);
+
+                return beast.isAlive() && isReady && isNewlyReady;
+            }).sort((a, b) => ((b.energy + b.stats.current.speed * counter) % 100) - ((a.energy + a.stats.current.speed * counter) % 100));
+
+            counter += 1;
+            turns.push(...available);
+        }
+
+        return turns.slice(0, amount);
+    }
 }
