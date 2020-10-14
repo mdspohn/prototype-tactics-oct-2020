@@ -49,36 +49,17 @@ class BeastRenderer {
             // Filter Effects
             // ------------------------------
 
-            if (beast.filters.length > 0) {
-                const completed = new Array();
-                beast.filters.forEach((effect, index) => {
-                    if (effect.ms === effect.duration && effect.value === effect.t)
-                        return;
+            Object.values(beast.filters).forEach(filter => {
+                if (filter.ms === filter.duration && filter.value === filter.target)
+                    return;
                     
-                    const progress = Math.min(Math.max(effect.ms + (~~isDeltaUpdate * adjustedMs), 0) / effect.duration, 1);
-                    
-                    effect.ms += ~~!isDeltaUpdate * adjustedMs;
-                    effect.value = effect.i + (effect.t - effect.i) * progress;
-        
-                    if (progress === 1) {
-                        if (effect.revert) {
-                            effect.revert = false;
-                            effect.ms -= effect.duration;
-                            [effect.t, effect.i] = [effect.i, effect.t];
-                            effect.value = Math.min(effect.t * (Math.max(effect.ms + (~~isDeltaUpdate * adjustedMs), 0) / effect.duration), effect.t);
-                        } else {
-                            Events.dispatch(effect.type + '-filter-complete', { unit: beast });
-                            if (!effect.persist)
-                                completed.push(index);
-                        }
-                    }
-                });
-        
-                if (completed.length !== 0) {
-                    completed.sort((a, b) => b - a);
-                    completed.forEach(index => beast.filters.splice(index, 1));
-                }
-            }
+                filter.ms += ~~!isDeltaUpdate * adjustedMs;
+                const progress = Math.min(Math.max(filter.ms + (~~isDeltaUpdate * adjustedMs), 0) / filter.duration, 1);
+                filter.value = filter.initial + ((filter.target - filter.initial) * progress);
+
+                if (progress === 1)
+                    Events.dispatch(filter.type + '-filter-complete', { unit: beast });
+            });
 
             // ------------------------------
             // Text Effects
@@ -188,7 +169,13 @@ class BeastRenderer {
         ctx.translate(translateX + (~~isMirrored * beast.tileset.sw * scaling), translateY);
 
         let filters = '';
-        beast.filters.forEach(effect => filters += `${effect.type}(${effect.value}${effect.suffix}) `);
+        Object.values(beast.filters).forEach(filter => {
+            if (filter.base === filter.value)
+                return;
+
+            filters += `${filter.type}(${filter.value}${filter.suffix}) `;
+        });
+        
         ctx.filter = filters;
 
         if (beast.text.length > 0) {

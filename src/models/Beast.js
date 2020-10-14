@@ -50,7 +50,7 @@ class Beast {
         // Skills
         // -------------------------------
 
-        this.attack = 'double-slash';
+        this.attack = 'sneak';
         this.skills = ['double-slash', 'leap-slash', 'magic'];
 
         // ---------------------
@@ -88,7 +88,13 @@ class Beast {
         this.animations.modifiers.scaling = 1;
 
         this.text = new Array();
-        this.filters = new Array();
+
+        this.filters = {
+            brightness: { name: 'brightness', suffix: '%',   base: 100, target: 100, value: 100, ms: 0, duration: 0 },
+            opacity:    { name: 'opacity',    suffix: '%',   base: 100, target: 100, value: 100, ms: 0, duration: 0 },
+            invert:     { name: 'invert',     suffix: '%',   base: 0,   target: 0,   value: 0,   ms: 0, duration: 0 },
+            hue:        { name: 'hue-rotate', suffix: 'deg', base: 0,   target: 0,   value: 0,   ms: 0, duration: 0 }
+        };
     }
 
     // -----------------------

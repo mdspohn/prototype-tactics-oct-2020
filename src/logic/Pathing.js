@@ -1,5 +1,5 @@
 class PathingLogic {
-    static getRange(scene, opts, range = new WeakMap(), selection = null) {
+    static getRange(scene, opts, range = new WeakMap(), asArray = null) {
         const location = opts.location,
               previous = opts.previous,
               steps = ~~opts.steps,
@@ -56,8 +56,8 @@ class PathingLogic {
         if (isSelectable || continuePathing) {
             range.set(location, { previous, steps, isSelectable, isHazard });
 
-            if (selection !== null)
-                selection.push(location);
+            if (asArray !== null)
+                asArray.push(location);
         }
 
         if (continuePathing) {
@@ -81,12 +81,12 @@ class PathingLogic {
                 optsChanges.steps = steps + 1;
                 optsChanges.orientation = CombatLogic.getOrientation(location, next);
 
-                this.getRange(scene, Object.assign(opts, optsChanges), range, selection);
+                this.getRange(scene, Object.assign(opts, optsChanges), range, asArray);
             });
         }
 
         if (steps === 0) {
-            range.asArray = () => selection;
+            range.asArray = () => asArray;
             return range;
         }
 

@@ -106,13 +106,24 @@ GAME_DATA.skills["slash"] = {
         },
         {
             category: 'filter',
+            type: 'beast',
             on: 'primary',
             filters: [
-                { type: 'brightness', suffix: '%', i: 100, t: 0,   duration: 250, revert: true },
-                { type: 'invert',     suffix: '%', i: 0,   t: 100, duration: 250, revert: true }
+                { type: 'brightness', target: 0,   duration: 150 },
+                { type: 'invert',     target: 100, duration: 150 }
             ],
             wait: 'brightness-filter-complete'
-        }
+        },
+        {
+            category: 'filter',
+            type: 'beast',
+            on: 'primary',
+            filters: [
+                { type: 'brightness', target: 100, duration: 150 },
+                { type: 'invert',     target: 0,   duration: 150 }
+            ],
+            wait: 'brightness-filter-complete'
+        },
     ]
 };
 
@@ -152,8 +163,18 @@ GAME_DATA.skills["double-slash"] = {
             type: 'beast',
             on: 'primary',
             filters: [
-                { type: 'brightness', suffix: '%', i: 100, t: 0,   duration: 250, revert: true },
-                { type: 'invert',     suffix: '%', i: 0,   t: 100, duration: 250, revert: true }
+                { type: 'brightness', target: 0,   duration: 150 },
+                { type: 'invert',     target: 100, duration: 150 }
+            ],
+            wait: 'brightness-filter-complete'
+        },
+        {
+            category: 'filter',
+            type: 'beast',
+            on: 'primary',
+            filters: [
+                { type: 'brightness', target: 100, duration: 150 },
+                { type: 'invert',     target: 0,   duration: 150 }
             ],
             wait: 'brightness-filter-complete'
         },
@@ -187,58 +208,19 @@ GAME_DATA.skills["double-slash"] = {
             type: 'beast',
             on: 'primary',
             filters: [
-                { type: 'brightness', suffix: '%', i: 100, t: 0,   duration: 250, revert: true },
-                { type: 'invert',     suffix: '%', i: 0,   t: 100, duration: 250, revert: true }
+                { type: 'brightness', target: 0,   duration: 150 },
+                { type: 'invert',     target: 100, duration: 150 }
             ],
             wait: 'brightness-filter-complete'
-        }
-    ]
-};
-
-GAME_DATA.skills["heavy-slash"] = {
-    name: 'Heavy Slash',
-    description: 'Slash at the target using a two-handed weapon. Knocks the target back.',
-    range:  { selection: 'cardinal', zu: 2, zd: 2, min: 1, max: 1 },
-    target: { selection: 'cardinal', zu: 2, zd: 2, min: 0, max: 0 },
-    selectable: ['ally', 'enemy'],
-    sequence: [
-        {
-            category: 'animation',
-            type: 'beast',
-            on: 'self',
-            animations: [
-                { id: 'heavy-slash' },
-            ],
-            wait: 'hit'
-        },
-        {
-            category: 'animation',
-            type: 'beast',
-            on: 'primary',
-            animations: [
-                {   
-                    id: 'stagger',
-                    movement: true,
-                    destination: 'self',
-                    offset: 1,
-                    orientation: 'attacker',
-                }
-            ]
-        },
-        {
-            category: 'damage',
-            on: 'primary',
-            percentage: 100
         },
         {
             category: 'filter',
             type: 'beast',
             on: 'primary',
             filters: [
-                { type: 'brightness', suffix: '%', i: 100, t: 0,   duration: 150, revert: true },
-                { type: 'invert',     suffix: '%', i: 0,   t: 100, duration: 150, revert: true }
-            ],
-            wait: 'brightness-filter-complete'
+                { type: 'brightness', target: 100, duration: 150 },
+                { type: 'invert',     target: 0,   duration: 150 }
+            ]
         }
     ]
 };
@@ -290,10 +272,19 @@ GAME_DATA.skills["leap-slash"] = {
             type: 'beast',
             on: 'primary',
             filters: [
-                { type: 'brightness', suffix: '%', i: 100, t: 0,   duration: 150, revert: true },
-                { type: 'invert',     suffix: '%', i: 0,   t: 100, duration: 150, revert: true }
+                { type: 'brightness', target: 0,   duration: 150 },
+                { type: 'invert',     target: 100, duration: 150 }
             ],
             wait: 'brightness-filter-complete'
+        },
+        {
+            category: 'filter',
+            type: 'beast',
+            on: 'primary',
+            filters: [
+                { type: 'brightness', target: 100, duration: 150 },
+                { type: 'invert',     target: 0,   duration: 150 }
+            ]
         }
     ]
 };
@@ -306,56 +297,33 @@ GAME_DATA.skills["sneak"] = {
         {
             category: 'filter',
             type: 'beast',
-            on: 'primary',
+            on: 'self',
             filters: [
-                { type: 'hue-rotate', suffix: 'deg', i: 0, t: 1440, duration: 3000, revert: true },
+                { type: 'opacity', target: 0, duration: 500 },
             ]
         },
         {
             category: 'animation',
             type: 'beast',
             on: 'self',
-            animations: [ { 
-                id: 'crouch',
-            } ]
-        },
-        {
-            category: 'filter',
-            type: 'beast',
-            on: 'self',
-            filters: [
-                { type: 'opacity', suffix: '%', i: 100, t: 0, duration: 1000, revert: false },
+            animations: [
+                { 
+                    id: 'crouch',
+                    movement: true,
+                    type: 'teleport',
+                    destination: 'target',
+                    offset: -1,
+                    orientation: 'to-destination',
+                } 
             ],
-            wait: 'opacity-filter-complete'
-        },
-        {
-            category: 'animation',
-            type: 'beast',
-            on: 'self',
-            animations: [ { 
-                id: 'crouch',
-                movement: true,
-                type: 'teleport',
-                destination: 'target',
-                offset: -1,
-                orientation: 'to-destination',
-            } ]
+            wait: 'move-complete'
         },
         {
             category: 'filter',
             type: 'beast',
             on: 'self',
             filters: [
-                { type: 'opacity', suffix: '%', i: 0, t: 1, duration: 1000, revert: false },
-            ],
-            wait: 'opacity-filter-complete'
-        },
-        {
-            category: 'filter',
-            type: 'beast',
-            on: 'self',
-            filters: [
-                { type: 'opacity', suffix: '%', i: 0, t: 100, duration: 500, revert: false },
+                { type: 'opacity', target: 100, duration: 500 },
             ]
         },
         {
@@ -385,11 +353,20 @@ GAME_DATA.skills["sneak"] = {
             type: 'beast',
             on: 'primary',
             filters: [
-                { type: 'brightness', suffix: '%', i: 100, t: 0,   duration: 150, revert: true },
-                { type: 'invert',     suffix: '%', i: 0,   t: 100, duration: 150, revert: true }
+                { type: 'brightness', target: 0,   duration: 150 },
+                { type: 'invert',     target: 100, duration: 150 }
             ],
             wait: 'brightness-filter-complete'
         },
+        {
+            category: 'filter',
+            type: 'beast',
+            on: 'primary',
+            filters: [
+                { type: 'brightness', target: 100, duration: 150 },
+                { type: 'invert',     target: 0,   duration: 150 }
+            ]
+        }
     ]
 };
 

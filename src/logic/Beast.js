@@ -64,48 +64,55 @@ class BeastLogic {
     // Animations
     // -----------------------------------
 
-    static getAnimationConfig(unit, base, orientation) {
-        orientation = orientation || unit.orientation;
-        return unit.tileset.configuration[base][orientation];
+    static getConfig(beast, id, orientation) {
+        orientation = orientation || beast.orientation;
+        return beast.tileset.configuration[id][orientation];
     }
 
-    static getDefaultAnimation(unit, previous = null) {
+    static getAnimation(beast, id, orientation = beast.orientation, previous = null) {
         const animation = new Object(),
-              config = BeastLogic.getAnimationConfig(unit, 'idle', unit.orientation);
-
-        animation.id = 'idle';
-        animation.variation = !previous?.variation;
+              config = BeastLogic.getConfig(beast, id, orientation);
+  
+        animation.id = id;
+        animation.variation = (previous !== null) ? !previous?.variation : false;
         animation.mirrored = Boolean(config.mirrored);
         animation.config = (animation.variation && config.variation !== undefined) ? config.variation : config.frames;
         animation.ms = previous?.ms || 0;
         animation.multipliers = new Array(animation.config.length).fill(1);
         animation.frame = 0;
-        animation.destination = unit.location;
-        animation.orientation = unit.orientation;
+        animation.destination = beast.location;
+        animation.orientation = orientation;
         animation.movement = false;
         animation.events = new Object();
+        if (id !== 'idle') {
+            animation.events.end = { id: `${id}-complete`, data: { unit: beast, animation } };
+        }
         animation.x = animation.ox = ~~config.ox;
         animation.y = animation.oy = ~~config.oy;
 
         return animation;
     }
 
-    static getMovementAnimations(unit, path, destination, animationId = null) {
+    static getDefaultAnimation(beast, previous = null) {
+        return this.getAnimation(beast, 'idle', beast.orientation, previous);
+    }
+
+    static getMovementAnimation(beast, id, destination, path) {
         let animations = new Array(),
-            previous = unit.animations.queue[unit.animations.queue.length - 1] || unit.animations.current;
+            previous = beast.animations.queue[beast.animations.queue.length - 1] || beast.animations.current;
         
-        if (unit.animations.checkpoint === null)
-            unit.animations.checkpoint = previous;
+        if (beast.animations.checkpoint === null)
+            beast.animations.checkpoint = previous;
 
         path.forEach(location => {
             const animation = new Object();
             animation.ms = 0;
             animation.frame = 0;
             animation.destination = location;
-            animation.id = animationId;
-            BeastLogic._addAnimationProperties(animation, previous.destination, animation.destination);
+            animation.id = id;
+            BeastLogic._addMovementProperties(animation, previous.destination, animation.destination);
 
-            const config = BeastLogic.getAnimationConfig(unit, animation.id, animation.orientation);
+            const config = BeastLogic.getConfig(beast, animation.id, animation.orientation);
             animation.mirrored = Boolean(config.mirrored);
             animation.variation = !previous.variation;
             animation.x = animation.ox = ~~config.ox;
@@ -126,7 +133,7 @@ class BeastLogic {
             animation.events.end = {
                 id: (location === destination) ? 'move-complete' : 'move-step', 
                 data: {
-                    unit,
+                    unit: beast,
                     animation,
                     previous: previous.destination
                 }
@@ -139,7 +146,7 @@ class BeastLogic {
         return animations;
     }
 
-    static _addAnimationProperties(animation, start, end) {
+    static _addMovementProperties(animation, start, end) {
         const o = CombatLogic.getOrientation(start, end),
               so = start.orientation,
               eo = end.orientation,
