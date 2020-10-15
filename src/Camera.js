@@ -17,10 +17,6 @@ class Camera {
 
         this.msRemaining = 0;
 
-        this.delta = new Object();
-        this.delta.x = 0;
-        this.delta.y = 0;
-
         // to preserve pixel-perfect assets, canvas adjustments may accumulate small rounding errors
         this.adjustment = new Object();
         this.adjustment.x = 0;
@@ -33,11 +29,11 @@ class Camera {
     }
 
     getPosX() {
-        return Math.round(this.position.x + this.delta.x);
+        return Math.round(this.position.x);
     }
 
     getPosY() {
-        return Math.round(this.position.y + this.delta.y);
+        return Math.round(this.position.y);
     }
 
     // ------------------------
@@ -68,9 +64,6 @@ class Camera {
 
         this.target.x = x;
         this.target.y = y;
-
-        this.delta.x = 0;
-        this.delta.y = 0;
 
         this.msRemaining = ms;
         this.easing = easing;
@@ -234,24 +227,16 @@ class Camera {
     // Engine Hooks
     // ---------------------------------
 
-    update(step) {
+    render(delta) {
         if (this.isProcessingCameraMovement) {
-            this.msRemaining = Math.max(this.msRemaining - step, 0);
-
-            const changes = this._calculateCameraOffsets(step);
+            this.msRemaining = Math.max(this.msRemaining - delta, 0);
+            const changes = this._calculateCameraOffsets(delta);
+            
             this.position.x += changes.x;
             this.position.y += changes.y;
 
             if (this.position.x == this.target.x && this.position.y == this.target.y)
                 Events.dispatch('camera-movement-complete');
-        }
-    }
-
-    render(delta) {
-        if (this.isProcessingCameraMovement) {
-            const changes = this._calculateCameraOffsets(Math.min(delta, this.msRemaining));
-            this.delta.x = changes.x;
-            this.delta.y = changes.y;
         }
     }
 }

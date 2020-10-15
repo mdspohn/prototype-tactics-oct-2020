@@ -82,6 +82,7 @@ class Beast {
         this.animations = new Object();
         this.animations.queue = new Array();
         this.animations.current = null;
+        this.animations.default = null;
         this.animations.checkpoint = null;
         this.animations.modifiers = new Object();
         this.animations.modifiers.speed = 1;
@@ -108,7 +109,8 @@ class Beast {
         this.traveled.total = 0;
         this.usedSkill = false;
         this.usedAttack = false;
-        this.animations.current = BeastLogic.getDefaultAnimation(this);
+        this.animations.default = BeastLogic.getDefaultAnimation(this);
+        this.animations.current = this.animations.default;
         this.animations.queue = new Array();
         this.animations.checkpoint = null;
         this.animations.modifiers = new Object();

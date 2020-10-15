@@ -101,51 +101,37 @@ class CombatUI {
         await new Promise(loader);
     }
 
-    update(step) {
-        this.animations.forEach((animation) => {
-            const differenceRemaining = animation.target - animation.current,
-                  percentChange = Math.min(step / animation.ms, 1);
-            
-            animation.current += differenceRemaining * percentChange;
-            animation.ms = Math.max(animation.ms - step, 0);
-        });
-
-        if (!this.turns.isAnimating)
-            return;
-        
-        this.turns.offset = Math.floor(Math.max(this.turns.offset - ((step / 500) * 32), 0));
-    }
-
     render(delta) {
         for (let i = this.animations.length - 1; i >= 0; i--) {
-            const msRemaining = this.animations[i].ms - delta,
-                  element     = this.animations[i].element,
-                  type        = this.animations[i].style,
-                  event       = this.animations[i].event;
+            this.animations[i].current += (this.animations[i].target - this.animations[i].current) * Math.min(delta / this.animations[i].ms, 1);
+            this.animations[i].ms = Math.max(this.animations[i].ms - delta, 0);
 
-            if (msRemaining <= 0) {
+            const element = this.animations[i].element,
+                  type    = this.animations[i].style,
+                  event   = this.animations[i].event;
+
+            if (this.animations[i].ms <= 0) {
                 element.style[type] = this.animations[i].target + this.animations[i].suffix;
                 this.animations.splice(i, 1);
                 if (event !== null)
                     Events.dispatch(event);
             } else {
-                const value = this.animations[i].current + (this.animations[i].target - this.animations[i].current) * Math.min(delta / this.animations[i].ms, 1);
-                element.style[type] = value + this.animations[i].suffix;
+                element.style[type] = this.animations[i].current + this.animations[i].suffix;
             }
         }
 
         if (!this.turns.isAnimating)
             return;
         
-        const offset = Math.floor(Math.max(this.turns.offset - ((delta / 500) * 32), 0));
+        this.turns.offset = Math.floor(Math.max(this.turns.offset - ((delta / 500) * 32), 0));
 
-        this.turns.isAnimating = (offset !== 0);
+        this.turns.isAnimating = (this.turns.offset !== 0);
         this.turns.forecast.forEach((entity, index) => {
             const x       = (index *  32),
                   clear   = (index === 0),
-                  opacity = (index === 0) ? (Math.max(offset - 16, 0) / 16) : (index === this.turns.forecast.length - 1) ? 1 - (offset / 32) : 1;
+                  opacity = (index === 0) ? (Math.max(this.turns.offset - 16, 0) / 16) : (index === this.turns.forecast.length - 1) ? 1 - (this.turns.offset / 32) : 1;
                   
-            this._renderEntity(this.turns.dom.canvas, this.turns.ctx, entity, false, clear, x + offset, true, opacity);
+            this._renderEntity(this.turns.dom.canvas, this.turns.ctx, entity, false, clear, x + this.turns.offset, true, opacity);
         });
     }
 

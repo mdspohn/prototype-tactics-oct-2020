@@ -10,20 +10,20 @@ class Views {
         }, true);
     }
 
-    updateMap(map, ms, isDeltaUpdate = false) {
-        MapRenderer.update(map, ms, isDeltaUpdate, this.settings);
+    updateMap(map, ms) {
+        MapRenderer.update(map, ms, this.settings);
     }
 
-    updateBeasts(beasts, ms, isDeltaUpdate = false) {
-        BeastRenderer.update(beasts, ms, isDeltaUpdate, this.settings);
+    updateBeasts(beasts, ms) {
+        BeastRenderer.update(beasts, ms, this.settings);
     }
 
-    updateEffects(effects, ms, isDeltaUpdate = false) {
-        EffectRenderer.update(effects, ms, isDeltaUpdate, this.settings);
+    updateEffects(effects, ms) {
+        EffectRenderer.update(effects, ms, this.settings);
     }
 
-    updateMarkers(markers, ms, isDeltaUpdate = false) {
-        MarkerRenderer.update(markers, ms, isDeltaUpdate, this.settings);
+    updateMarkers(markers, ms) {
+        MarkerRenderer.update(markers, ms, this.settings);
     }
 
     // ----------------------

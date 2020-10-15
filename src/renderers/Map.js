@@ -1,15 +1,14 @@
 class MapRenderer {
-    static update(map, ms, isDeltaUpdate, { speed = 1, sort = 'X' } = settings) {
-        const adjustedMs = ms * speed;
+    static update(map, ms, { speed = 1, sort = 'X' } = settings) {
+        ms *= speed;
         map.getSorted(sort).forEach(location => {
             [...location.tiles, ...location.decorations].forEach(tile => {
                 if (tile.frames === null)
                     return;
                 
-                tile.ms += ~~!isDeltaUpdate * adjustedMs;
-                tile.delta = ~~isDeltaUpdate * adjustedMs;
+                tile.ms += ms;
                 
-                while ((tile.ms + tile.delta) > tile.frames[tile.idx].ms)
+                while (tile.ms > tile.frames[tile.idx].ms)
                     MapRenderer.nextFrame(tile, map);
             });
 
@@ -18,13 +17,13 @@ class MapRenderer {
                 return;
                 
             if (location.fade && location.opacity !== 50) {
-                location.ms += ~~!isDeltaUpdate * adjustedMs;
-                location.opacity = 100 - Math.min(((location.ms + (~~isDeltaUpdate * adjustedMs)) / location.duration) * 50, 50);
+                location.ms += ms;
+                location.opacity = 100 - Math.min((location.ms / location.duration) * 50, 50);
                 if (location.opacity === 50)
                     location.ms = 0;
             } else if (!location.fade && location.opacity !== 100) {
-                location.ms += ~~!isDeltaUpdate * adjustedMs;
-                location.opacity = 50 + Math.min(((location.ms + (~~isDeltaUpdate * adjustedMs)) / location.duration) * 50, 50);
+                location.ms += ms;
+                location.opacity = 50 + Math.min((location.ms / location.duration) * 50, 50);
                 if (location.opacity === 100)
                     location.ms = 0;
             }

@@ -300,20 +300,4 @@ class Actions {
             Events.listen(segment.wait, () => resolve());
         });
     }
-
-    useSkill_effectSegment(segment, unit, target, selection, range, entities, map, effects) {
-        return Promise.resolve();
-    }
-
-    useSkill_soundSegment(segment, sounds) {
-        return Promise.resolve();
-    }
-
-    useSkill_cameraSegment(segment, camera) {
-        return Promise.resolve();
-    }
-
-    useSkill_waitSegment(segment) {
-        return Promise.resolve();
-    }
 }

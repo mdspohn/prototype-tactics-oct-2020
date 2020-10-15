@@ -1,14 +1,13 @@
 class MarkerRenderer {
-    static update(markers, ms, isDeltaUpdate, { speed = 1 } = settings) {
+    static update(markers, ms, { speed = 1 } = settings) {
         if (!markers.hasActive())
             return;
 
-        const adjustedMs = ms * speed;
-        markers.delta = ~~isDeltaUpdate * adjustedMs;
+        ms *= speed;
         markers.forEachConfig(config => {
             if (config.ms === undefined)
                 return;
-            config.ms = (config.ms + (~~!isDeltaUpdate * adjustedMs)) % config.duration;
+            config.ms = (config.ms + ms) % config.duration;
         });
     }
     

@@ -81,23 +81,14 @@ class CombatController {
     }
 
     // -------------------
-    // Update and Rendering
+    // Rendering
     // --------------------------
-    
-    update(step) {
-        this.views.updateMap(this.map, step);
-        this.views.updateBeasts(this.beasts, step);
-        this.views.updateEffects(this.effects, step);
-        this.views.updateMarkers(this.markers, step);
-
-        this.scene.ui.update(step);
-    }
 
     render(delta) {
-        this.views.updateMap(this.map, delta, true);
-        this.views.updateBeasts(this.beasts, delta, true);
-        this.views.updateEffects(this.effects, delta, true);
-        this.views.updateMarkers(this.markers, delta, true);
+        this.views.updateMap(this.map, delta);
+        this.views.updateBeasts(this.beasts, delta);
+        this.views.updateEffects(this.effects, delta);
+        this.views.updateMarkers(this.markers, delta);
 
         this.map.getSorted(this.views.settings.sorting).forEach(location => {
             this.views.renderTiles(this.map, location);

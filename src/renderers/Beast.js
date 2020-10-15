@@ -1,26 +1,25 @@
 class BeastRenderer {
-    static update(beasts, ms, isDeltaUpdate, { speed = 1, scaling = 1 } = settings) {
+    static update(beasts, ms, { speed = 1, scaling = 1 } = settings) {
         beasts.forEach(beast => {
 
             // ------------------------------
             // Animation
             // ------------------------------
 
-            const adjustedMs = ms * speed;
             let animation = beast.animations.current;
+            ms *= speed;
 
-            animation.ms += ~~!isDeltaUpdate * adjustedMs;
-            animation.delta = ~~isDeltaUpdate * adjustedMs;
+            animation.ms += ms;
 
             if (animation.terminate)
                 animation = BeastRenderer.nextAnimation(beast, animation, true);
 
-            while ((animation.ms + animation.delta) > (animation.config[animation.frame].ms * animation.multipliers[animation.frame]))
+            while (animation.ms > (animation.config[animation.frame].ms * animation.multipliers[animation.frame]))
                 animation = BeastRenderer.nextFrame(beast, animation);
 
-            if (isDeltaUpdate && animation.movement) {
+            if (animation.movement) {
                 const frame = animation.config[animation.frame],
-                      p  = (animation.ms + animation.delta) / (frame.ms * animation.multipliers[animation.frame]),
+                      p  = animation.ms / (frame.ms * animation.multipliers[animation.frame]),
                       d  = beast.location.z - animation.destination.z,
                       px = animation.px + (p * (frame.px || 0)),
                       py = animation.py + (p * (frame.py || 0)),
@@ -53,11 +52,10 @@ class BeastRenderer {
                 if (filter.ms === filter.duration && filter.value === filter.target)
                     return;
                     
-                filter.ms += ~~!isDeltaUpdate * adjustedMs;
-                const progress = Math.min(Math.max(filter.ms + (~~isDeltaUpdate * adjustedMs), 0) / filter.duration, 1);
-                filter.value = filter.initial + ((filter.target - filter.initial) * progress);
+                filter.ms = Math.min(filter.ms + ms, filter.duration);
+                filter.value = filter.initial + ((filter.target - filter.initial) * (filter.ms / filter.duration));
 
-                if (progress === 1)
+                if (filter.ms === filter.duration)
                     Events.dispatch(filter.type + '-filter-complete', { unit: beast });
             });
 
@@ -68,8 +66,8 @@ class BeastRenderer {
             if (beast.text.length > 0) {
                 const completed = new Array();
                 beast.text.forEach((blurb, index) => {
-                    blurb.ms += ~~!isDeltaUpdate * adjustedMs;
-                    const percentage = Math.min(Math.max(blurb.ms + (~~isDeltaUpdate * adjustedMs), 0) / blurb.duration, 1);
+                    blurb.ms += ms;
+                    const percentage = Math.min(Math.max(blurb.ms, 0) / blurb.duration, 1);
                     blurb.ox = blurb.initial.x + ((blurb.target.x - blurb.initial.x) * percentage);
                     blurb.oy = blurb.initial.y + ((blurb.target.y - blurb.initial.y) * percentage);
 
@@ -137,7 +135,7 @@ class BeastRenderer {
         if (next === undefined)
             next = BeastLogic.getDefaultAnimation(beast, animation);
 
-        Object.assign(next, { ms: animation.ms * ~~!isForced, delta: animation.delta * ~~!isForced })
+        Object.assign(next, { ms: animation.ms * ~~!isForced })
 
         beast.animations.current = next;
         beast.orientation = next.orientation;

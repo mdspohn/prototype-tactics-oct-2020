@@ -16,12 +16,12 @@ class GameEngine {
             now = timestamp;
             delta = delta + (now - last);
     
-            while(delta >= this.step) {
+            while (delta >= this.step) {
                 delta -= this.step;
                 Game.update(this.step);
             }
     
-            Game.render(delta);
+            Game.render(now - last);
         }
         this.frame = requestAnimationFrame(loop);
         console.log('Engine started...');

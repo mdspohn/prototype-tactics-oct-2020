@@ -84,10 +84,9 @@ class GameManager {
     }
     
     update(step) {
+        // update player input at regular intervals
         this.tools.update(step);
         this.input.update(step);
-        this.camera.update(step);
-        this.controllers[this.state].update(step);
     }
 
     render(delta) {
