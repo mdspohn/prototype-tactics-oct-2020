@@ -145,7 +145,7 @@ class Beast {
     // -----------------------------
 
     animate(animations, force = false) {
-        this.animations.queue.push(...GeneralLogic.toArray(animations));
+        this.animations.queue = GeneralLogic.toArray(animations);
         this.animations.current.terminate = force;
     }
 
@@ -155,9 +155,8 @@ class Beast {
         
         this.orientation = orientation;
         
-        const animation = BeastLogic.getDefaultAnimation(this, this.animation);
+        const animation = BeastLogic.getAnimation(this, this.animations.current.id, orientation, this.animations.current);
         animation.frame = this.animations.current.frame;
-        animation.ms = this.animations.current.ms;
         this.animate(animation, true);
     }
 

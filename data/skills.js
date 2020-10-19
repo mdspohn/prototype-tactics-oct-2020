@@ -308,6 +308,9 @@ GAME_DATA.skills["sneak"] = {
             on: 'self',
             animations: [
                 { 
+                    id: 'crouch'
+                },
+                { 
                     id: 'crouch',
                     movement: true,
                     type: 'teleport',

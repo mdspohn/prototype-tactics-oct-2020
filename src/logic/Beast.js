@@ -64,8 +64,7 @@ class BeastLogic {
     // Animations
     // -----------------------------------
 
-    static getConfig(beast, id, orientation) {
-        orientation = orientation || beast.orientation;
+    static getConfig(beast, id, orientation = beast.orientation) {
         return beast.tileset.configuration[id][orientation];
     }
 
@@ -77,7 +76,7 @@ class BeastLogic {
         animation.variation = (previous !== null) ? !previous?.variation : false;
         animation.mirrored = Boolean(config.mirrored);
         animation.config = (animation.variation && config.variation !== undefined) ? config.variation : config.frames;
-        animation.ms = previous?.ms || 0;
+        animation.ms = ~~previous?.ms;
         animation.multipliers = new Array(animation.config.length).fill(1);
         animation.frame = 0;
         animation.destination = beast.location;
